@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { FaHome, FaCalendarAlt, FaPoll, FaBell, FaBars } from "react-icons/fa";
@@ -9,10 +9,69 @@ import { ButtonOutline } from "../Buttons/Buttons";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for login
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for testing notifications
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const navigate = useNavigate();
+
+  // WebSocket State and Ref - Explicitly typed ref
+  const [notifications, setNotifications] = useState<string[]>([]);
+  const ws = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      ws.current = new WebSocket("ws://localhost:5000"); // Connect to WebSocket server
+
+      ws.current.onopen = () => {
+        console.log("WebSocket connected in Navbar");
+      };
+
+      ws.current.onclose = () => {
+        console.log("WebSocket disconnected in Navbar");
+      };
+
+      ws.current.onmessage = (event) => {
+        console.log("WebSocket message received:", event); // Log raw event for debugging
+        try {
+          const message = JSON.parse(event.data);
+          console.log("Parsed WebSocket message:", message); // Log parsed message for debugging
+          if (message.type === "notification") {
+            setNotifications((prevNotifications) => [
+              message.message,
+              ...prevNotifications,
+            ]);
+          } else if (message.type === "newEvent") {
+            // Handle 'newEvent' type
+            const newEventNotificationMessage = `New Betting Event: ${message.eventData.name}`; // Customize message
+            setNotifications((prevNotifications) => [
+              newEventNotificationMessage,
+              ...prevNotifications,
+            ]);
+            // You can also store message.eventData if you want to display more details in the notification dropdown later
+          } else {
+            console.log("Received unknown message type:", message);
+          }
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error, event.data);
+        }
+      };
+
+      ws.current.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      return () => {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.close();
+        }
+      };
+    } else {
+      setNotifications([]);
+      if (ws.current?.readyState === WebSocket.OPEN) {
+        ws.current.close();
+      }
+    }
+  }, [isLoggedIn]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -20,12 +79,13 @@ const Navbar = () => {
   };
 
   const handleLogin = () => {
-    setIsLoggedIn(true); // Simulate login
+    setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false); // Simulate logout
-    setProfilePopupOpen(false); // Close profile popup on logout
+    setIsLoggedIn(false);
+    setProfilePopupOpen(false);
+    setNotificationPanelOpen(false);
   };
 
   const commonLinks = [
@@ -90,19 +150,30 @@ const Navbar = () => {
                 onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
               >
                 <FaBell />
+                {notifications.length > 0 && (
+                  <span className="absolute top-[-8px] right-[-8px] bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                    {notifications.length}
+                  </span>
+                )}
               </button>
               {notificationPanelOpen && (
                 <div className="absolute right-0 mt-6 w-64 bg-primary border border-secondary rounded-lg shadow-lg z-[1000]">
                   <div className="p-4 text-accent font-bold">Notifications</div>
                   <ul>
-                    <li className="px-4 py-2 hover:bg-secondary hover:text-white">
-                      New market: Will Michel Barnier be the next French Prime
-                      Minister?
-                    </li>
-                    <li className="px-4 py-2 hover:bg-secondary hover:text-white">
-                      New market: Will François Baroin be the next French Prime
-                      Minister?
-                    </li>
+                    {notifications.length > 0 ? (
+                      notifications.map((notification, index) => (
+                        <li
+                          key={index}
+                          className="px-4 py-2 hover:bg-secondary hover:text-white"
+                        >
+                          {notification}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2 text-gray-500">
+                        No new notifications
+                      </li>
+                    )}
                   </ul>
                 </div>
               )}
