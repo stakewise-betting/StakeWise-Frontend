@@ -1,0 +1,83 @@
+[
+    {
+      "id": "1",
+      "eventName": "SL VS IND T20 Series 2024",
+      "market": "Who will win the series",
+      "result": "Won",
+      "profitLoss": 200,
+      "date": "2024-02-10"
+    },
+    {
+      "id": "2",
+      "eventName": "SL VS IND T20 Series 2024",
+      "market": "Who will win the series",
+      "result": "Lost",
+      "profitLoss": -200,
+      "date": "2024-02-11"
+    },
+    {
+      "id": "3",
+      "eventName": "AUS VS ENG Ashes 2024",
+      "market": "Highest run scorer",
+      "result": "Won",
+      "profitLoss": 500,
+      "date": "2024-03-05"
+    },
+    {
+      "id": "4",
+      "eventName": "FIFA World Cup 2026",
+      "market": "Who will win the World Cup",
+      "result": "Lost",
+      "profitLoss": -300,
+      "date": "2026-07-14"
+    },
+    {
+      "id": "5",
+      "eventName": "NBA Finals 2024",
+      "market": "Total Points Over/Under 200",
+      "result": "Won",
+      "profitLoss": 350,
+      "date": "2024-06-10"
+    },
+    {
+      "id": "6",
+      "eventName": "US Open Tennis 2024",
+      "market": "Who will win the tournament",
+      "result": "Lost",
+      "profitLoss": -150,
+      "date": "2024-09-01"
+    },
+    {
+      "id": "7",
+      "eventName": "UEFA Champions League Final 2024",
+      "market": "Correct score 2-1",
+      "result": "Won",
+      "profitLoss": 1000,
+      "date": "2024-05-28"
+    },
+    {
+      "id": "8",
+      "eventName": "IPL 2024",
+      "market": "Who will hit most sixes",
+      "result": "Lost",
+      "profitLoss": -500,
+      "date": "2024-04-15"
+    },
+    {
+      "id": "9",
+      "eventName": "Super Bowl 2025",
+      "market": "First touchdown scorer",
+      "result": "Won",
+      "profitLoss": 800,
+      "date": "2025-02-09"
+    },
+    {
+      "id": "10",
+      "eventName": "Wimbledon 2024",
+      "market": "Who will win the men's final",
+      "result": "Won",
+      "profitLoss": 600,
+      "date": "2024-07-07"
+    }
+  ]
+  

@@ -1,0 +1,52 @@
+[
+    {
+      "eventName": "Manchester United vs Liverpool",
+      "market": "Match Winner",
+      "outcome": "Manchester United",
+      "price": "2.50",
+      "status": "Open"
+    },
+    {
+      "eventName": "NBA Finals Game 1",
+      "market": "Total Points",
+      "outcome": "Over 195.5",
+      "price": "1.95",
+      "status": "Settled"
+    },
+    {
+      "eventName": "Wimbledon Finals",
+      "market": "Match Winner",
+      "outcome": "Djokovic",
+      "price": "1.75",
+      "status": "Open"
+    },
+    {
+      "eventName": "F1 Monaco GP",
+      "market": "Race Winner",
+      "outcome": "Verstappen",
+      "price": "2.10",
+      "status": "Pending"
+    },
+    {
+      "eventName": "Real Madrid vs Barcelona",
+      "market": "Both Teams to Score",
+      "outcome": "Yes",
+      "price": "1.85",
+      "status": "Open"
+    },
+    {
+      "eventName": "UFC 300 Main Event",
+      "market": "Method of Victory",
+      "outcome": "KO/TKO",
+      "price": "2.25",
+      "status": "Open"
+    },
+    {
+      "eventName": "Australian Open Final",
+      "market": "Set Betting",
+      "outcome": "3-1",
+      "price": "3.50",
+      "status": "Pending"
+    }
+  ]
+  

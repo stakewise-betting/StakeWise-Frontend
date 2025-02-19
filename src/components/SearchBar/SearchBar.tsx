@@ -18,7 +18,7 @@ const BarComponent = () => {
       </button>
 
       {/* Search Bar with Icon */}
-      <div className="flex items-center flex-grow max-w-md px-3 py-2 bg-gray-800 rounded-md border border-gray-600">
+      <div className="flex items-center flex-grow max-w-md px-3 py-2 bg-primary rounded-md border border-gray-600">
         <FaSearch className="text-accent mr-2" />
         <input
           type="text"
@@ -42,14 +42,14 @@ const BarComponent = () => {
       ].map((tab, index) => (
         <button
           key={index}
-          className="px-3 py-2 bg-gray-800 rounded-md text-sm text-accent border border-gray-600"
+          className="px-3 py-2 bg-card rounded-md text-sm text-accent border border-gray-600"
         >
           {tab}
         </button>
       ))}
 
       {/* Forward Arrow */}
-      <button className="flex items-center px-3 py-2 bg-gray-800 rounded-md text-sm text-accent border border-gray-600">
+      <button className="flex items-center px-3 py-2 bg-card rounded-md text-sm text-accent border border-gray-600">
         <IoIosArrowForward />
       </button>
     </div>

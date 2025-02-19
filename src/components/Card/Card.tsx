@@ -3,7 +3,6 @@ import React from "react";
 import {
   FaPlus,
   FaMinus,
-  FaArrowUp,
   FaStar,
   FaRegStar,
   FaChevronUp,
@@ -112,7 +111,7 @@ const Card = () => {
   const [showMore, setShowMore] = useState(false);
   const [interestedCards, setInterestedCards] = useState<number[]>([]);
   const [showBettingPanel, setShowBettingPanel] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory] = useState<string>("All");
 
   const toggleInterested = (index: number) => {
     setInterestedCards((prev) =>
