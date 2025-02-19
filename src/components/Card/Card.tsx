@@ -3,7 +3,6 @@ import React from "react";
 import {
   FaPlus,
   FaMinus,
-  FaArrowUp,
   FaStar,
   FaRegStar,
   FaChevronUp,
@@ -112,7 +111,7 @@ const Card = () => {
   const [showMore, setShowMore] = useState(false);
   const [interestedCards, setInterestedCards] = useState<number[]>([]);
   const [showBettingPanel, setShowBettingPanel] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory] = useState<string>("All");
 
   const toggleInterested = (index: number) => {
     setInterestedCards((prev) =>
@@ -184,7 +183,7 @@ const Card = () => {
                   {item.title}
                 </h3>
               </div>
-              <p className="mt-2 text-xs text-gray-400">$11.3m Vol.</p>
+              <p className="mt-2 text-xs text-gray-400">$11.3m Vol</p>
 
               <div className="flex justify-between items-center mt-4">
                 <ButtonOutline className="flex items-center justify-center w-[45%] px-2 py-1 text-xs font-semibold text-green border-green/50 bg-green/30 hover:bg-green hover:text-white rounded-lg transition-all">
