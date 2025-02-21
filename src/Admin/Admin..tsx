@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios"; // Import axios - keep this import
 
-const contractAddress = "0x5bA5Bf00D1484aD1f5DBBEA9D252F7fBCEd9799b";
+const contractAddress = "0xC57D2b7E0dDaad51E54D94Ebd41A4DE5656A0BF3";
 const contractABI = [
   {
     inputs: [],
@@ -105,7 +106,6 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
-    constant: true,
   },
   {
     inputs: [
@@ -162,10 +162,14 @@ const contractABI = [
         name: "prizePool",
         type: "uint256",
       },
+      {
+        internalType: "string",
+        name: "notificationMessage",
+        type: "string",
+      },
     ],
     stateMutability: "view",
     type: "function",
-    constant: true,
   },
   {
     inputs: [],
@@ -179,7 +183,6 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
-    constant: true,
   },
   {
     inputs: [
@@ -213,6 +216,11 @@ const contractABI = [
         name: "_endTime",
         type: "uint256",
       },
+      {
+        internalType: "string",
+        name: "_notificationMessage",
+        type: "string",
+      },
     ],
     name: "createEvent",
     outputs: [],
@@ -236,7 +244,6 @@ const contractABI = [
     outputs: [],
     stateMutability: "payable",
     type: "function",
-    payable: true,
   },
   {
     inputs: [
@@ -316,10 +323,14 @@ const contractABI = [
         name: "prizePool",
         type: "uint256",
       },
+      {
+        internalType: "string",
+        name: "notificationMessage",
+        type: "string",
+      },
     ],
     stateMutability: "view",
     type: "function",
-    constant: true,
   },
   {
     inputs: [
@@ -339,7 +350,6 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
-    constant: true,
   },
 ];
 
@@ -350,8 +360,9 @@ const Admin = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    imageURL: "",
+    notificationMessage: "",
   });
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>(""); // State for uploaded image URL
   const [options, setOptions] = useState<string[]>([""]);
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
@@ -372,7 +383,7 @@ const Admin = () => {
         setWeb3(web3Instance);
         setContract(betContract);
         loadEvents(betContract);
-        checkAdminAddress(betContract); // Load admin address on init
+        checkAdminAddress(betContract);
       } else {
         alert("Please install MetaMask to continue.");
       }
@@ -390,8 +401,8 @@ const Admin = () => {
           const eventData = await betContract.methods.getEvent(i).call();
           const eventOptions = await betContract.methods
             .getEventOptions(i)
-            .call(); // Fetch options
-          eventList.push({ ...eventData, options: eventOptions }); // Add options to event data
+            .call();
+          eventList.push({ ...eventData, options: eventOptions });
         } catch (error) {
           console.error(`Error fetching event ${i}:`, error);
         }
@@ -415,6 +426,43 @@ const Admin = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      alert("Please select an image to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "betting_event_images"); // **REPLACE WITH YOUR CLOUDINARY UPLOAD PRESET!**
+    formData.append("cloud_name", "dwlge5zg7"); // **REPLACE WITH YOUR CLOUDINARY CLOUD NAME!**
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/dwlge5zg7/image/upload`, // **REPLACE WITH YOUR CLOUDINARY CLOUD NAME!**
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const message = `An error occurred: ${response.statusText}`;
+        window.alert(message);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Cloudinary Upload Response:", data);
+      setUploadedImageUrl(data.secure_url);
+      alert("Image uploaded successfully!");
+    } catch (error: any) {
+      console.error("Error uploading image to Cloudinary:", error);
+      alert(`Error uploading image: ${error.message}`);
+    }
+  };
+
   const handleOptionChange = (index: number, value: string) => {
     const updatedOptions = [...options];
     updatedOptions[index] = value;
@@ -429,17 +477,21 @@ const Admin = () => {
     const accounts = await web3?.eth.getAccounts();
     if (!accounts || !contract) return;
 
-    const { name, description, imageURL } = formData;
+    const { name, description, notificationMessage } = formData;
+    const imageURL = uploadedImageUrl; // Use uploadedImageUrl from Cloudinary
 
     if (
       !name ||
       !description ||
-      !imageURL ||
+      !imageURL || // Check if imageURL from Cloudinary is available
       options.length < 2 ||
       !startTime ||
-      !endTime
+      !endTime ||
+      !notificationMessage
     ) {
-      alert("Please fill in all fields.");
+      alert(
+        "Please fill in all fields including notification message and image."
+      );
       return;
     }
 
@@ -451,15 +503,33 @@ const Admin = () => {
         .createEvent(
           name,
           description,
-          imageURL,
+          imageURL, // Use the Cloudinary image URL
           options,
           startTimestamp,
-          endTimestamp
+          endTimestamp,
+          notificationMessage // Include notification message
         )
         .send({ from: accounts[0] });
 
-      alert("Event created successfully!");
-      setFormData({ name: "", description: "", imageURL: "" });
+      // Send POST request to backend for notification - Keep this part as it was if you need it
+      try {
+        await axios.post("http://localhost:5000/send-notification", {
+          message: notificationMessage, // Send notification message in the body
+        });
+        console.log("Notification request sent successfully to backend");
+      } catch (notificationError) {
+        console.error("Error sending notification request:", notificationError);
+        alert("Event created successfully, but error sending notification.");
+        return;
+      }
+
+      alert("Event created successfully and notification sent!");
+      setFormData({
+        name: "",
+        description: "",
+        notificationMessage: "",
+      }); // Reset form data, exclude imageURL
+      setUploadedImageUrl(""); // Clear uploaded image URL
       setOptions([""]);
       setStartTime("");
       setEndTime("");
@@ -475,7 +545,6 @@ const Admin = () => {
   };
 
   const confirmDeclareWinner = async (eventId: number, event: any) => {
-    // Pass the event object
     if (!contract || !web3) return;
     const accounts = await web3.eth.getAccounts();
     if (!accounts || accounts.length === 0) {
@@ -499,9 +568,9 @@ const Admin = () => {
       alert(
         `Winner declared for Event ID: ${eventId} - Winning Option: ${winningOption}`
       );
-      setDeclaringWinnerEventId(null); // Reset state
+      setDeclaringWinnerEventId(null);
       setWinningOption("");
-      loadEvents(contract); // Refresh events list
+      loadEvents(contract);
     } catch (error: any) {
       console.error("Error declaring winner:", error);
       alert(`Error declaring winner: ${error.message}`);
@@ -524,7 +593,6 @@ const Admin = () => {
           Create a New Event
         </h2>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          {/* ... (Create Event Form - same as before) */}
           <div>
             <Label className="text-black" htmlFor="name">
               Event Name
@@ -535,7 +603,7 @@ const Admin = () => {
               value={formData.name}
               onChange={handleInputChange}
               placeholder="Event Name"
-              className="text-black" // Added text-black class here
+              className="text-black"
             />
           </div>
 
@@ -549,21 +617,47 @@ const Admin = () => {
               value={formData.description}
               onChange={handleInputChange}
               placeholder="Event Description"
-              className="text-black" // Added text-black class here
+              className="text-black"
             />
           </div>
 
           <div>
-            <Label className="text-black" htmlFor="imageURL">
-              Image URL
+            <Label className="text-black" htmlFor="imageUpload">
+              Event Image
             </Label>
             <Input
-              id="imageURL"
-              name="imageURL"
-              value={formData.imageURL}
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="text-black"
+            />
+          </div>
+
+          {uploadedImageUrl && (
+            <div>
+              <Label className="text-black">Image Preview</Label>
+              <img
+                src={uploadedImageUrl}
+                alt="Event Preview"
+                className="mt-2 rounded-md"
+                style={{ maxWidth: "100%", maxHeight: "200px" }} // Basic styling for preview
+              />
+            </div>
+          )}
+
+          {/* Notification Message Field - Keep this as it was */}
+          <div>
+            <Label className="text-black" htmlFor="notificationMessage">
+              Notification Message
+            </Label>
+            <Textarea
+              id="notificationMessage"
+              name="notificationMessage"
+              value={formData.notificationMessage}
               onChange={handleInputChange}
-              placeholder="Event Image URL"
-              className="text-black" // Added text-black class here
+              placeholder="Enter notification message to be sent to users"
+              className="text-black"
             />
           </div>
 
@@ -575,7 +669,7 @@ const Admin = () => {
                   value={option}
                   onChange={(e) => handleOptionChange(index, e.target.value)}
                   placeholder={`Option ${index + 1}`}
-                  className="text-black" // Added text-black class here
+                  className="text-black"
                 />
                 {options.length > 1 && (
                   <Button
@@ -600,7 +694,7 @@ const Admin = () => {
               type="datetime-local"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="text-black" // Added text-black class here
+              className="text-black"
             />
           </div>
 
@@ -610,7 +704,7 @@ const Admin = () => {
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="text-black" // Added text-black class here
+              className="text-black"
             />
           </div>
 
@@ -659,10 +753,9 @@ const Admin = () => {
                       <select
                         value={winningOption}
                         onChange={(e) => setWinningOption(e.target.value)}
-                        className="block w-full p-2 border border-gray-300 rounded text-black" // Basic select styling
+                        className="block w-full p-2 border border-gray-300 rounded text-black"
                       >
-                        <option value="">Select Winning Option</option>{" "}
-                        {/* Default placeholder option */}
+                        <option value="">Select Winning Option</option>
                         {event.options.map((option: string, index: number) => (
                           <option key={index} value={option}>
                             {option}
@@ -677,8 +770,7 @@ const Admin = () => {
                           }
                         >
                           Confirm Declare Winner
-                        </Button>{" "}
-                        {/* Pass event object here */}
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -693,8 +785,6 @@ const Admin = () => {
                       className="mt-4"
                       onClick={() => handleDeclareWinner(Number(event.id))}
                     >
-                      {" "}
-                      {/* Pass event options */}
                       Declare Winner
                     </Button>
                   )}
