@@ -31,10 +31,10 @@ const Navbar = () => {
       };
 
       ws.current.onmessage = (event) => {
-        console.log("WebSocket message received:", event); // Log raw event for debugging
+        console.log("WebSocket message received:", event);
         try {
           const message = JSON.parse(event.data);
-          console.log("Parsed WebSocket message:", message); // Log parsed message for debugging
+          console.log("Parsed WebSocket message:", message);
           if (message.type === "notification") {
             setNotifications((prevNotifications) => [
               message.message,
@@ -42,7 +42,7 @@ const Navbar = () => {
             ]);
           } else if (message.type === "newEvent") {
             // Handle 'newEvent' type
-            const newEventNotificationMessage = `New Betting Event: ${message.eventData.name}`; // Customize message
+            const newEventNotificationMessage = message.notificationMessage; // Access notificationMessage from message
             setNotifications((prevNotifications) => [
               newEventNotificationMessage,
               ...prevNotifications,

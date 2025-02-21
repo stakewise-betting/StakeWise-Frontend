@@ -4,7 +4,7 @@ import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
 
-const contractAddress = "0x5bA5Bf00D1484aD1f5DBBEA9D252F7fBCEd9799b";
+const contractAddress = "0xC57D2b7E0dDaad51E54D94Ebd41A4DE5656A0BF3";
 const contractABI = [
   {
     inputs: [],
