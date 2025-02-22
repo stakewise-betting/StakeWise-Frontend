@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios"; // Import axios - keep this import
 
-const contractAddress = "0xC57D2b7E0dDaad51E54D94Ebd41A4DE5656A0BF3";
+const contractAddress = "0x904d11bEEbFc370D2fC0A7ba256A44c5d9e665A9";
 const contractABI = [
   {
     inputs: [],
@@ -50,7 +50,7 @@ const contractABI = [
       {
         indexed: false,
         internalType: "uint256",
-        name: "id",
+        name: "eventId",
         type: "uint256",
       },
       {
@@ -106,6 +106,7 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
+    constant: true,
   },
   {
     inputs: [
@@ -119,7 +120,7 @@ const contractABI = [
     outputs: [
       {
         internalType: "uint256",
-        name: "id",
+        name: "eventId",
         type: "uint256",
       },
       {
@@ -170,6 +171,7 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
+    constant: true,
   },
   {
     inputs: [],
@@ -183,9 +185,15 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
+    constant: true,
   },
   {
     inputs: [
+      {
+        internalType: "uint256",
+        name: "_eventId",
+        type: "uint256",
+      },
       {
         internalType: "string",
         name: "_name",
@@ -244,6 +252,7 @@ const contractABI = [
     outputs: [],
     stateMutability: "payable",
     type: "function",
+    payable: true,
   },
   {
     inputs: [
@@ -275,7 +284,7 @@ const contractABI = [
     outputs: [
       {
         internalType: "uint256",
-        name: "id",
+        name: "eventId",
         type: "uint256",
       },
       {
@@ -331,6 +340,7 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
+    constant: true,
   },
   {
     inputs: [
@@ -350,6 +360,7 @@ const contractABI = [
     ],
     stateMutability: "view",
     type: "function",
+    constant: true,
   },
 ];
 
@@ -394,17 +405,20 @@ const Admin = () => {
   const loadEvents = async (betContract: any) => {
     try {
       const eventCount = await betContract.methods.nextEventId().call();
-      const eventList: any[] = [];
+      console.log("Total events:", eventCount);
 
-      for (let i = 0; i < eventCount; i++) {
+      const eventList: any[] = [];
+      // Loop through valid eventIds, starting from 1
+      for (let eventId = 1; eventId < eventCount; eventId++) {
+        // **[CHANGE LOOP START TO 1 - in Admin.tsx]**
         try {
-          const eventData = await betContract.methods.getEvent(i).call();
+          const eventData = await betContract.methods.getEvent(eventId).call(); // Use eventId directly
           const eventOptions = await betContract.methods
-            .getEventOptions(i)
+            .getEventOptions(eventId)
             .call();
           eventList.push({ ...eventData, options: eventOptions });
         } catch (error) {
-          console.error(`Error fetching event ${i}:`, error);
+          console.warn(`Skipping invalid event ${eventId}:`, error); // Log with eventId
         }
       }
       setEvents(eventList);
@@ -478,12 +492,11 @@ const Admin = () => {
     if (!accounts || !contract) return;
 
     const { name, description, notificationMessage } = formData;
-    const imageURL = uploadedImageUrl; // Use uploadedImageUrl from Cloudinary
-
+    const imageURL = uploadedImageUrl;
     if (
       !name ||
       !description ||
-      !imageURL || // Check if imageURL from Cloudinary is available
+      !imageURL ||
       options.length < 2 ||
       !startTime ||
       !endTime ||
@@ -499,41 +512,80 @@ const Admin = () => {
       const startTimestamp = Math.floor(new Date(startTime).getTime() / 1000);
       const endTimestamp = Math.floor(new Date(endTime).getTime() / 1000);
 
+      // **Fetch nextEventId from contract BEFORE creating event**
+      const nextEventIdFromContract = await contract.methods
+        .nextEventId()
+        .call();
+      const eventIdForNewEvent = parseInt(nextEventIdFromContract); // Use the current nextEventId
+
+      console.log("Arguments being passed to createEvent:"); // Log arguments before calling
+      console.log(
+        "eventIdForNewEvent:",
+        eventIdForNewEvent,
+        typeof eventIdForNewEvent
+      );
+      console.log("name:", name, typeof name);
+      console.log("description:", description, typeof description);
+      console.log("imageURL:", imageURL, typeof imageURL);
+      console.log("options:", options, typeof options, options);
+      console.log("startTimestamp:", startTimestamp, typeof startTimestamp);
+      console.log("endTimestamp:", endTimestamp, typeof endTimestamp);
+      console.log(
+        "notificationMessage:",
+        notificationMessage,
+        typeof notificationMessage
+      );
+
+      // **Blockchain Transaction to Create Event - PASS eventId AS STRING**
       await contract.methods
         .createEvent(
+          eventIdForNewEvent.toString(), // Pass eventId as STRING - IMPORTANT
           name,
           description,
-          imageURL, // Use the Cloudinary image URL
+          imageURL,
           options,
-          startTimestamp,
-          endTimestamp,
-          notificationMessage // Include notification message
+          startTimestamp.toString(), // Convert timestamps to string as well
+          endTimestamp.toString(),
+          notificationMessage
         )
         .send({ from: accounts[0] });
 
-      // Send POST request to backend for notification - Keep this part as it was if you need it
+      alert("Event created on blockchain successfully!");
+
+      // **Send Event Data to Backend to Store in MongoDB - Include eventId**
       try {
-        await axios.post("http://localhost:5000/send-notification", {
-          message: notificationMessage, // Send notification message in the body
-        });
-        console.log("Notification request sent successfully to backend");
-      } catch (notificationError) {
-        console.error("Error sending notification request:", notificationError);
-        alert("Event created successfully, but error sending notification.");
+        const eventDataForMongoDB = {
+          eventId: eventIdForNewEvent, // Send eventId to backend - as NUMBER
+          name: name,
+          description: description,
+          imageURL: imageURL,
+          options: options,
+          startTime: startTimestamp,
+          endTime: endTimestamp,
+          notificationMessage: notificationMessage,
+        };
+        await axios.post(
+          "http://localhost:5000/api/events",
+          eventDataForMongoDB
+        );
+        console.log("Event data saved to MongoDB successfully!");
+        alert("Event data saved to MongoDB!");
+      } catch (mongoDbError) {
+        console.error("Error saving event data to MongoDB:", mongoDbError);
+        alert("Event created on blockchain, but error saving data to MongoDB.");
         return;
       }
 
-      alert("Event created successfully and notification sent!");
       setFormData({
         name: "",
         description: "",
         notificationMessage: "",
-      }); // Reset form data, exclude imageURL
-      setUploadedImageUrl(""); // Clear uploaded image URL
+      });
+      setUploadedImageUrl("");
       setOptions([""]);
       setStartTime("");
       setEndTime("");
-      loadEvents(contract);
+      loadEvents(contract); // Reload events after successful creation
     } catch (err: any) {
       console.error(err);
       alert(`Error creating event: ${err.message}`);
@@ -721,7 +773,7 @@ const Admin = () => {
         ) : (
           events.map((event) => (
             <div
-              key={Number(event.id)}
+              key={Number(event.eventId)} // Changed key to event.eventId
               className="bg-white p-4 rounded-xl shadow mb-4"
             >
               <h3 className="text-lg font-bold text-black">{event.name}</h3>
@@ -745,7 +797,7 @@ const Admin = () => {
 
               {!event.isCompleted && (
                 <div>
-                  {declaringWinnerEventId === Number(event.id) ? (
+                  {declaringWinnerEventId === Number(event.eventId) ? (
                     <div className="mt-4">
                       <Label className="text-black">
                         Select Winning Option:
@@ -766,7 +818,7 @@ const Admin = () => {
                         <Button
                           size="sm"
                           onClick={() =>
-                            confirmDeclareWinner(Number(event.id), event)
+                            confirmDeclareWinner(Number(event.eventId), event)
                           }
                         >
                           Confirm Declare Winner
@@ -783,7 +835,7 @@ const Admin = () => {
                   ) : (
                     <Button
                       className="mt-4"
-                      onClick={() => handleDeclareWinner(Number(event.id))}
+                      onClick={() => handleDeclareWinner(Number(event.eventId))}
                     >
                       Declare Winner
                     </Button>

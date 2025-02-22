@@ -3,65 +3,9 @@ import Web3 from "web3";
 import BettingCard from "@/components/BettingCard/BettingCard";
 import Slider from "@/components/Slider/Slider";
 
-const contractAddress = "0xC57D2b7E0dDaad51E54D94Ebd41A4DE5656A0BF3";
+const contractAddress = "0x904d11bEEbFc370D2fC0A7ba256A44c5d9e665A9"; // Replace with your actual contract address
 const contractABI = [
-  {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "bettor",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "option",
-        type: "string",
-      },
-    ],
-    name: "BetPlaced",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: false, internalType: "uint256", name: "id", type: "uint256" },
-      { indexed: false, internalType: "string", name: "name", type: "string" },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "endTime",
-        type: "uint256",
-      },
-    ],
-    name: "EventCreated",
-    type: "event",
-  },
+  // ... (your contract ABI - keep it the same) ...
   {
     inputs: [],
     name: "nextEventId",
@@ -73,7 +17,7 @@ const contractABI = [
     inputs: [{ internalType: "uint256", name: "_eventId", type: "uint256" }],
     name: "getEvent",
     outputs: [
-      { internalType: "uint256", name: "id", type: "uint256" },
+      { internalType: "uint256", name: "eventId", type: "uint256" }, // IMPORTANT: Correct output name to eventId
       { internalType: "string", name: "name", type: "string" },
       { internalType: "string", name: "description", type: "string" },
       { internalType: "string", name: "imageURL", type: "string" },
@@ -83,6 +27,7 @@ const contractABI = [
       { internalType: "bool", name: "isCompleted", type: "bool" },
       { internalType: "string", name: "winningOption", type: "string" },
       { internalType: "uint256", name: "prizePool", type: "uint256" },
+      { internalType: "string", name: "notificationMessage", type: "string" }, // Add notificationMessage to ABI
     ],
     stateMutability: "view",
     type: "function",
@@ -113,9 +58,16 @@ const Home = () => {
     try {
       const eventCount = await betContract.methods.nextEventId().call();
       const eventList: any[] = [];
-      for (let i = 0; i < eventCount; i++) {
-        const eventData = await betContract.methods.getEvent(i).call();
-        eventList.push(eventData);
+      // Loop through valid eventIds, starting from 1
+      for (let eventId = 1; eventId < eventCount; eventId++) {
+        // Start loop from 1
+        try {
+          const eventData = await betContract.methods.getEvent(eventId).call(); // Use eventId directly
+          eventList.push(eventData);
+        } catch (error) {
+          console.error(`Error fetching event ${eventId}:`, error); // Log error with eventId
+          // If getEvent(eventId) fails (e.g., eventId doesn't exist or was deleted), just continue to the next eventId
+        }
       }
       setEvents(eventList);
     } catch (error) {

@@ -4,7 +4,7 @@ import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
 
 interface BetInterfaceProps {
   eventData: {
-    id: string;
+    eventId: number; // Changed from id: string; to eventId: number; - CORRECTED
     name: string;
     description: string;
     imageURL: string;
@@ -14,6 +14,7 @@ interface BetInterfaceProps {
     isCompleted: boolean;
     winningOption: string;
     prizePool: string;
+    notificationMessage: string; // Added notificationMessage to props interface - CORRECTED
   };
   selectedOption: string;
   setSelectedOption: (option: string) => void;
@@ -28,7 +29,9 @@ export default function BetInterface({
   const displayedOptions = showMore
     ? eventData.options
     : eventData.options.slice(0, 3);
-  const endDate = new Date(eventData.endTime * 1000).toLocaleDateString();
+  const endDate = new Date(
+    Number(eventData.endTime) * 1000
+  ).toLocaleDateString(); // **[CORRECTED - Convert to Number]**
 
   return (
     <div className="lg:col-span-2">
@@ -37,7 +40,7 @@ export default function BetInterface({
           <div className="flex items-start gap-6 mb-4">
             <img
               src={eventData.imageURL}
-              alt={eventData.name}
+              alt={eventData.name + ` - Event ID ${eventData.eventId}`} // Updated to use eventId in alt text - CORRECTED
               width={80}
               height={80}
               className="rounded-lg"
