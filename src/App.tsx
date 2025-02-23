@@ -26,7 +26,7 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           {/* <Route path="/bet/:id" element={<BetDetails />} /> */}
           <Route
-            path="/bet/:id"
+            path="/bet/:eventId"
             element={
               <BetDetails onCancel={() => console.log("Bet canceled")} />
             }

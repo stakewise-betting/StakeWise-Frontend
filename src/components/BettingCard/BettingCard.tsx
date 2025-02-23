@@ -17,10 +17,12 @@ interface BettingCardProps {
 const BettingCard: FC<BettingCardProps> = ({ event }) => {
   const navigate = useNavigate();
 
-  const options: BettingOption[] = event.options.map((option: string, index: number) => ({
-    id: index,
-    text: option,
-  }));
+  const options: BettingOption[] = event.options.map(
+    (option: string, index: number) => ({
+      id: index,
+      text: option,
+    })
+  );
 
   return (
     <Card className="w-full max-w-md bg-[#333447] text-white shadow-lg border-0">
@@ -49,12 +51,21 @@ const BettingCard: FC<BettingCardProps> = ({ event }) => {
         <ScrollArea className="h-[80px] pr-2 overflow-hidden">
           <div className="space-y-0">
             {options.map((option) => (
-              <div key={option.id} className="flex items-center justify-between h-[28px]">
+              <div
+                key={option.id}
+                className="flex items-center justify-between h-[28px]"
+              >
                 <span className="text-sm text-gray-200">{option.text}</span>
                 <Button
                   variant="secondary"
                   className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] px-1 py-1 h-4"
-                  onClick={() => navigate(`/bet/${event.id}`)} // Navigate to bet page
+                  onClick={() => {
+                    console.log(
+                      "BettingCard - Navigate to eventId:",
+                      event.eventId
+                    ); // **[ADD THIS LOG - IMPORTANT]**
+                    navigate(`/bet/${event.eventId}`);
+                  }}
                 >
                   Place Bet
                 </Button>
