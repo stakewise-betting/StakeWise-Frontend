@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import axios from "axios"; // Import axios - keep this import
-
+import DownloadReport from "./DownloadReport";
 const contractAddress = "0x904d11bEEbFc370D2fC0A7ba256A44c5d9e665A9";
 const contractABI = [
   {
@@ -851,6 +851,7 @@ const Admin = () => {
           ))
         )}
       </section>
+      <DownloadReport />
     </div>
   );
 };
