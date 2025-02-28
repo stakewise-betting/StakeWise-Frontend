@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { FaHome, FaCalendarAlt, FaPoll, FaBell, FaBars } from "react-icons/fa";
 import logo from "../../assets/images/logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { ButtonOutline } from "../Buttons/Buttons";
+
+// Define an interface for Notification object
+interface Notification {
+  message: string;
+  notificationImageURL?: string; // Optional as it might not always be present
+}
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,9 +19,10 @@ const Navbar = () => {
   const [profilePopupOpen, setProfilePopupOpen] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Use useLocation to get current path
 
-  // WebSocket State and Ref - Explicitly typed ref
-  const [notifications, setNotifications] = useState<string[]>([]);
+  // WebSocket State and Ref - Explicitly typed ref, now array of Notification objects
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -36,15 +43,23 @@ const Navbar = () => {
           const message = JSON.parse(event.data);
           console.log("Parsed WebSocket message:", message);
           if (message.type === "notification") {
+            // Assume message contains { type: "notification", message: "...", notificationImageURL: "..." }
+            const notificationPayload: Notification = {
+              message: message.message,
+              notificationImageURL: message.notificationImageURL, // Optional, might be undefined
+            };
             setNotifications((prevNotifications) => [
-              message.message,
+              notificationPayload,
               ...prevNotifications,
             ]);
           } else if (message.type === "newEvent") {
-            // Handle 'newEvent' type
-            const newEventNotificationMessage = message.notificationMessage; // Access notificationMessage from message
+            // Assume message contains { type: "newEvent", notificationMessage: "...", notificationImageURL: "..." }
+            const newEventNotification: Notification = {
+              message: message.notificationMessage,
+              notificationImageURL: message.notificationImageURL, // Optional, might be undefined
+            };
             setNotifications((prevNotifications) => [
-              newEventNotificationMessage,
+              newEventNotification,
               ...prevNotifications,
             ]);
             // You can also store message.eventData if you want to display more details in the notification dropdown later
@@ -98,6 +113,11 @@ const Navbar = () => {
     { to: "/dashboard", label: "Dashboard", icon: <FaPoll /> },
   ];
 
+  // Function to determine if a link is active
+  const isLinkActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <nav className="bg-primary px-4 py-3 z-[1000] relative">
       <div className="container mx-auto flex justify-between items-center">
@@ -121,6 +141,7 @@ const Navbar = () => {
                     isActive ? "text-secondary after:w-full" : ""
                   }`
                 }
+                end // Use end to match the exact route
               >
                 {link.icon}
                 <span>{link.label}</span>
@@ -164,9 +185,16 @@ const Navbar = () => {
                       notifications.map((notification, index) => (
                         <li
                           key={index}
-                          className="px-4 py-2 hover:bg-secondary hover:text-white"
+                          className="px-4 py-2 flex items-center space-x-2 hover:bg-secondary hover:text-white" // Flex and space-x-2 for image and text
                         >
-                          {notification}
+                          {notification.notificationImageURL && (
+                            <img
+                              src={notification.notificationImageURL}
+                              alt="Notification Icon"
+                              className="w-6 h-6 rounded-full object-cover" // Adjust size as needed
+                            />
+                          )}
+                          <span>{notification.message}</span>
                         </li>
                       ))
                     ) : (
