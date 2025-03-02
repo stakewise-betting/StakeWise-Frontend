@@ -12,6 +12,7 @@ import Home from "./pages/HomePage/home";
 import AdminPanel from "./Admin/AdminPanel";
 
 import BetDetails from "./pages/BetDetails/BetDetails";
+import DepositPage from "./pages/DepositPage/Deposit";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             }
           />
           <Route path="/home" element={<Home />} />
+          <Route path="/deposit" element={<DepositPage />} />
           <Route path="/politics" element={<Politics />} />
           <Route path="/sports" element={<Sports />} />
           <Route path="/upcoming" element={<Upcoming />} />
