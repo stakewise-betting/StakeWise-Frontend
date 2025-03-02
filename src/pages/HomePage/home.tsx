@@ -2,37 +2,7 @@ import { useEffect, useState } from "react";
 import Web3 from "web3";
 import BettingCard from "@/components/BettingCard/BettingCard";
 import Slider from "@/components/Slider/Slider";
-
-const contractAddress = "0x904d11bEEbFc370D2fC0A7ba256A44c5d9e665A9"; // Replace with your actual contract address
-const contractABI = [
-  // ... (your contract ABI - keep it the same) ...
-  {
-    inputs: [],
-    name: "nextEventId",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "_eventId", type: "uint256" }],
-    name: "getEvent",
-    outputs: [
-      { internalType: "uint256", name: "eventId", type: "uint256" }, // IMPORTANT: Correct output name to eventId
-      { internalType: "string", name: "name", type: "string" },
-      { internalType: "string", name: "description", type: "string" },
-      { internalType: "string", name: "imageURL", type: "string" },
-      { internalType: "string[]", name: "options", type: "string[]" },
-      { internalType: "uint256", name: "startTime", type: "uint256" },
-      { internalType: "uint256", name: "endTime", type: "uint256" },
-      { internalType: "bool", name: "isCompleted", type: "bool" },
-      { internalType: "string", name: "winningOption", type: "string" },
-      { internalType: "uint256", name: "prizePool", type: "uint256" },
-      { internalType: "string", name: "notificationMessage", type: "string" }, // Add notificationMessage to ABI
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+import { contractABI, contractAddress } from "@/config/contractConfig";
 
 const Home = () => {
   const [, setWeb3] = useState<Web3 | null>(null);

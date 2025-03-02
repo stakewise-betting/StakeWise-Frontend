@@ -8,11 +8,11 @@ import Sports from "./pages/Sports/Sports";
 import Footer from "./components/Footer/Footer";
 import ContactUs from "./pages/ContactUs/ContactUs";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import EthereumBetting from "./components/bettingPanel/bettingPanel";
-import Admin from "./Admin/Admin.";
 import Home from "./pages/HomePage/home";
+import AdminPanel from "./Admin/AdminPanel";
 
 import BetDetails from "./pages/BetDetails/BetDetails";
+import DepositPage from "./pages/DepositPage/Deposit";
 
 function App() {
   return (
@@ -23,7 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />{" "}
           {/* kalin thibbe login kiyala */}
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<AdminPanel />} />
           {/* <Route path="/bet/:id" element={<BetDetails />} /> */}
           <Route
             path="/bet/:eventId"
@@ -31,8 +31,8 @@ function App() {
               <BetDetails onCancel={() => console.log("Bet canceled")} />
             }
           />
-          <Route path="/bet" element={<EthereumBetting />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/deposit" element={<DepositPage />} />
           <Route path="/politics" element={<Politics />} />
           <Route path="/sports" element={<Sports />} />
           <Route path="/upcoming" element={<Upcoming />} />

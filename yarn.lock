@@ -444,6 +444,11 @@
     semver "^7.5.4"
     uuid "^9.0.1"
 
+"@moonpay/moonpay-react@^1.8.10":
+  version "1.8.10"
+  resolved "https://registry.yarnpkg.com/@moonpay/moonpay-react/-/moonpay-react-1.8.10.tgz#2f8eccc07935b0cf2452d6bb4c118b8657b571da"
+  integrity sha512-N6IuLZNVExyjOCikHU/DuyN+9gkUsVc/usTAaTL5mXOwClfWH3UFJGJUt3CY/gloVZSPnhldbVfjisyoRd4J4A==
+
 "@noble/curves@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.2.0.tgz#92d7e12e4e49b23105a2555c6984d41733d65c35"
