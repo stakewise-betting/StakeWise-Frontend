@@ -104,7 +104,7 @@ const Navbar = () => {
   };
 
   const commonLinks = [
-    { to: "/", label: "Home", icon: <FaHome /> },
+    { to: "/home", label: "Home", icon: <FaHome /> },
     { to: "/upcoming", label: "Upcoming Events", icon: <FaCalendarAlt /> },
     { to: "/results", label: "Results", icon: <FaPoll /> },
   ];
@@ -124,7 +124,10 @@ const Navbar = () => {
         {/* Logo Section */}
         <div className="flex items-center space-x-2">
           <img src={logo} alt="Logo" className="h-8" />
-          <Link to="/" className="text-accent font-saira-stencil text-[30px]">
+          <Link
+            to="/home"
+            className="text-accent font-saira-stencil text-[30px]"
+          >
             STAKEWISE
           </Link>
         </div>
@@ -161,7 +164,7 @@ const Navbar = () => {
 
               <button
                 className="text-sub bg-transparent border border-secondary py-1 px-6 rounded-full hover:text-white hover:bg-secondary transition-all duration-300"
-                onClick={() => alert("Deposit clicked!")}
+                onClick={() => navigate("/deposit")}
               >
                 Deposit
               </button>

@@ -3,364 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
-import { contractAddress } from "@/config/contractConfig";
+import { contractABI, contractAddress } from "@/config/contractConfig";
 
-const contractABI = [
-  {
-    inputs: [],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "bettor",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "option",
-        type: "string",
-      },
-    ],
-    name: "BetPlaced",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "endTime",
-        type: "uint256",
-      },
-    ],
-    name: "EventCreated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "winningOption",
-        type: "string",
-      },
-    ],
-    name: "WinnerDeclared",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "admin",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "events",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "description",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "imageURL",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "endTime",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isCompleted",
-        type: "bool",
-      },
-      {
-        internalType: "string",
-        name: "winningOption",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "prizePool",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "notificationMessage",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [],
-    name: "nextEventId",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_description",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_imageURL",
-        type: "string",
-      },
-      {
-        internalType: "string[]",
-        name: "_options",
-        type: "string[]",
-      },
-      {
-        internalType: "uint256",
-        name: "_startTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_endTime",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_notificationMessage",
-        type: "string",
-      },
-    ],
-    name: "createEvent",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_option",
-        type: "string",
-      },
-    ],
-    name: "placeBet",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-    payable: true,
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "_winningOption",
-        type: "string",
-      },
-    ],
-    name: "declareWinner",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-    ],
-    name: "getEvent",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "eventId",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "description",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "imageURL",
-        type: "string",
-      },
-      {
-        internalType: "string[]",
-        name: "options",
-        type: "string[]",
-      },
-      {
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "endTime",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isCompleted",
-        type: "bool",
-      },
-      {
-        internalType: "string",
-        name: "winningOption",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "prizePool",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "notificationMessage",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_eventId",
-        type: "uint256",
-      },
-    ],
-    name: "getEventOptions",
-    outputs: [
-      {
-        internalType: "string[]",
-        name: "",
-        type: "string[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-    constant: true,
-  },
-];
+interface OptionOdds {
+  optionName: string;
+  oddsPercentage: number;
+}
 
 interface EventData {
   eventId: number;
@@ -381,15 +29,16 @@ interface BetDetailsProps {
 }
 
 export default function BetDetails({ onCancel }: BetDetailsProps) {
-  const { eventId: eventIdParam } = useParams<{ eventId: string }>(); // **[CORRECTED - Use 'eventId' here]**
+  const { eventId: eventIdParam } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any>(null);
   const [eventData, setEventData] = useState<EventData | null>(null);
+  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null); // State for event odds - ADDED
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // State for error message
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("BetDetails.tsx useEffect - eventIdParam:", eventIdParam);
@@ -408,7 +57,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           await loadEventData(betContract, eventIdParam);
         } catch (initError: any) {
           console.error("Failed to initialize Web3:", initError);
-          setError("Failed to initialize Web3. Please check console."); // Set error state
+          setError("Failed to initialize Web3. Please check console.");
           setLoading(false);
         }
       }
@@ -424,19 +73,22 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
     try {
       if (!eventIdParam) {
         console.error("Event ID is missing (inside loadEventData).");
-        setError("Event ID is missing from the URL."); // Set error state
+        setError("Event ID is missing from the URL.");
         setLoading(false);
         return;
       }
       const event = await betContract.methods.getEvent(eventIdParam).call();
-      console.log("loadEventData - event fetched from contract:", event); // Log fetched event
-      setEventData(event); // Directly set event data - assuming getEvent returns correctly structured data
+      const odds = await betContract.methods.getEventOdds(eventIdParam).call(); // Fetch event odds - ADDED
+      console.log("loadEventData - event fetched from contract:", event);
+      console.log("loadEventData - odds fetched from contract:", odds); // Log fetched odds - ADDED
+      setEventData(event);
+      setEventOdds(odds); // Set event odds state - ADDED
       setLoading(false);
     } catch (error: any) {
       console.error("Failed to load event data:", error);
       setError(
         "Failed to load event details. Event may not exist or network error."
-      ); // Set error state
+      );
       setLoading(false);
       navigate("/");
     }
@@ -452,9 +104,10 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         value: web3.utils.toWei(amount, "ether"),
       });
       alert("Bet placed successfully!");
+      await loadEventData(contract, eventIdParam); // Refetch event data and odds after bet - ADDED odds refetch
     } catch (betError: any) {
       console.error("Failed to place bet:", betError);
-      setError("Bet placement failed. Please check console for details."); // Set error state
+      setError("Bet placement failed. Please check console for details.");
     }
   };
 
@@ -504,8 +157,10 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
         <BetInterface
           eventData={eventData}
+          eventOdds={eventOdds} // Pass eventOdds to BetInterface - ADDED
           selectedOption={selectedOption}
           setSelectedOption={setSelectedOption}
+          web3={web3}
         />
         <BetSlip
           eventData={eventData}
