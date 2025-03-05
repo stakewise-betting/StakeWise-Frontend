@@ -4,6 +4,7 @@ import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
 import { contractABI, contractAddress } from "@/config/contractConfig";
+import CommentSection from "@/components/CommentSection";
 
 interface OptionOdds {
   optionName: string;
@@ -39,6 +40,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { eventId } = useParams<{ eventId: string }>();
 
   useEffect(() => {
     console.log("BetDetails.tsx useEffect - eventIdParam:", eventIdParam);
@@ -171,6 +173,8 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           onBet={handleBet}
           onCancel={onCancel}
         />
+        {/* {betId && <CommentSection betId={betId} />} */}
+        <CommentSection betId={eventId || ""} />
       </div>
     </div>
   );
