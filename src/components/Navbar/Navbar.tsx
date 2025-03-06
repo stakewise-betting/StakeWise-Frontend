@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { FaHome, FaCalendarAlt, FaPoll, FaBell, FaBars } from "react-icons/fa";
 import { AppContext } from "@/context/AppContext";
 import { toast } from "react-toastify";
@@ -8,9 +9,10 @@ import logo from "../../assets/images/logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { ButtonOutline } from "../Buttons/Buttons";
 
+// Define an interface for Notification object
 interface Notification {
   message: string;
-  notificationImageURL?: string;
+  notificationImageURL?: string; // Optional as it might not always be present
 }
 
 const Navbar = () => {
