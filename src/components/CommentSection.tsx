@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
-import { AiFillHeart, AiOutlineHeart } from "react-icons/ai"; // Import heart icons
-import { RiDeleteBin6Line } from "react-icons/ri"; // Import delete bin icon
-import { FiMoreVertical } from "react-icons/fi"; // Import vertical dots icon
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { FiMoreVertical } from "react-icons/fi";
 
 type Comment = {
   _id: string;
@@ -12,17 +12,17 @@ type Comment = {
   text: string;
   createdAt: string;
   likes: number;
-  likedByUser?: boolean; // To track if the current user has liked the comment (frontend only for this example)
+  likedByUser?: boolean;
 };
 
 const CommentSection = ({ betId }: { betId: string }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [username, setUsername] = useState("");
-  const [likedComments, setLikedComments] = useState<Set<string>>(new Set()); // Track liked comments in frontend
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [menuVisibleCommentId, setMenuVisibleCommentId] = useState<
     string | null
-  >(null); // Track which comment's menu is visible
+  >(null);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
@@ -32,15 +32,15 @@ const CommentSection = ({ betId }: { betId: string }) => {
     axios
       .get(`http://localhost:5000/api/comments/${betId}`)
       .then((res) => {
-        // Initialize likedByUser based on likedComments state (for frontend tracking)
         const initialComments = res.data.map((comment: Comment) => ({
           ...comment,
           likedByUser: likedComments.has(comment._id),
         }));
         setComments(initialComments);
+        console.log("Initial comments fetched:", initialComments); // ADDED LOG
       })
       .catch((error) => console.error("Error fetching comments:", error));
-  }, [betId, likedComments]); // Added likedComments to dependency array to refresh likes correctly
+  }, [betId]); // Modified dependency array: removed `likedComments`
 
   const handleAddComment = async () => {
     if (!newComment.trim() || !username.trim()) return;
@@ -51,44 +51,66 @@ const CommentSection = ({ betId }: { betId: string }) => {
       text: newComment,
     });
 
-    setComments([...comments, { ...res.data, likedByUser: false }]); // Initialize likedByUser for new comment
+    setComments([...comments, { ...res.data, likedByUser: false }]);
     setNewComment("");
   };
 
   const handleLike = async (commentId: string) => {
+    console.log("handleLike called for commentId:", commentId); // ADDED LOG
+    console.log("likedComments before click:", likedComments); // ADDED LOG
+
     if (likedComments.has(commentId)) {
-      // Already liked, unlike action (for frontend tracking - in real app, handle unlike on backend)
+      // Unlike action
       setLikedComments((prevLikedComments) => {
         const newLikedComments = new Set(prevLikedComments);
         newLikedComments.delete(commentId);
         return newLikedComments;
       });
-      setComments(
-        comments.map(
-          (c) =>
-            c._id === commentId
-              ? { ...c, likes: Math.max(0, c.likes - 1), likedByUser: false }
-              : c // Decrement likes and update likedByUser
-        )
-      );
-      await axios.post(
-        `http://localhost:5000/api/comments/unlike/${commentId}` // Assuming you have an unlike route in backend
-      );
+
+      try {
+        const unlikeRes = await axios.post(
+          `http://localhost:5000/api/comments/unlike/${commentId}`
+        );
+        console.log("Unlike API response:", unlikeRes.data); // ADDED LOG
+        setComments(
+          comments.map(
+            (c) =>
+              c._id === commentId
+                ? { ...c, likes: unlikeRes.data.likes, likedByUser: false }
+                : c // Updated likes from API response
+          )
+        );
+      } catch (error) {
+        console.error("Error in unlike API:", error);
+      }
     } else {
       // Like action
       setLikedComments(
         (prevLikedComments) => new Set(prevLikedComments.add(commentId))
-      ); // Add to liked comments set
-      setComments(
-        comments.map(
-          (c) =>
-            c._id === commentId
-              ? { ...c, likes: c.likes + 1, likedByUser: true }
-              : c // Increment likes and update likedByUser
-        )
       );
-      await axios.post(`http://localhost:5000/api/comments/like/${commentId}`);
+
+      try {
+        const likeRes = await axios.post(
+          `http://localhost:5000/api/comments/like/${commentId}`
+        );
+        console.log("Like API response:", likeRes.data); // ADDED LOG
+        setComments(
+          comments.map(
+            (c) =>
+              c._id === commentId
+                ? { ...c, likes: likeRes.data.likes, likedByUser: true }
+                : c // Updated likes from API response
+          )
+        );
+      } catch (error) {
+        console.error("Error in like API:", error);
+      }
     }
+    console.log("likedComments after click:", likedComments); // ADDED LOG
+    console.log(
+      "comments state after click:",
+      comments.find((c) => c._id === commentId)
+    ); // ADDED LOG
   };
 
   const handleDelete = async () => {
@@ -105,13 +127,13 @@ const CommentSection = ({ betId }: { betId: string }) => {
   const handleDotsClick = (commentId: string) => {
     setMenuVisibleCommentId(
       menuVisibleCommentId === commentId ? null : commentId
-    ); // Toggle menu visibility
+    );
   };
 
   const confirmDelete = (commentId: string) => {
     setCommentToDelete(commentId);
     setShowConfirmation(true);
-    setMenuVisibleCommentId(null); // Close the menu after delete is clicked
+    setMenuVisibleCommentId(null);
   };
 
   const cancelDeleteConfirmation = () => {
@@ -162,9 +184,9 @@ const CommentSection = ({ betId }: { betId: string }) => {
                 className="text-red flex items-center mr-2"
               >
                 {comment.likedByUser ? (
-                  <AiFillHeart className="text-red-500" /> // Filled heart if liked
+                  <AiFillHeart className="text-red-500" />
                 ) : (
-                  <AiOutlineHeart className="text-DFprimary" /> // Outlined heart if not liked
+                  <AiOutlineHeart className="text-DFprimary" />
                 )}
                 <span className="ml-1">{comment.likes}</span>
               </button>
