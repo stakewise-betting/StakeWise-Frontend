@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import CommentSection from "@/components/CommentSection";
+import { AppContext } from "@/context/AppContext"; // Adjust path to your AppContext
 
 interface OptionOdds {
   optionName: string;
@@ -35,12 +36,18 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any>(null);
   const [eventData, setEventData] = useState<EventData | null>(null);
-  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null); // State for event odds - ADDED
+  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
+
+  // Access AppContext and get currentUserId
+  const appContext = useContext(AppContext);
+  const currentUserId = appContext?.userData?._id || undefined;
+  console.log(appContext); // Get userId from AppContext, default to undefined if not available
+  console.log(currentUserId); // Debugging
 
   useEffect(() => {
     console.log("BetDetails.tsx useEffect - eventIdParam:", eventIdParam);
@@ -80,11 +87,11 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         return;
       }
       const event = await betContract.methods.getEvent(eventIdParam).call();
-      const odds = await betContract.methods.getEventOdds(eventIdParam).call(); // Fetch event odds - ADDED
+      const odds = await betContract.methods.getEventOdds(eventIdParam).call();
       console.log("loadEventData - event fetched from contract:", event);
-      console.log("loadEventData - odds fetched from contract:", odds); // Log fetched odds - ADDED
+      console.log("loadEventData - odds fetched from contract:", odds);
       setEventData(event);
-      setEventOdds(odds); // Set event odds state - ADDED
+      setEventOdds(odds);
       setLoading(false);
     } catch (error: any) {
       console.error("Failed to load event data:", error);
@@ -106,7 +113,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         value: web3.utils.toWei(amount, "ether"),
       });
       alert("Bet placed successfully!");
-      await loadEventData(contract, eventIdParam); // Refetch event data and odds after bet - ADDED odds refetch
+      await loadEventData(contract, eventIdParam);
     } catch (betError: any) {
       console.error("Failed to place bet:", betError);
       setError("Bet placement failed. Please check console for details.");
@@ -159,7 +166,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
         <BetInterface
           eventData={eventData}
-          eventOdds={eventOdds} // Pass eventOdds to BetInterface - ADDED
+          eventOdds={eventOdds}
           selectedOption={selectedOption}
           setSelectedOption={setSelectedOption}
           web3={web3}
@@ -173,8 +180,8 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           onBet={handleBet}
           onCancel={onCancel}
         />
-        {/* {betId && <CommentSection betId={betId} />} */}
-        <CommentSection betId={eventId || ""} />
+        {/* Pass currentUserId from AppContext to CommentSection */}
+        <CommentSection betId={eventId || ""} currentUserId={currentUserId} />
       </div>
     </div>
   );

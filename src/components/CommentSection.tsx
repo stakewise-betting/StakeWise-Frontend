@@ -1,5 +1,5 @@
 // frontend >>
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
@@ -13,12 +13,20 @@ type Comment = {
   createdAt: string;
   likes: number;
   likedByUser?: boolean;
+  userId: string; // Add userId to the Comment type
 };
 
-const CommentSection = ({ betId }: { betId: string }) => {
+const CommentSection = ({
+  betId,
+  currentUserId,
+}: {
+  betId: string;
+  currentUserId?: string;
+}) => {
+  // Add currentUserId prop
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [username, setUsername] = useState("");
+  // Removed username state
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [menuVisibleCommentId, setMenuVisibleCommentId] = useState<
     string | null
@@ -37,27 +45,41 @@ const CommentSection = ({ betId }: { betId: string }) => {
           likedByUser: likedComments.has(comment._id),
         }));
         setComments(initialComments);
-        console.log("Initial comments fetched:", initialComments); // ADDED LOG
+        console.log("Initial comments fetched:", initialComments);
       })
       .catch((error) => console.error("Error fetching comments:", error));
-  }, [betId]); // Modified dependency array: removed `likedComments`
+  }, [betId]);
 
   const handleAddComment = async () => {
-    if (!newComment.trim() || !username.trim()) return;
+    console.log("handleAddComment function called"); // ADD THIS LINE
+    console.log("newComment value:", newComment); // ADD THIS LINE
+    console.log("currentUserId value:", currentUserId); // ADD THIS LINE
 
-    const res = await axios.post("http://localhost:5000/api/comments", {
-      betId,
-      username,
-      text: newComment,
-    });
+    if (!newComment.trim() || !currentUserId) {
+      console.log("Validation failed - comment or userId missing"); // ADD THIS LINE
+      return;
+    }
 
-    setComments([...comments, { ...res.data, likedByUser: false }]);
-    setNewComment("");
+    console.log("Validation passed - making API call"); // ADD THIS LINE
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/comments", {
+        betId,
+        userId: currentUserId,
+        text: newComment,
+      });
+
+      console.log("API Response received:", res.data); // ADD THIS LINE
+      setComments([...comments, { ...res.data, likedByUser: false }]);
+      setNewComment("");
+    } catch (error) {
+      console.error("Error in handleAddComment:", error); // Keep this error log
+    }
   };
 
   const handleLike = async (commentId: string) => {
-    console.log("handleLike called for commentId:", commentId); // ADDED LOG
-    console.log("likedComments before click:", likedComments); // ADDED LOG
+    console.log("handleLike called for commentId:", commentId);
+    console.log("likedComments before click:", likedComments);
 
     if (likedComments.has(commentId)) {
       // Unlike action
@@ -71,13 +93,12 @@ const CommentSection = ({ betId }: { betId: string }) => {
         const unlikeRes = await axios.post(
           `http://localhost:5000/api/comments/unlike/${commentId}`
         );
-        console.log("Unlike API response:", unlikeRes.data); // ADDED LOG
+        console.log("Unlike API response:", unlikeRes.data);
         setComments(
-          comments.map(
-            (c) =>
-              c._id === commentId
-                ? { ...c, likes: unlikeRes.data.likes, likedByUser: false }
-                : c // Updated likes from API response
+          comments.map((c) =>
+            c._id === commentId
+              ? { ...c, likes: unlikeRes.data.likes, likedByUser: false }
+              : c
           )
         );
       } catch (error) {
@@ -93,30 +114,30 @@ const CommentSection = ({ betId }: { betId: string }) => {
         const likeRes = await axios.post(
           `http://localhost:5000/api/comments/like/${commentId}`
         );
-        console.log("Like API response:", likeRes.data); // ADDED LOG
+        console.log("Like API response:", likeRes.data);
         setComments(
-          comments.map(
-            (c) =>
-              c._id === commentId
-                ? { ...c, likes: likeRes.data.likes, likedByUser: true }
-                : c // Updated likes from API response
+          comments.map((c) =>
+            c._id === commentId
+              ? { ...c, likes: likeRes.data.likes, likedByUser: true }
+              : c
           )
         );
       } catch (error) {
         console.error("Error in like API:", error);
       }
     }
-    console.log("likedComments after click:", likedComments); // ADDED LOG
+    console.log("likedComments after click:", likedComments);
     console.log(
       "comments state after click:",
       comments.find((c) => c._id === commentId)
-    ); // ADDED LOG
+    );
   };
 
   const handleDelete = async () => {
     if (commentToDelete) {
       await axios.delete(
-        `http://localhost:5000/api/comments/${commentToDelete}`
+        `http://localhost:5000/api/comments/${commentToDelete}`,
+        { data: { userId: currentUserId } } // Send userId for deletion authorization
       );
       setComments(comments.filter((c) => c._id !== commentToDelete));
       setCommentToDelete(null);
@@ -145,13 +166,7 @@ const CommentSection = ({ betId }: { betId: string }) => {
     <div className="p-4 bg-primary text-DFprimary rounded-lg">
       <h3 className="text-lg font-bold mb-2">Comments</h3>
       <div className="mb-3">
-        <input
-          type="text"
-          placeholder="Your name"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="p-2 border rounded w-full mb-2 text-black"
-        />
+        {/* Removed username input */}
         <textarea
           placeholder="Write a comment..."
           value={newComment}
@@ -190,29 +205,34 @@ const CommentSection = ({ betId }: { betId: string }) => {
                 )}
                 <span className="ml-1">{comment.likes}</span>
               </button>
-              <button
-                onClick={() => handleDotsClick(comment._id)}
-                className="text-DFprimary ml-auto"
-              >
-                <FiMoreVertical />
-              </button>
-              {menuVisibleCommentId === comment._id && (
-                <div
-                  className="absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-card ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu-button"
-                >
-                  <div className="py-1" role="menuitem">
-                    <button
-                      onClick={() => confirmDelete(comment._id)}
-                      className="text-red-500 flex items-center px-4 py-2 text-sm hover:bg-gray-800 w-full text-left"
-                      role="menuitem"
+              {/* Conditionally render delete button based on ownership */}
+              {currentUserId === comment.userId && (
+                <>
+                  <button
+                    onClick={() => handleDotsClick(comment._id)}
+                    className="text-DFprimary ml-auto"
+                  >
+                    <FiMoreVertical />
+                  </button>
+                  {menuVisibleCommentId === comment._id && (
+                    <div
+                      className="absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-card ring-1 ring-black ring-opacity-5 focus:outline-none"
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="options-menu-button"
                     >
-                      <RiDeleteBin6Line className="mr-2" /> Delete
-                    </button>
-                  </div>
-                </div>
+                      <div className="py-1" role="menuitem">
+                        <button
+                          onClick={() => confirmDelete(comment._id)}
+                          className="text-red-500 flex items-center px-4 py-2 text-sm hover:bg-gray-800 w-full text-left"
+                          role="menuitem"
+                        >
+                          <RiDeleteBin6Line className="mr-2" /> Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
