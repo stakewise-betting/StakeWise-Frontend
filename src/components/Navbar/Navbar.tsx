@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useState, useEffect, useRef, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { FaHome, FaCalendarAlt, FaPoll, FaBell, FaBars } from "react-icons/fa";
+import { AppContext } from "@/context/AppContext";
+import { toast } from "react-toastify";
+import axios from "axios";
 import logo from "../../assets/images/logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { ButtonOutline } from "../Buttons/Buttons";
@@ -13,322 +16,301 @@ interface Notification {
 }
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
+    useContext(AppContext)!;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Set to true for testing notifications
-  const [profilePopupOpen, setProfilePopupOpen] = useState(false);
-  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation(); // Use useLocation to get current path
-
-  // WebSocket State and Ref - Explicitly typed ref, now array of Notification objects
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const ws = useRef<WebSocket | null>(null);
 
+  // WebSocket connection
   useEffect(() => {
-    if (isLoggedIn) {
-      ws.current = new WebSocket("ws://localhost:5000"); // Connect to WebSocket server
+    if (!isLoggedin) return;
 
-      ws.current.onopen = () => {
-        console.log("WebSocket connected in Navbar");
-      };
+    const websocketUrl =
+      import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:5000";
+    ws.current = new WebSocket(websocketUrl);
 
-      ws.current.onclose = () => {
-        console.log("WebSocket disconnected in Navbar");
-      };
-
-      ws.current.onmessage = (event) => {
-        console.log("WebSocket message received:", event);
-        try {
-          const message = JSON.parse(event.data);
-          console.log("Parsed WebSocket message:", message);
-          if (message.type === "notification") {
-            // Assume message contains { type: "notification", message: "...", notificationImageURL: "..." }
-            const notificationPayload: Notification = {
-              message: message.message,
-              notificationImageURL: message.notificationImageURL, // Optional, might be undefined
-            };
-            setNotifications((prevNotifications) => [
-              notificationPayload,
-              ...prevNotifications,
-            ]);
-          } else if (message.type === "newEvent") {
-            // Assume message contains { type: "newEvent", notificationMessage: "...", notificationImageURL: "..." }
-            const newEventNotification: Notification = {
-              message: message.notificationMessage,
-              notificationImageURL: message.notificationImageURL, // Optional, might be undefined
-            };
-            setNotifications((prevNotifications) => [
-              newEventNotification,
-              ...prevNotifications,
-            ]);
-            // You can also store message.eventData if you want to display more details in the notification dropdown later
-          } else {
-            console.log("Received unknown message type:", message);
-          }
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error, event.data);
+    ws.current.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === "notification" || message.type === "newEvent") {
+          setNotifications((prev) => [
+            {
+              message: message.message || message.notificationMessage,
+              notificationImageURL: message.notificationImageURL,
+            },
+            ...prev,
+          ]);
         }
-      };
-
-      ws.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      return () => {
-        if (ws.current?.readyState === WebSocket.OPEN) {
-          ws.current.close();
-        }
-      };
-    } else {
-      setNotifications([]);
-      if (ws.current?.readyState === WebSocket.OPEN) {
-        ws.current.close();
+      } catch (error) {
+        console.error("WebSocket message error:", error);
       }
+    };
+
+    return () => ws.current?.close();
+  }, [isLoggedin]);
+
+  // User actions
+  const handleVerification = async () => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/sendVerifyOtp`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      data.success ? navigate("/email-verify") : toast.error(data.message);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Verification failed");
     }
-  }, [isLoggedIn]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.body.classList.toggle("dark-mode", !isDarkMode);
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  const handleLogout = async () => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/logout`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      if (data.success) {
+        setUserData(null);
+        setIsLoggedin(false);
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setProfilePopupOpen(false);
-    setNotificationPanelOpen(false);
-  };
-
-  const commonLinks = [
-    { to: "/", label: "Home", icon: <FaHome /> },
+  // Navigation links
+  const navLinks = [
+    { to: "/home", label: "Home", icon: <FaHome /> },
     { to: "/upcoming", label: "Upcoming Events", icon: <FaCalendarAlt /> },
     { to: "/results", label: "Results", icon: <FaPoll /> },
+    ...(isLoggedin
+      ? [{ to: "/dashboard", label: "Dashboard", icon: <FaPoll /> }]
+      : []),
   ];
-
-  const loggedInLinks = [
-    { to: "/dashboard", label: "Dashboard", icon: <FaPoll /> },
-  ];
-
-  // Function to determine if a link is active
-  const isLinkActive = (path: string) => {
-    return location.pathname === path;
-  };
 
   return (
-    <nav className="bg-primary px-4 py-3 z-[1000] relative">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo Section */}
-        <div className="flex items-center space-x-2">
-          <img src={logo} alt="Logo" className="h-8" />
-          <Link to="/" className="text-accent font-saira-stencil text-[30px]">
+    <nav className="bg-primary px-4 py-3 sticky top-0 z-50 shadow-lg">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        {/* Branding */}
+        <div className="flex items-center space-x-3">
+          <img src={logo} alt="Logo" className="h-9 w-auto" />
+          <Link
+            to="/"
+            className="text-2xl font-bold text-accent hover:text-secondary transition"
+          >
             STAKEWISE
           </Link>
         </div>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex space-x-6">
-          {[...commonLinks, ...(isLoggedIn ? loggedInLinks : [])].map(
-            (link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `relative flex items-center space-x-2 text-sub hover:text-secondary transition-all duration-700 after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[3px] after:bg-secondary hover:after:w-full after:transition-all ${
-                    isActive ? "text-secondary after:w-full" : ""
-                  }`
-                }
-                end // Use end to match the exact route
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </NavLink>
-            )
-          )}
-        </div>
-
-        {/* Right Section (Login/Signup or Profile Section) */}
+        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
-          {isLoggedIn ? (
-            <>
-              <div className="flex flex-col items-center text-sub font-normal">
-                <div className="text-green">$0.00</div>
-                <div>Cash</div>
-              </div>
-
-              <button
-                className="text-sub bg-transparent border border-secondary py-1 px-6 rounded-full hover:text-white hover:bg-secondary transition-all duration-300"
-                onClick={() => alert("Deposit clicked!")}
+          {/* Main Links */}
+          <div className="flex space-x-6">
+            {navLinks.map(({ to, label, icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({
+                  isActive,
+                }) => `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
+                  ${
+                    isActive
+                      ? "text-secondary bg-secondary/10"
+                      : "text-sub hover:bg-secondary/10"
+                  }`}
               >
-                Deposit
-              </button>
+                {icon}
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </div>
 
-              <button
-                className="relative text-accent text-2xl hover:text-secondary transition-all duration-300"
-                onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
-              >
-                <FaBell />
-                {notifications.length > 0 && (
-                  <span className="absolute top-[-8px] right-[-8px] bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                    {notifications.length}
-                  </span>
-                )}
-              </button>
-              {notificationPanelOpen && (
-                <div className="absolute right-0 mt-6 w-64 bg-primary border border-secondary rounded-lg shadow-lg z-[1000]">
-                  <div className="p-4 text-accent font-bold">Notifications</div>
-                  <ul>
-                    {notifications.length > 0 ? (
-                      notifications.map((notification, index) => (
-                        <li
-                          key={index}
-                          className="px-4 py-2 flex items-center space-x-2 hover:bg-secondary hover:text-white" // Flex and space-x-2 for image and text
-                        >
-                          {notification.notificationImageURL && (
-                            <img
-                              src={notification.notificationImageURL}
-                              alt="Notification Icon"
-                              className="w-6 h-6 rounded-full object-cover" // Adjust size as needed
-                            />
-                          )}
-                          <span>{notification.message}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="px-4 py-2 text-gray-500">
-                        No new notifications
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              )}
+          {/* User Section */}
+          {isLoggedin ? (
+            <div className="flex items-center space-x-6">
+              {/* Notifications */}
               <div className="relative">
                 <button
-                  className="w-12 h-12 rounded-full overflow-hidden"
-                  onClick={() => setProfilePopupOpen(!profilePopupOpen)}
+                  onClick={() => setNotificationsOpen(!notificationsOpen)}
+                  className="text-2xl text-sub hover:text-secondary relative"
                 >
-                  <img
-                    src="https://cdn.lazyshop.com/files/9cf1cce8-c416-4a69-89ba-327f54c3c5a0/product/1d1de2db7e719dfdc2fd999d7a01df55.jpeg"
-                    alt="User Profile"
-                    className="w-full h-full object-cover"
-                  />
+                  <FaBell />
+                  {notifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {notifications.length}
+                    </span>
+                  )}
                 </button>
-                {profilePopupOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-primary border border-secondary rounded-lg shadow-lg z-[1000]">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-accent hover:bg-secondary hover:text-white transition-all duration-300"
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/watchlist"
-                      className="block px-4 py-2 text-accent hover:bg-secondary hover:text-white transition-all duration-300"
-                    >
-                      Watchlist
-                    </Link>
-                    <button
-                      onClick={toggleDarkMode}
-                      className="block w-full text-left px-4 py-2 text-accent hover:bg-secondary hover:text-white transition-all duration-300"
-                    >
-                      Dark Mode
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-accent hover:bg-secondary hover:text-white transition-all duration-300"
-                    >
-                      Logout
-                    </button>
+
+                {notificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-primary border border-secondary rounded-lg shadow-xl">
+                    <div className="p-4 font-bold border-b border-secondary">
+                      Notifications
+                    </div>
+                    <div className="max-h-60 overflow-y-auto">
+                      {notifications.map((n, i) => (
+                        <div
+                          key={i}
+                          className="p-4 flex items-center space-x-3 hover:bg-secondary/10"
+                        >
+                          {n.notificationImageURL && (
+                            <img
+                              src={n.notificationImageURL}
+                              className="w-8 h-8 rounded-full"
+                              alt="Notification"
+                            />
+                          )}
+                          <span>{n.message}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
-            </>
+
+              {/* User Profile */}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center space-x-3 group"
+                >
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
+                    {userData?.name[0].toUpperCase()}
+                  </div>
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
+                    <div className="p-4 border-b border-secondary">
+                      <div className="font-bold">{userData?.name}</div>
+                      <div className="text-sm text-sub">{userData?.email}</div>
+                    </div>
+
+                    <div className="p-2 space-y-1">
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 rounded hover:bg-secondary/10"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/watchlist"
+                        className="block px-4 py-2 rounded hover:bg-secondary/10"
+                      >
+                        Watchlist
+                      </Link>
+                      <button
+                        onClick={() => setIsDarkMode(!isDarkMode)}
+                        className="w-full text-left px-4 py-2 rounded hover:bg-secondary/10"
+                      >
+                        {isDarkMode ? "Light" : "Dark"} Mode
+                      </button>
+                      {!userData?.isAccountVerified && (
+                        <button
+                          onClick={handleVerification}
+                          className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
+                        >
+                          Verify Account
+                        </button>
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           ) : (
-            <>
-              <ButtonOutline
-                onClick={handleLogin}
-                className="text-sub border border-secondary hover:text-white hover:bg-secondary transition-all duration-300 py-0.5 px-6 rounded-full"
-              >
+            <div className="flex space-x-4">
+              <ButtonOutline onClick={() => navigate("/login")}>
                 Login
               </ButtonOutline>
-
-              <ButtonOutline
-                onClick={() => navigate("/signup")}
-                className="text-sub bg-transparent border border-secondary py-0.5 px-6 rounded-full hover:text-white hover:bg-secondary transition-all duration-300"
-              >
+              <ButtonOutline onClick={() => navigate("/signup")}>
                 Sign Up
               </ButtonOutline>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Menu */}
-        <div className="md:hidden relative">
-          <button
-            className="text-accent text-2xl"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <FaBars />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 mt-4 w-48 bg-primary border border-secondary rounded-lg shadow-lg z-[1000]">
-              {[...commonLinks, ...(isLoggedIn ? loggedInLinks : [])].map(
-                (link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className="block px-4 py-2 text-accent hover:bg-secondary hover:text-white transition-all duration-300"
-                  >
-                    {link.icon}
-                    <span className="ml-2">{link.label}</span>
-                  </Link>
-                )
-              )}
-              {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="px-6 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-all duration-300"
-                >
-                  Logout
-                </button>
-              ) : (
-                <>
-                  <Link
-                    to="/signup"
-                    className="px-6 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-all duration-300"
-                  >
-                    Sign Up
-                  </Link>
-                  <button
-                    onClick={handleLogin}
-                    className="px-6 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-all duration-300"
-                  >
-                    Login
-                  </button>
-                </>
-              )}
-              <div className="flex items-center justify-between px-4 py-2 text-accent">
-                <span>Dark Mode</span>
-                <button
-                  onClick={toggleDarkMode}
-                  className={`relative w-12 h-6 bg-gray-300 rounded-full ${
-                    isDarkMode ? "bg-secondary" : ""
-                  }`}
-                >
-                  <span
-                    className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
-                      isDarkMode ? "transform translate-x-6" : ""
-                    }`}
-                  ></span>
-                </button>
-              </div>
             </div>
           )}
         </div>
+
+        {/* Mobile Menu Trigger */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-2xl text-sub"
+          >
+            <FaBars />
+          </button>
+        </div>
       </div>
+
+      {/* Mobile Menu Content */}
+      {menuOpen && (
+        <div className="md:hidden absolute top-full w-full bg-primary border-t border-secondary">
+          <div className="p-4 space-y-4">
+            {navLinks.map(({ to, label, icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({
+                  isActive,
+                }) => `flex items-center space-x-2 p-3 rounded-lg
+                  ${isActive ? "bg-secondary/10 text-secondary" : "text-sub"}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                {icon}
+                <span>{label}</span>
+              </NavLink>
+            ))}
+
+            {isLoggedin ? (
+              <div className="pt-4 border-t border-secondary">
+                <button
+                  onClick={handleLogout}
+                  className="w-full p-3 text-left text-red-500 hover:bg-red-500/10 rounded-lg"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-3 pt-4 border-t border-secondary">
+                <ButtonOutline
+                  fullWidth
+                  onClick={() => {
+                    navigate("/login");
+                    setMenuOpen(false);
+                  }}
+                >
+                  Login
+                </ButtonOutline>
+                <ButtonOutline
+                  fullWidth
+                  onClick={() => {
+                    navigate("/signup");
+                    setMenuOpen(false);
+                  }}
+                >
+                  Sign Up
+                </ButtonOutline>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

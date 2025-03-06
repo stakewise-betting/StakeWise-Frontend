@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
+import Web3 from "web3";
+
+interface OptionOdds {
+  optionName: string;
+  oddsPercentage: number;
+}
 
 interface BetInterfaceProps {
   eventData: {
-    eventId: number; // Changed from id: string; to eventId: number; - CORRECTED
+    eventId: number;
     name: string;
     description: string;
     imageURL: string;
@@ -14,16 +20,20 @@ interface BetInterfaceProps {
     isCompleted: boolean;
     winningOption: string;
     prizePool: string;
-    notificationMessage: string; // Added notificationMessage to props interface - CORRECTED
+    notificationMessage: string;
   };
+  eventOdds: OptionOdds[] | null; // Receive eventOdds as prop - ADDED
   selectedOption: string;
   setSelectedOption: (option: string) => void;
+  web3: Web3 | null;
 }
 
 export default function BetInterface({
   eventData,
+  eventOdds, // Destructure eventOdds from props - ADDED
   selectedOption,
   setSelectedOption,
+  web3,
 }: BetInterfaceProps) {
   const [showMore, setShowMore] = useState(false);
   const displayedOptions = showMore
@@ -31,7 +41,25 @@ export default function BetInterface({
     : eventData.options.slice(0, 3);
   const endDate = new Date(
     Number(eventData.endTime) * 1000
-  ).toLocaleDateString(); // **[CORRECTED - Convert to Number]**
+  ).toLocaleDateString();
+
+  const formattedPrizePool = () => {
+    if (!web3) return "0 ETH";
+    try {
+      const prizePoolInEther = web3.utils.fromWei(eventData.prizePool, "ether");
+      return `${Number(prizePoolInEther).toFixed(2)} ETH`;
+    } catch (error) {
+      console.error("Error formatting prize pool:", error);
+      return "0 ETH";
+    }
+  };
+
+  // Helper function to get odds for an option - ADDED
+  const getOddsForOption = (optionName: string) => {
+    if (!eventOdds) return "0%";
+    const optionOdd = eventOdds.find((odd) => odd.optionName === optionName);
+    return optionOdd ? `${optionOdd.oddsPercentage}%` : "0%";
+  };
 
   return (
     <div className="lg:col-span-2">
@@ -40,7 +68,7 @@ export default function BetInterface({
           <div className="flex items-start gap-6 mb-4">
             <img
               src={eventData.imageURL}
-              alt={eventData.name + ` - Event ID ${eventData.eventId}`} // Updated to use eventId in alt text - CORRECTED
+              alt={`${eventData.name} - Event ID ${eventData.eventId}`}
               width={80}
               height={80}
               className="rounded-lg"
@@ -54,7 +82,7 @@ export default function BetInterface({
             <div className="flex items-center gap-6 text-sm text-gray-400">
               <div className="flex items-center gap-2">
                 <Trophy className="h-5 w-5" />
-                <span>{eventData.prizePool} ETH Vol.</span>
+                <span>{formattedPrizePool()} Vol.</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
@@ -78,6 +106,8 @@ export default function BetInterface({
             <div className="flex justify-between px-4 text-sm text-gray-400">
               <span>OUTCOME</span>
               <span>OPTION</span>
+              <span className="text-right">ODDS</span>{" "}
+              {/* Added ODDS header - ADDED */}
             </div>
 
             {displayedOptions.map((option, index) => (
@@ -100,6 +130,10 @@ export default function BetInterface({
                     Buy Yes
                   </button>
                 </div>
+                <div className="text-right w-16">
+                  {getOddsForOption(option)}
+                </div>{" "}
+                {/* Display odds here - ADDED */}
               </div>
             ))}
           </div>

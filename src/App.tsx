@@ -10,12 +10,18 @@ import ContactUs from "./pages/ContactUs/ContactUs";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Home from "./pages/HomePage/home";
 import AdminPanel from "./Admin/AdminPanel";
-
 import BetDetails from "./pages/BetDetails/BetDetails";
+import DepositPage from "./pages/DepositPage/Deposit";
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Login from "./pages/userAuth/Login";
+import ResetPassword from "./pages/userAuth/ResetPassword";
+import EmailVerify from "./pages/userAuth/EmailVerify";
 
 function App() {
   return (
     <div>
+      <ToastContainer />
       <Router>
         <Navbar />
 
@@ -31,12 +37,16 @@ function App() {
             }
           />
           <Route path="/home" element={<Home />} />
+          <Route path="/deposit" element={<DepositPage />} />
           <Route path="/politics" element={<Politics />} />
           <Route path="/sports" element={<Sports />} />
           <Route path="/upcoming" element={<Upcoming />} />
           <Route path="/results" element={<Results />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/email-verify" element={<EmailVerify />} />
         </Routes>
         <Footer />
       </Router>
