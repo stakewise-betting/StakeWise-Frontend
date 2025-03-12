@@ -3,10 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+
+interface GoogleUser {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string;
+}
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const appContext = useContext(AppContext);
   if (!appContext) {
@@ -19,30 +28,24 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
+  // Handle login using email and password
   const onSubmitHandler = async (e: any) => {
     e.preventDefault();
-    setIsSubmitting(true); // Disable button when submitting
+    setIsSubmitting(true);
 
     try {
-      let data; // Declare data before using it
+      let data;
       if (state === "Sign Up") {
         const response = await axios.post(
           `${backendUrl}/api/auth/register`,
-          {
-            name,
-            email,
-            password,
-          },
+          { name, email, password },
           { withCredentials: true }
         );
         data = response.data;
       } else {
         const response = await axios.post(
           `${backendUrl}/api/auth/login`,
-          {
-            email,
-            password,
-          },
+          { email, password },
           { withCredentials: true }
         );
         data = response.data;
@@ -59,7 +62,37 @@ const Login = () => {
       console.error("Error response:", error.response);
       toast.error(error.response?.data?.message || "An error occurred");
     } finally {
-      setIsSubmitting(false); // Re-enable button after request
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle Google Login Response
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    if (credentialResponse.credential) {
+      const token = credentialResponse.credential;
+      const user: GoogleUser = jwtDecode<GoogleUser>(token);
+
+      console.log("Google User:", user);
+
+      try {
+        // Send Google token to backend for verification
+        const response = await axios.post(
+          `${backendUrl}/api/auth/google-login`,
+          { token },
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          setIsLoggedin(true);
+          getUserData();
+          navigate("/");
+        } else {
+          toast.error(response.data.message || "Google login failed");
+        }
+      } catch (error: any) {
+        console.error("Google login error:", error.response);
+        toast.error(error.response?.data?.message || "Google login failed");
+      }
     }
   };
 
@@ -67,6 +100,15 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen p-4 text-white">
       <div className="w-full max-w-md shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)] rounded-2xl p-6">
         <h1 className="text-2xl font-semibold text-center">{state}</h1>
+        
+        {/* Google Login Button */}
+        <div className="flex justify-center my-4">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => toast.error("Google login failed")}
+          />
+        </div>
+
         <form className="mt-6" onSubmit={onSubmitHandler}>
           {state === "Sign Up" && (
             <>
