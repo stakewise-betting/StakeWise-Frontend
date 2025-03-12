@@ -18,13 +18,14 @@ import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
 
+
 function App() {
+
   return (
     <div>
       <ToastContainer />
       <Router>
         <Navbar />
-
         <Routes>
           <Route path="/" element={<HomePage />} />{" "}
           {/* kalin thibbe login kiyala */}
