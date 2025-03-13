@@ -70,7 +70,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   
   useEffect(() => {
     getAuthState();
-  }, []);
+  }, []); 
 
   const value: AppContextType = {
     backendUrl,
