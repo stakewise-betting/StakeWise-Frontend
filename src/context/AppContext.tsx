@@ -8,6 +8,8 @@ interface UserData {
   name: string;
   email: string;
   isAccountVerified: boolean;
+  walletAddress: string;
+  picture: string;
 }
 
 // Define context type
