@@ -8,6 +8,7 @@ import axios from "axios";
 import logo from "../../assets/images/logo.png";
 import { NavLink, Link } from "react-router-dom";
 import { ButtonOutline } from "../Buttons/Buttons";
+import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
 // Define an interface for Notification object
 interface Notification {
@@ -17,8 +18,7 @@ interface Notification {
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
-    useContext(AppContext)!;
+  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } = useContext(AppContext)!;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -186,15 +186,42 @@ const Navbar = () => {
                   className="flex items-center space-x-3 group"
                 >
                   <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
-                    {userData?.name[0].toUpperCase()}
+                    {userData?.picture ? (
+                      <img
+                        src={userData.picture}
+                        alt="User profile"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : userData?.name ? (
+                      userData.name[0].toUpperCase()
+                    ) : userData?.walletAddress ? (
+                      <img
+                        src={MetamaskLogo}
+                        alt="MetaMask Logo"
+                        className="w-3/4 h-3/4 object-contain rounded-full"
+                      />
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </button>
 
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
                     <div className="p-4 border-b border-secondary">
-                      <div className="font-bold">{userData?.name}</div>
-                      <div className="text-sm text-sub">{userData?.email}</div>
+                      <div className="font-bold">
+                        {userData?.name ||
+                          (userData?.walletAddress
+                            ? "MetaMask User" : "User")}
+                      </div>
+                      <div className="text-sm text-sub">
+                        {userData?.email ||
+                          (userData?.walletAddress
+                            ? userData.walletAddress.slice(0, 6) +
+                              "..." +
+                              userData.walletAddress.slice(-4)
+                            : "")}
+                      </div>
                     </div>
 
                     <div className="p-2 space-y-1">

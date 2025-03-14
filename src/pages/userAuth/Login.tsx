@@ -3,15 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
-
-interface GoogleUser {
-  sub: string;
-  email: string;
-  name: string;
-  picture: string;
-}
+import MetaMaskLogin from "../../components/Metamask/MetaMaskLogin";
+import GoogleLoginButton from "@/components/GoogleAuth/GoogleLogin";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -66,50 +59,30 @@ const Login = () => {
     }
   };
 
-  // Handle Google Login Response
-  const handleGoogleLogin = async (credentialResponse: any) => {
-    if (credentialResponse.credential) {
-      const token = credentialResponse.credential;
-      const user: GoogleUser = jwtDecode<GoogleUser>(token);
-
-      console.log("Google User:", user);
-
-      try {
-        // Send Google token to backend for verification
-        const response = await axios.post(
-          `${backendUrl}/api/auth/google-login`,
-          { token },
-          { withCredentials: true }
-        );
-
-        if (response.data.success) {
-          setIsLoggedin(true);
-          getUserData();
-          navigate("/");
-        } else {
-          toast.error(response.data.message || "Google login failed");
-        }
-      } catch (error: any) {
-        console.error("Google login error:", error.response);
-        toast.error(error.response?.data?.message || "Google login failed");
-      }
-    }
-  };
-
   return (
     <div className="flex items-center justify-center min-h-screen p-4 text-white">
+      
       <div className="w-full max-w-md shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)] rounded-2xl p-6">
         <h1 className="text-2xl font-semibold text-center">{state}</h1>
-        
+
         {/* Google Login Button */}
-        <div className="flex justify-center my-4">
-          <GoogleLogin
-            onSuccess={handleGoogleLogin}
-            onError={() => toast.error("Google login failed")}
-          />
+        <GoogleLoginButton />
+
+        {/* MetaMask Login Button */}
+        <MetaMaskLogin />
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 text-gray-400 bg-[#1c1c27]">
+              OR
+            </span>
+          </div>
         </div>
 
-        <form className="mt-6" onSubmit={onSubmitHandler}>
+        <form className="mt-4" onSubmit={onSubmitHandler}>
           {state === "Sign Up" && (
             <>
               <div className="mb-4">
