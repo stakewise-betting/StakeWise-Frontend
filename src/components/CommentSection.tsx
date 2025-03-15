@@ -1,4 +1,3 @@
-// frontend >>
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
@@ -13,7 +12,7 @@ type Comment = {
   createdAt: string;
   likes: number;
   likedByUser?: boolean;
-  userId: string; // Add userId to the Comment type
+  userId: string;
 };
 
 const CommentSection = ({
@@ -23,44 +22,64 @@ const CommentSection = ({
   betId: string;
   currentUserId?: string;
 }) => {
-  // Add currentUserId prop
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  // Removed username state
-  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [menuVisibleCommentId, setMenuVisibleCommentId] = useState<
     string | null
   >(null);
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
+  // Load liked comments from localStorage on component mount
   useEffect(() => {
-    if (!betId) return;
+    if (!currentUserId) return;
 
-    axios
-      .get(`http://localhost:5000/api/comments/${betId}`)
-      .then((res) => {
-        const initialComments = res.data.map((comment: Comment) => ({
+    // Create a localStorage key specific to this user
+    const storageKey = `likedComments_${currentUserId}`;
+
+    // Load previously liked comments from localStorage
+    const loadLikedComments = () => {
+      try {
+        const savedLikes = localStorage.getItem(storageKey);
+        return savedLikes ? new Set(JSON.parse(savedLikes)) : new Set();
+      } catch (error) {
+        console.error("Error loading liked comments from localStorage:", error);
+        return new Set();
+      }
+    };
+
+    // Fetch comments and apply liked status
+    const fetchComments = async () => {
+      if (!betId) return;
+
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/comments/${betId}`
+        );
+        const likedCommentIds = loadLikedComments();
+
+        const commentsWithLikeStatus = res.data.map((comment: Comment) => ({
           ...comment,
-          likedByUser: likedComments.has(comment._id),
+          likedByUser: likedCommentIds.has(comment._id),
         }));
-        setComments(initialComments);
-        console.log("Initial comments fetched:", initialComments);
-      })
-      .catch((error) => console.error("Error fetching comments:", error));
-  }, [betId]);
+
+        setComments(commentsWithLikeStatus);
+        console.log(
+          "Comments fetched with restored like status:",
+          commentsWithLikeStatus
+        );
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [betId, currentUserId]);
 
   const handleAddComment = async () => {
-    console.log("handleAddComment function called"); // ADD THIS LINE
-    console.log("newComment value:", newComment); // ADD THIS LINE
-    console.log("currentUserId value:", currentUserId); // ADD THIS LINE
-
     if (!newComment.trim() || !currentUserId) {
-      console.log("Validation failed - comment or userId missing"); // ADD THIS LINE
       return;
     }
-
-    console.log("Validation passed - making API call"); // ADD THIS LINE
 
     try {
       const res = await axios.post("http://localhost:5000/api/comments", {
@@ -69,75 +88,70 @@ const CommentSection = ({
         text: newComment,
       });
 
-      console.log("API Response received:", res.data); // ADD THIS LINE
       setComments([...comments, { ...res.data, likedByUser: false }]);
       setNewComment("");
     } catch (error) {
-      console.error("Error in handleAddComment:", error); // Keep this error log
+      console.error("Error in handleAddComment:", error);
     }
   };
 
   const handleLike = async (commentId: string) => {
-    console.log("handleLike called for commentId:", commentId);
-    console.log("likedComments before click:", likedComments);
+    if (!currentUserId) return;
 
-    if (likedComments.has(commentId)) {
-      // Unlike action
-      setLikedComments((prevLikedComments) => {
-        const newLikedComments = new Set(prevLikedComments);
-        newLikedComments.delete(commentId);
-        return newLikedComments;
-      });
+    // Find the comment to check its current liked status
+    const comment = comments.find((c) => c._id === commentId);
+    if (!comment) return;
 
-      try {
-        const unlikeRes = await axios.post(
-          `http://localhost:5000/api/comments/unlike/${commentId}`
-        );
-        console.log("Unlike API response:", unlikeRes.data);
-        setComments(
-          comments.map((c) =>
-            c._id === commentId
-              ? { ...c, likes: unlikeRes.data.likes, likedByUser: false }
-              : c
-          )
-        );
-      } catch (error) {
-        console.error("Error in unlike API:", error);
-      }
-    } else {
-      // Like action
-      setLikedComments(
-        (prevLikedComments) => new Set(prevLikedComments.add(commentId))
+    const isLiked = comment.likedByUser || false;
+    const storageKey = `likedComments_${currentUserId}`;
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/comments/${
+          isLiked ? "unlike" : "like"
+        }/${commentId}`,
+        { userId: currentUserId }
       );
 
+      // Update comments state
+      setComments((prevComments) =>
+        prevComments.map((c) =>
+          c._id === commentId
+            ? { ...c, likes: response.data.likes, likedByUser: !isLiked }
+            : c
+        )
+      );
+
+      // Update localStorage
       try {
-        const likeRes = await axios.post(
-          `http://localhost:5000/api/comments/like/${commentId}`
-        );
-        console.log("Like API response:", likeRes.data);
-        setComments(
-          comments.map((c) =>
-            c._id === commentId
-              ? { ...c, likes: likeRes.data.likes, likedByUser: true }
-              : c
-          )
+        const savedLikes = localStorage.getItem(storageKey);
+        const likedCommentIds = savedLikes
+          ? new Set(JSON.parse(savedLikes))
+          : new Set();
+
+        if (isLiked) {
+          likedCommentIds.delete(commentId);
+        } else {
+          likedCommentIds.add(commentId);
+        }
+
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify(Array.from(likedCommentIds))
         );
       } catch (error) {
-        console.error("Error in like API:", error);
+        console.error("Error updating localStorage:", error);
       }
+    } catch (error) {
+      console.error("Error in like API:", error);
     }
-    console.log("likedComments after click:", likedComments);
-    console.log(
-      "comments state after click:",
-      comments.find((c) => c._id === commentId)
-    );
   };
 
   const handleDelete = async () => {
     if (commentToDelete) {
       await axios.delete(
         `http://localhost:5000/api/comments/${commentToDelete}`,
-        { data: { userId: currentUserId } } // Send userId for deletion authorization
+        { data: { userId: currentUserId } }
       );
       setComments(comments.filter((c) => c._id !== commentToDelete));
       setCommentToDelete(null);
@@ -166,7 +180,6 @@ const CommentSection = ({
     <div className="p-4 bg-primary text-DFprimary rounded-lg">
       <h3 className="text-lg font-bold mb-2">Comments</h3>
       <div className="mb-3">
-        {/* Removed username input */}
         <textarea
           placeholder="Write a comment..."
           value={newComment}
@@ -205,7 +218,6 @@ const CommentSection = ({
                 )}
                 <span className="ml-1">{comment.likes}</span>
               </button>
-              {/* Conditionally render delete button based on ownership */}
               {currentUserId === comment.userId && (
                 <>
                   <button
