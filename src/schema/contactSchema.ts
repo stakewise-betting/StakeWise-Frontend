@@ -1,12 +1,14 @@
 import { z } from "zod";
 
 const contactFormSchema = z.object({
-  fname: z.string().min(1),
-  lname: z.string().min(1),
-  email: z.string().email(),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-   subject: z.enum(["normal", "general", "support", "feedback"], {
-    required_error: "Please select a subject",
+  fullname: z.string().min(1, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  message: z
+    .string()
+    .min(10, { message: "Message must be at least 10 characters long" })
+    .max(500, { message: "Message cannot exceed 500 characters" }),
+  queryCategory: z.enum(["Account Issues", "Deposits & Withdrawals", "Betting Questions", "Bonuses & Promotions", "Technical Support", "Other"], {
+    required_error: "Please select a query category",
   }),
 });
 
