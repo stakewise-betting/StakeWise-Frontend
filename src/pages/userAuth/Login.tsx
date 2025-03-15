@@ -4,7 +4,7 @@ import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import MetaMaskLogin from "../../components/Metamask/MetaMaskLogin";
-import GoogleLoginButton from "@/components/GoogleAuth/GoogleLogin";
+import GoogleLoginButton  from "@/components/GoogleAuth/GoogleLogin";
 
 const Login = () => {
   const navigate = useNavigate();
