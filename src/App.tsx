@@ -17,6 +17,7 @@ import Home from "./pages/HomePage/home";
 import AdminPanel from "./Admin/AdminPanel";
 import BetDetails from "./pages/BetDetails/BetDetails";
 import DepositPage from "./pages/DepositPage/Deposit";
+import Profile from "./pages/Profile/Profile";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/userAuth/Login";
@@ -43,6 +44,7 @@ function Layout() {
         <Route path="/sports" element={<Sports />} />
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/contactus" element={<ContactUs />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />

@@ -107,6 +107,7 @@ const Navbar = () => {
           <img src={logo} alt="Logo" className="h-9 w-auto" />
           <Link
             to="/"
+            onClick={() => window.scrollTo(0, 0)}
             className="text-2xl font-bold text-accent hover:text-secondary transition"
           >
             STAKEWISE
@@ -121,6 +122,7 @@ const Navbar = () => {
               <NavLink
                 key={to}
                 to={to}
+                onClick={() => window.scrollTo(0, 0)}
                 className={({
                   isActive,
                 }) => `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
@@ -227,12 +229,14 @@ const Navbar = () => {
                     <div className="p-2 space-y-1">
                       <Link
                         to="/profile"
+                        onClick={() => window.scrollTo(0, 0)}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Profile
                       </Link>
                       <Link
                         to="/watchlist"
+                        onClick={() => window.scrollTo(0, 0)}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Watchlist
