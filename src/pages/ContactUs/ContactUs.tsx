@@ -10,7 +10,7 @@ export default function ContactUs() {
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <div className="container mx-auto py-12 px-4 md:px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Contact Support
