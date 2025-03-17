@@ -5,10 +5,17 @@ import axios from "axios";
 // Define UserData type
 interface UserData {
   id: string;
-  name: string;
+  fname: string;
+  lname: string;
+  username: string;
   email: string;
   isAccountVerified: boolean;
   walletAddress: string;
+  gender: string;
+  avatarSrc: string;
+  phone: string;
+  birthday: string;
+  country: string;
   picture: string;
 }
 

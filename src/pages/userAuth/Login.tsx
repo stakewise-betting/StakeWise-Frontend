@@ -19,7 +19,7 @@ const Login = () => {
   const [state, setState] = useState("Sign Up");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
 
   // Handle login using email and password
   const onSubmitHandler = async (e: any) => {
@@ -31,7 +31,7 @@ const Login = () => {
       if (state === "Sign Up") {
         const response = await axios.post(
           `${backendUrl}/api/auth/register`,
-          { name, email, password },
+          { username, email, password },
           { withCredentials: true }
         );
         data = response.data;
@@ -88,8 +88,8 @@ const Login = () => {
               <div className="mb-4">
                 <input
                   type="text"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
+                  onChange={(e) => setUsername(e.target.value)}
+                  value={username}
                   placeholder="Full Name"
                   className="w-full p-3 bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />

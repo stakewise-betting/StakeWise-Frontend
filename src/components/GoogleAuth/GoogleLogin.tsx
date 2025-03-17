@@ -1,6 +1,5 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
- // Corrected default import for jwt-decode
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useContext, useState } from "react";
@@ -10,7 +9,9 @@ import { AppContext } from "@/context/AppContext";
 interface GoogleUser {
   sub: string;
   email: string;
-  name: string;
+  fname: string;
+  lname: string;
+  username: string;
   picture: string;
 }
 
@@ -27,16 +28,33 @@ export const GoogleLoginButton = () => {
   // Handle Google Login Response
   const handleGoogleLogin = async (credentialResponse: any) => {
     if (credentialResponse.credential) {
-      const token = credentialResponse.credential;
-      const user: GoogleUser = jwtDecode<GoogleUser>(token);
-
-      console.log("Google User:", user);
+      setIsSubmitting(true);
 
       try {
-        // Send Google token to backend for verification
+        const token = credentialResponse.credential;
+        const decodedUser: any = jwtDecode(token);
+
+        // Extract user details safely
+        const fullName = decodedUser.name || "";
+        const nameParts = fullName.split(" ");
+        const fname = nameParts[0] || "Unknown";
+        const lname = nameParts.slice(1).join(" ") || "User";
+
+        const user: GoogleUser = {
+          sub: decodedUser.sub,
+          email: decodedUser.email,
+          fname,
+          lname,
+          username: decodedUser.email.split("@")[0], // Generate username from email
+          picture: decodedUser.picture,
+        };
+
+        console.log("Google User:", user);
+
+        // Send Google token & user data to backend
         const response = await axios.post(
           `${backendUrl}/api/auth/google-login`,
-          { token },
+          { token, user },
           { withCredentials: true }
         );
 
@@ -50,7 +68,7 @@ export const GoogleLoginButton = () => {
       } catch (error: any) {
         console.error("Google login error:", error.response);
         toast.error(error.response?.data?.message || "Google login failed");
-      }finally {
+      } finally {
         setIsSubmitting(false);
       }
     }
