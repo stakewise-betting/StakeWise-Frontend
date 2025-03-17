@@ -1,15 +1,19 @@
-// import React from "react";
 import Achievements from "@/components/Achievements/Achievements";
 import OngoingTable from "../../components/Tables/OngoingTable";
-import Image from "@/assets/images/userProfile.png";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BsGraphDownArrow, BsGraphUpArrow } from "react-icons/bs";
 import { GiCardRandom } from "react-icons/gi";
 import { GiReceiveMoney } from "react-icons/gi";
 import BetHistory from "@/components/Tables/BetHistory";
 import TransactionTable from "@/components/Tables/TransactionTable";
 import { motion } from "framer-motion";
+import { AppContext } from "@/context/AppContext";
+import { useContext } from "react";
+import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
 const Dashboard = () => {
+  const { userData } = useContext(AppContext)!;
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -21,16 +25,46 @@ const Dashboard = () => {
           {/* Profile Section */}
 
           <div className="mb-4 flex items-center justify-center gap-5">
-            <img
-              src={Image}
-              alt=""
-              width={115}
-              height={115}
-              className="rounded-lg"
-            />
+          <Avatar className="h-32 w-32 border-2 border-zinc-800">
+            <AvatarImage alt="Profile" />
+            <AvatarFallback className="bg-zinc-800 text-zinc-100 text-4xl">
+            {userData?.picture ? (
+              <img
+                src={userData.picture}
+                alt="User profile"
+                width={115}
+                height={115}
+                className="bject-cover rounded-full"
+              />
+            ) : userData?.fname ? (
+              userData.fname[0].toUpperCase()
+            ) : userData?.walletAddress ? (
+              <img
+                src={MetamaskLogo}
+                alt="MetaMask Logo"
+                width={115}
+                height={115}
+                className="object-contain rounded-full"
+              />
+            ) : (
+              ""
+            )}
+            </AvatarFallback>
+          </Avatar>
+            
             <div>
-              <h2 className="text-lg font-semibold text-white">John Doe</h2>
-              <p className="text-sm text-slate-400">johndoe23@gmail.com</p>
+              <h2 className="text-lg font-semibold text-white">
+                {userData?.fname ||
+                  (userData?.walletAddress ? "MetaMask User" : "User")}
+              </h2>
+              <p className="text-sm text-slate-400">
+                {userData?.email ||
+                  (userData?.walletAddress
+                    ? userData.walletAddress.slice(0, 6) +
+                      "..." +
+                      userData.walletAddress.slice(-4)
+                    : "")}
+              </p>
             </div>
           </div>
 

@@ -18,12 +18,14 @@ interface Notification {
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } = useContext(AppContext)!;
+  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
+    useContext(AppContext)!;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [picture, setPicture] = useState(userData?.picture || "");
   const ws = useRef<WebSocket | null>(null);
 
   // WebSocket connection
@@ -88,6 +90,15 @@ const Navbar = () => {
       toast.error(error.response?.data?.message || "Logout failed");
     }
   };
+
+  useEffect(() => {
+    if (userData?.picture) {
+      setTimeout(() => {
+        setPicture(userData.picture);
+      }, 100); // Short delay to allow React to process updates
+    }
+  }, [userData]);
+  
 
   // Navigation links
   const navLinks = [
@@ -190,12 +201,13 @@ const Navbar = () => {
                   <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
                     {userData?.picture ? (
                       <img
-                        src={userData.picture}
+                        key={picture}
+                        src={picture}
                         alt="User profile"
                         className="w-full h-full object-cover rounded-full"
                       />
-                    ) : userData?.name ? (
-                      userData.name[0].toUpperCase()
+                    ) : userData?.fname ? (
+                      userData.fname[0].toUpperCase()
                     ) : userData?.walletAddress ? (
                       <img
                         src={MetamaskLogo}
@@ -212,9 +224,8 @@ const Navbar = () => {
                   <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
                     <div className="p-4 border-b border-secondary">
                       <div className="font-bold">
-                        {userData?.name ||
-                          (userData?.walletAddress
-                            ? "MetaMask User" : "User")}
+                        {userData?.fname ||
+                          (userData?.walletAddress ? "MetaMask User" : "User")}
                       </div>
                       <div className="text-sm text-sub">
                         {userData?.email ||
