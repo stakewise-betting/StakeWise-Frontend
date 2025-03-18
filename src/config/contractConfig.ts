@@ -1,6 +1,6 @@
 // config/contractConfig.ts
 
-export const contractAddress = "0x3987177272727E6B6Ae242e646f3A5dA28A2ebdf";
+export const contractAddress = "0x094c6A85b8A1454B4AD674854fB3b341bfa86540";
 
 export const contractABI = [
   {
