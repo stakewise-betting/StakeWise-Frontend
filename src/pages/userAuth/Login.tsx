@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import MetaMaskLogin from "../../components/Metamask/MetaMaskLogin";
+import GoogleLoginButton  from "@/components/GoogleAuth/GoogleLogin";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const appContext = useContext(AppContext);
   if (!appContext) {
@@ -17,32 +19,26 @@ const Login = () => {
   const [state, setState] = useState("Sign Up");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
 
+  // Handle login using email and password
   const onSubmitHandler = async (e: any) => {
     e.preventDefault();
-    setIsSubmitting(true); // Disable button when submitting
+    setIsSubmitting(true);
 
     try {
-      let data; // Declare data before using it
+      let data;
       if (state === "Sign Up") {
         const response = await axios.post(
           `${backendUrl}/api/auth/register`,
-          {
-            name,
-            email,
-            password,
-          },
+          { username, email, password },
           { withCredentials: true }
         );
         data = response.data;
       } else {
         const response = await axios.post(
           `${backendUrl}/api/auth/login`,
-          {
-            email,
-            password,
-          },
+          { email, password },
           { withCredentials: true }
         );
         data = response.data;
@@ -59,22 +55,41 @@ const Login = () => {
       console.error("Error response:", error.response);
       toast.error(error.response?.data?.message || "An error occurred");
     } finally {
-      setIsSubmitting(false); // Re-enable button after request
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 text-white">
+      
       <div className="w-full max-w-md shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)] rounded-2xl p-6">
         <h1 className="text-2xl font-semibold text-center">{state}</h1>
-        <form className="mt-6" onSubmit={onSubmitHandler}>
+
+        {/* Google Login Button */}
+        <GoogleLoginButton />
+
+        {/* MetaMask Login Button */}
+        <MetaMaskLogin />
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-3 text-gray-400 bg-[#1c1c27]">
+              OR
+            </span>
+          </div>
+        </div>
+
+        <form className="mt-4" onSubmit={onSubmitHandler}>
           {state === "Sign Up" && (
             <>
               <div className="mb-4">
                 <input
                   type="text"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
+                  onChange={(e) => setUsername(e.target.value)}
+                  value={username}
                   placeholder="Full Name"
                   className="w-full p-3 bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />

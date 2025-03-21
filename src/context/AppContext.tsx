@@ -4,10 +4,19 @@ import axios from "axios";
 
 // Define UserData type
 interface UserData {
-  _id: string;
-  name: string;
+  id: string;
+  fname: string;
+  lname: string;
+  username: string;
   email: string;
   isAccountVerified: boolean;
+  walletAddress: string;
+  gender: string;
+  avatarSrc: string;
+  phone: string;
+  birthday: string;
+  country: string;
+  picture: string;
 }
 
 // Define context type

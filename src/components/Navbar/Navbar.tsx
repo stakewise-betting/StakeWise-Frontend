@@ -15,6 +15,7 @@ import axios from "axios";
 import logo from "../../assets/images/logo.png";
 import { ButtonOutline } from "../Buttons/Buttons";
 import Web3 from "web3";
+import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
 // Define an interface for Notification object
 interface Notification {
@@ -37,6 +38,7 @@ const Navbar: React.FC = () => {
   const [walletBalance, setWalletBalance] = useState("0.00");
   const [walletConnected, setWalletConnected] = useState(false);
   const [ethPrice, setEthPrice] = useState(0);
+  const [picture, setPicture] = useState(userData?.picture || "");
   const ws = useRef<WebSocket | null>(null);
 
   // Count unread notifications
@@ -229,6 +231,14 @@ const Navbar: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (userData?.picture) {
+      setTimeout(() => {
+        setPicture(userData.picture);
+      }, 100); // Short delay to allow React to process updates
+    }
+  }, [userData]);
+
   // Navigation links
   const navLinks = [
     { to: "/home", label: "Home", icon: <FaHome /> },
@@ -247,6 +257,7 @@ const Navbar: React.FC = () => {
           <img src={logo} alt="Logo" className="h-9 w-auto" />
           <Link
             to="/"
+            onClick={() => window.scrollTo(0, 0)}
             className="text-2xl font-bold text-accent hover:text-secondary transition"
           >
             STAKEWISE
@@ -261,14 +272,15 @@ const Navbar: React.FC = () => {
               <NavLink
                 key={to}
                 to={to}
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
+                onClick={() => window.scrollTo(0, 0)}
+                className={({
+                  isActive,
+                }) => `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
                   ${
                     isActive
                       ? "text-secondary bg-secondary/10"
                       : "text-sub hover:bg-secondary/10"
-                  }`
-                }
+                  }`}
               >
                 {icon}
                 <span>{label}</span>
@@ -360,26 +372,55 @@ const Navbar: React.FC = () => {
                   className="flex items-center space-x-3 group"
                 >
                   <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
-                    {userData?.name ? userData.name[0].toUpperCase() : "?"}
+                    {userData?.picture ? (
+                      <img
+                        key={picture}
+                        src={picture}
+                        alt="User profile"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : userData?.fname ? (
+                      userData.fname[0].toUpperCase()
+                    ) : userData?.walletAddress ? (
+                      <img
+                        src={MetamaskLogo}
+                        alt="MetaMask Logo"
+                        className="w-3/4 h-3/4 object-contain rounded-full"
+                      />
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </button>
 
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
                     <div className="p-4 border-b border-secondary">
-                      <div className="font-bold">{userData?.name}</div>
-                      <div className="text-sm text-sub">{userData?.email}</div>
+                      <div className="font-bold">
+                        {userData?.fname ||
+                          (userData?.walletAddress ? "MetaMask User" : "User")}
+                      </div>
+                      <div className="text-sm text-sub">
+                        {userData?.email ||
+                          (userData?.walletAddress
+                            ? userData.walletAddress.slice(0, 6) +
+                              "..." +
+                              userData.walletAddress.slice(-4)
+                            : "")}
+                      </div>
                     </div>
 
                     <div className="p-2 space-y-1">
                       <Link
                         to="/profile"
+                        onClick={() => window.scrollTo(0, 0)}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Profile
                       </Link>
                       <Link
                         to="/watchlist"
+                        onClick={() => window.scrollTo(0, 0)}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Watchlist

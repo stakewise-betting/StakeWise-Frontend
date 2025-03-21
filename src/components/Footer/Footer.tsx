@@ -7,8 +7,7 @@ import { TbWorld } from "react-icons/tb";
 import footer01 from "@/assets/images/footer01.png";
 import footer02 from "@/assets/images/footer02.png";
 import footer03 from "@/assets/images/footer03.png";
-import {Link} from "react-router-dom";
-
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -33,8 +32,12 @@ const Footer = () => {
           <div>
             <h2 className="text-white font-bold mb-4">Resources</h2>
             <ul className="flex flex-col space-y-2">
-               <Link to="/contactus">Contact Us</Link>
-               <Link to="/results">Results</Link>
+              <Link to="/contactus" onClick={() => window.scrollTo(0, 0)}>
+                Contact Us
+              </Link>
+              <Link to="/results" onClick={() => window.scrollTo(0, 0)}>
+                Results
+              </Link>
             </ul>
           </div>
           <div>
@@ -86,10 +89,7 @@ const Footer = () => {
           <p className="">
             StakeWise is committed to promoting responsible betting. If you or
             someone you know needs support, visit{" "}
-            <a
-              href="https://gamblingtherapy.org"
-              className=" underline"
-            >
+            <a href="https://gamblingtherapy.org" className=" underline">
               GamblingTherapy.org
             </a>{" "}
             for resources.
@@ -122,12 +122,10 @@ const Footer = () => {
               Terms of Service
             </a>
             <a href="#" className="hover:underline flex gap-2 items-center">
-            <TbWorld />
+              <TbWorld />
               EN
             </a>
-            
           </div>
-          
         </div>
       </div>
     </footer>
