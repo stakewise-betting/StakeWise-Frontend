@@ -45,7 +45,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   // Access AppContext and get currentUserId
   const appContext = useContext(AppContext);
-  const currentUserId = appContext?.userData?._id || undefined;
+  const currentUserId = appContext?.userData?.id || undefined;
   console.log(appContext); // Get userId from AppContext, default to undefined if not available
   console.log(currentUserId); // Debugging
 
