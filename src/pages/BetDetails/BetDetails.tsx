@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
+import CountdownTimer from "@/components/countDownTimer"; // Import the new component
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import CommentSection from "@/components/CommentSection";
 import { AppContext } from "@/context/AppContext"; // Adjust path to your AppContext
@@ -16,6 +17,7 @@ interface EventData {
   eventId: number;
   name: string;
   description: string;
+  rules: string; // <-- Add this missing property
   imageURL: string;
   options: string[];
   startTime: number;
@@ -163,6 +165,12 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       >
         {`< Back to Events`}
       </button>
+
+      {/* Add countdown timer after the back button */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <CountdownTimer endTime={Number(eventData.endTime)} />
+      </div>
+
       <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
         <BetInterface
           eventData={eventData}

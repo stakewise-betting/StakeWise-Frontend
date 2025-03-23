@@ -23,6 +23,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     name: "",
     description: "",
     notificationMessage: "",
+    rules: "",
   });
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [uploadedNotificationImageUrl, setUploadedNotificationImageUrl] =
@@ -51,7 +52,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     const accounts = await web3?.eth.getAccounts();
     if (!accounts || !contract) return;
 
-    const { name, description, notificationMessage } = formData;
+    const { name, rules, description, notificationMessage } = formData;
     const imageURL = uploadedImageUrl;
     const notificationImageURL = uploadedNotificationImageUrl;
 
@@ -63,7 +64,8 @@ export const EventForm: React.FC<EventFormProps> = ({
       !notificationImageURL ||
       options.length < 2 ||
       !startTime ||
-      !endTime
+      !endTime ||
+      !rules
     ) {
       alert(
         "Please fill in all fields including notification message and images."
@@ -80,16 +82,17 @@ export const EventForm: React.FC<EventFormProps> = ({
         .call();
       const eventIdForNewEvent = parseInt(nextEventIdFromContract);
 
+      // Fixed order of parameters to match the updated contract
       await contract.methods
         .createEvent(
-          eventIdForNewEvent.toString(),
-          name,
-          description,
-          imageURL,
-          options,
-          startTimestamp.toString(),
-          endTimestamp.toString(),
-          notificationMessage
+          eventIdForNewEvent, // uint256 _eventId (number, not string)
+          name, // string memory _name
+          description, // string memory _description
+          imageURL, // string memory _imageURL
+          options, // string[] memory _options
+          startTimestamp, // uint256 _startTime (number, not string)
+          endTimestamp, // uint256 _endTime (number, not string)
+          rules // string memory _rules
         )
         .send({ from: accounts[0] });
 
@@ -100,6 +103,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           eventId: eventIdForNewEvent,
           name: name,
           description: description,
+          rules: rules,
           imageURL: imageURL,
           options: options,
           startTime: startTimestamp,
@@ -123,6 +127,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         name: "",
         description: "",
         notificationMessage: "",
+        rules: "",
       });
       setUploadedImageUrl("");
       setUploadedNotificationImageUrl("");
@@ -166,6 +171,20 @@ export const EventForm: React.FC<EventFormProps> = ({
             value={formData.description}
             onChange={handleInputChange}
             placeholder="Event Description"
+            className="text-black"
+          />
+        </div>
+
+        <div>
+          <Label className="text-black" htmlFor="description">
+            Event Rules
+          </Label>
+          <Textarea
+            id="rules"
+            name="rules"
+            value={formData.rules}
+            onChange={handleInputChange}
+            placeholder="Event Rules"
             className="text-black"
           />
         </div>

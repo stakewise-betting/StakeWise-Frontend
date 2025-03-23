@@ -19,11 +19,11 @@ import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
 // Define an interface for Notification object
 interface Notification {
-  id: string; // Added ID for tracking individual notifications
+  id: string;
   message: string;
   notificationImageURL?: string;
-  read: boolean; // Added read status
-  timestamp: number; // Added timestamp for sorting
+  read: boolean;
+  timestamp: number;
 }
 
 const Navbar: React.FC = () => {
@@ -61,32 +61,122 @@ const Navbar: React.FC = () => {
     }
   }, [notificationsOpen]);
 
-  // WebSocket connection
+  // Load initial notifications from API
   useEffect(() => {
-    if (!isLoggedin) return;
+    if (isLoggedin && userData?.id) {
+      fetchNotifications();
+    }
+  }, [isLoggedin, userData]);
+
+  // Fetch notifications from backend
+  const fetchNotifications = async () => {
+    try {
+      // Check if the user is properly authenticated before making the request
+      if (!userData?.id) {
+        console.log(
+          "User not authenticated or missing ID, skipping notification fetch"
+        );
+        return;
+      }
+
+      console.log(
+        "Fetching notifications for user ID:",
+        userData.id,
+        "from:",
+        `${backendUrl}/api/notifications`
+      );
+
+      // Explicitly pass the user ID both in query params and headers for robustness
+      const { data } = await axios.get(`${backendUrl}/api/notifications`, {
+        withCredentials: true,
+        timeout: 10000,
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": userData.id, // Add user ID in header
+        },
+        params: {
+          userId: userData.id, // Also add as query parameter
+        },
+      });
+
+      console.log("Notifications response:", data);
+
+      if (data.notifications && Array.isArray(data.notifications)) {
+        const formattedNotifications = data.notifications.map((n: any) => ({
+          id: n._id || `temp-${Date.now()}`,
+          message: n.message || "New notification",
+          notificationImageURL: n.image,
+          timestamp: n.createdAt ? new Date(n.createdAt).getTime() : Date.now(),
+          read: n.read ? true : false, // Handle different read status formats
+        }));
+
+        setNotifications(formattedNotifications);
+      } else {
+        console.log(
+          "No notifications found in response or invalid format:",
+          data
+        );
+        setNotifications([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching notifications:", error);
+      if (error.response) {
+        console.error("Response error data:", error.response.data);
+        console.error("Response error status:", error.response.status);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      } else {
+        console.error("Request setup error:", error.message);
+      }
+    }
+  };
+  // WebSocket connection
+  // WebSocket connection in Navbar.tsx
+  useEffect(() => {
+    if (!isLoggedin || !userData?.id) return;
 
     const websocketUrl =
       import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:5000";
-    ws.current = new WebSocket(websocketUrl);
+
+    // Include user ID in WebSocket connection URL
+    const wsUrl = `${websocketUrl}?userId=${userData.id}`;
+    console.log("Connecting to WebSocket:", wsUrl);
+
+    ws.current = new WebSocket(wsUrl);
 
     ws.current.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+        console.log("WebSocket message received:", message);
+
         if (message.type === "notification" || message.type === "newEvent") {
-          setNotifications((prev) => [
-            {
-              id: Date.now().toString(), // Generate unique ID
-              message: message.message || message.notificationMessage,
-              notificationImageURL: message.notificationImageURL,
-              read: false, // New notifications are unread
-              timestamp: Date.now(), // Add timestamp
-            },
-            ...prev,
-          ]);
+          // Add new notification and mark as unread
+          const newNotification = {
+            id: message.id || Date.now().toString(),
+            message:
+              message.message ||
+              message.notificationMessage ||
+              "New notification",
+            notificationImageURL: message.notificationImageURL || message.image,
+            read: false, // Mark new notifications as unread
+            timestamp: message.timestamp || Date.now(),
+          };
+
+          setNotifications((prev) => [newNotification, ...prev]);
+
+          // Show toast for new notification
+          toast.info(newNotification.message, {
+            position: "top-right",
+            autoClose: 5000,
+          });
         }
       } catch (error) {
         console.error("WebSocket message error:", error);
       }
+    };
+
+    ws.current.onopen = () => {
+      console.log("WebSocket connected successfully");
     };
 
     ws.current.onclose = () => {
@@ -99,10 +189,11 @@ const Navbar: React.FC = () => {
 
     return () => {
       if (ws.current) {
+        console.log("Closing WebSocket connection");
         ws.current.close();
       }
     };
-  }, [isLoggedin]);
+  }, [isLoggedin, userData]);
 
   // Check wallet connection and get balance
   useEffect(() => {
@@ -249,6 +340,25 @@ const Navbar: React.FC = () => {
       : []),
   ];
 
+  // Format timestamp to relative time
+  const formatTimestamp = (timestamp: number): string => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+    if (seconds < 60) return `${seconds} sec ago`;
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} min ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day ago`;
+
+    const date = new Date(timestamp);
+    return date.toLocaleDateString();
+  };
+
   return (
     <nav className="bg-primary px-4 py-3 sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -315,7 +425,7 @@ const Navbar: React.FC = () => {
                   <FaBell />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount}
+                      {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
                 </button>
@@ -338,20 +448,31 @@ const Navbar: React.FC = () => {
                         notifications.map((n) => (
                           <div
                             key={n.id}
-                            className={`p-4 flex items-center space-x-3 hover:bg-secondary/10 ${
+                            className={`p-4 flex items-start space-x-3 hover:bg-secondary/10 ${
                               !n.read ? "bg-secondary/5" : ""
                             }`}
                           >
-                            {n.notificationImageURL && (
-                              <img
-                                src={n.notificationImageURL}
-                                className="w-8 h-8 rounded-full"
-                                alt="Notification"
-                              />
-                            )}
-                            <span>{n.message}</span>
+                            <div className="flex-shrink-0">
+                              {n.notificationImageURL ? (
+                                <img
+                                  src={n.notificationImageURL}
+                                  className="w-8 h-8 rounded-full"
+                                  alt="Notification"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
+                                  <FaBell className="text-white text-xs" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-sm">{n.message}</div>
+                              <div className="text-xs text-sub mt-1">
+                                {formatTimestamp(n.timestamp)}
+                              </div>
+                            </div>
                             {!n.read && (
-                              <span className="w-2 h-2 bg-blue-500 rounded-full ml-auto"></span>
+                              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></span>
                             )}
                           </div>
                         ))
@@ -413,14 +534,20 @@ const Navbar: React.FC = () => {
                     <div className="p-2 space-y-1">
                       <Link
                         to="/profile"
-                        onClick={() => window.scrollTo(0, 0)}
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                          setProfileOpen(false);
+                        }}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Profile
                       </Link>
                       <Link
                         to="/watchlist"
-                        onClick={() => window.scrollTo(0, 0)}
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                          setProfileOpen(false);
+                        }}
                         className="block px-4 py-2 rounded hover:bg-secondary/10"
                       >
                         Watchlist
@@ -475,7 +602,7 @@ const Navbar: React.FC = () => {
       </div>
       {/* Mobile Menu Content */}
       {menuOpen && (
-        <div className="md:hidden absolute top-full w-full bg-primary border-t border-secondary">
+        <div className="md:hidden absolute top-full left-0 w-full bg-primary border-t border-secondary">
           <div className="p-4 space-y-4">
             {/* Wallet Balance for Mobile - Conditionally render when logged in and wallet connected */}
             {isLoggedin && walletConnected && (
@@ -486,8 +613,7 @@ const Navbar: React.FC = () => {
                     <div className="text-xs text-sub">Balance</div>
                     <div className="font-medium text-green-400">
                       ${usdValue}
-                    </div>{" "}
-                    {/* Amount in Green */}
+                    </div>
                   </div>
                 </div>
                 <ButtonOutline
@@ -538,6 +664,23 @@ const Navbar: React.FC = () => {
                     Deposit
                   </ButtonOutline>
                 )}
+
+                <Link
+                  to="/notifications"
+                  className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-secondary/10 mt-2"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <FaBell />
+                    <span>Notifications</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+
                 <button
                   onClick={handleLogout}
                   className="w-full p-3 text-left text-red-500 hover:bg-red-500/10 rounded-lg mt-3"
