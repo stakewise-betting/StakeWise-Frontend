@@ -1,17 +1,23 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface BetSlipProps {
   eventData: {
-    options: string[]
-  }
-  selectedOption: string
-  setSelectedOption: (option: string) => void
-  amount: string
-  setAmount: (amount: string) => void
-  onBet: () => Promise<void>
-  onCancel: () => void
+    options: string[];
+  };
+  selectedOption: string;
+  setSelectedOption: (option: string) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
+  onBet: () => Promise<void>;
+  onCancel: () => void;
 }
 
 export default function BetSlip({
@@ -21,9 +27,9 @@ export default function BetSlip({
   amount,
   setAmount,
   onBet,
-  onCancel
+  onCancel,
 }: BetSlipProps) {
-  const isValidAmount = Number(amount) >= 5.0
+  const isValidAmount = Number(amount) >= 5.0;
 
   return (
     <div className="bg-[#1C1C27] rounded-lg p-6 h-fit border border-[#8488AC]">
@@ -32,10 +38,7 @@ export default function BetSlip({
       <div className="space-y-6">
         <div>
           <label className="block text-sm text-slate-400 mb-2">Options</label>
-          <Select
-            value={selectedOption}
-            onValueChange={setSelectedOption}
-          >
+          <Select value={selectedOption} onValueChange={setSelectedOption}>
             <SelectTrigger>
               <SelectValue>{selectedOption || "Select an option"}</SelectValue>
             </SelectTrigger>
@@ -86,5 +89,5 @@ export default function BetSlip({
         </p>
       </div>
     </div>
-  )
+  );
 }
