@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ProfilePicture from "@/components/ProfileCom/ProfilePicture";
 import PersonalInfoForm from "@/components/ProfileCom/PersonalInfoForm";
 import ContactInfoForm from "@/components/ProfileCom/ContactInfoForm";
@@ -9,20 +8,6 @@ import DangerZone from "@/components/ProfileCom/DangerZone";
 import { motion } from "framer-motion";
 
 export default function ProfileSettings() {
-
-  
-  // test data
-  const [userData, setUserData] = useState({
-    firstName: "test1",
-    lastName: "test2",
-    username: "testtt",
-    email: "test@example.com",
-    phone: "+94 344243243",
-  });
-
-  const updateUserData = (field: string, value: string) => {
-    setUserData((prev) => ({ ...prev, [field]: value }));
-  };
 
   return (
     <motion.div
@@ -42,10 +27,7 @@ export default function ProfileSettings() {
           <div className="grid gap-8">
             <ProfilePicture/>
             <PersonalInfoForm/>
-            <ContactInfoForm
-              userData={userData}
-              updateUserData={updateUserData}
-            />
+            <ContactInfoForm/>
             <AccountPreferences />
             <PrivacySettings />
             <PasswordSecurity />
