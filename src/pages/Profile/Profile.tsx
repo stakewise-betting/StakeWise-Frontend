@@ -9,13 +9,15 @@ import DangerZone from "@/components/ProfileCom/DangerZone";
 import { motion } from "framer-motion";
 
 export default function ProfileSettings() {
-  // Shared state could be lifted here if needed across components
+
+  
+  // test data
   const [userData, setUserData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    username: "johnsmith",
-    email: "john.smith@example.com",
-    phone: "+1 (555) 123-4567",
+    firstName: "test1",
+    lastName: "test2",
+    username: "testtt",
+    email: "test@example.com",
+    phone: "+94 344243243",
   });
 
   const updateUserData = (field: string, value: string) => {
@@ -38,14 +40,8 @@ export default function ProfileSettings() {
           </div>
 
           <div className="grid gap-8">
-            <ProfilePicture
-              firstName={userData.firstName}
-              lastName={userData.lastName}
-            />
-            <PersonalInfoForm
-              userData={userData}
-              updateUserData={updateUserData}
-            />
+            <ProfilePicture/>
+            <PersonalInfoForm/>
             <ContactInfoForm
               userData={userData}
               updateUserData={updateUserData}

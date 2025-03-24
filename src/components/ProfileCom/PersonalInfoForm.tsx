@@ -16,7 +16,7 @@ import { useContext, useState, useEffect } from "react";
 import { AppContext } from "@/context/AppContext";
 
 const PersonalInfoForm = () => {
-  const { userData, backendUrl, setIsLoggedin, getUserData } =
+  const { userData, backendUrl} =
     useContext(AppContext)!;
   const [fname, setFname] = useState(userData?.fname || "");
   const [lname, setLname] = useState(userData?.lname || "");
@@ -81,8 +81,6 @@ const PersonalInfoForm = () => {
       const responses = await Promise.all(requests); // call all API requests
 
       if (responses.every((res) => res.data.success)) {
-        setIsLoggedin(true);
-        getUserData();
         toast.success("Profile updated successfully");
       } else {
         toast.error("Some updates failed. Please try again.");
