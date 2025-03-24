@@ -193,24 +193,7 @@ const Navbar: React.FC = () => {
   };
 
   // User actions
-  const handleVerification = async () => {
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/sendVerifyOtp`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      if (data.success) {
-        navigate("/email-verify");
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Verification failed");
-    }
-  };
+  
 
   const handleLogout = async () => {
     try {
@@ -431,14 +414,6 @@ const Navbar: React.FC = () => {
                       >
                         {isDarkMode ? "Light" : "Dark"} Mode
                       </button>
-                      {!userData?.isAccountVerified && (
-                        <button
-                          onClick={handleVerification}
-                          className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
-                        >
-                          Verify Account
-                        </button>
-                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"

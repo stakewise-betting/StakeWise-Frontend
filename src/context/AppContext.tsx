@@ -18,6 +18,7 @@ interface UserData {
   birthday: string;
   country: string;
   picture: string;
+  language: string;
 }
 
 // Define context type
