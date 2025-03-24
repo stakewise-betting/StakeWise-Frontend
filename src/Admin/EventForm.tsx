@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "./ImageUploader";
 import axios from "axios";
-import { contractABI } from "@/config/contractConfig";
+// import { contractABI } from "@/config/contractConfig";
 
 interface EventFormProps {
   contract: any;
