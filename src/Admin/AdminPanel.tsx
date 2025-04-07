@@ -1,59 +1,125 @@
-import { useState, useEffect } from "react";
+// components/admin/AdminPanel.tsx
+import React, { useState, useEffect, useCallback } from "react";
 import Web3 from "web3";
-import { EventForm } from "./EventForm";
-import { EventList } from "./EventList";
-import DownloadReport from "./DownloadReport";
-
+import { AdminLayout } from "./layout/AdminLayout";
+import { Dashboard } from "./dashboard/Dashboard";
+import { EventsPage } from "./events/EventsPage";
 import setupWeb3AndContract from "@/services/blockchainService";
+import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { Button } from "@/components/ui/button"; // Added for retry button
 
-export const AdminPanel = () => {
+const AdminPanel = () => {
+  // Default export for page/component usage
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [adminProfit, setAdminProfit] = useState<string>("0");
   const [adminAddress, setAdminAddress] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      const { web3Instance, betContract } = await setupWeb3AndContract();
-      setWeb3(web3Instance);
-      setContract(betContract);
-      if (betContract && web3Instance) {
-        await Promise.all([
-          loadEvents(betContract),
-          checkAdminAddress(betContract),
-          fetchTotalAdminProfit(betContract, web3Instance),
-        ]);
-      }
-      setLoading(false);
-    };
-    init();
-  }, []);
+  // Placeholder data for dashboard (replace with actual fetching)
+  const [dashboardStats, setDashboardStats] = useState({
+    totalBetsPlaced: 1234, // Hardcoded
+    totalUsers: 567, // Hardcoded
+    ongoingEventsCount: 0,
+    totalEventsCount: 0,
+  });
 
-  const loadEvents = async (betContract: any) => {
-    try {
-      const eventCount = await betContract.methods.nextEventId().call();
-      console.log("Total events:", eventCount);
+  // --- Fetch Backend URL using Vite's import.meta.env ---
+  // Ensure VITE_BACKEND_URL is set in your .env file
+  const backendBaseUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  // Log the URL being used for debugging
+  console.log("Using Backend URL:", backendBaseUrl);
+  // --- End Environment Variable Handling ---
 
-      const eventList: any[] = [];
-      for (let eventId = 1; eventId < eventCount; eventId++) {
-        try {
-          const eventData = await betContract.methods.getEvent(eventId).call();
-          const eventOptions = await betContract.methods
-            .getEventOptions(eventId)
-            .call();
-          eventList.push({ ...eventData, options: eventOptions });
-        } catch (error) {
-          console.warn(`Skipping invalid event ${eventId}:`, error);
+  const loadEvents = useCallback(
+    async (betContract: any) => {
+      // Removed backendBaseUrl definition from here, use the one defined above
+      try {
+        console.log("Loading events...");
+        const eventCountBigInt = await betContract.methods.nextEventId().call();
+        const eventCount = Number(eventCountBigInt); // Convert BigInt
+        console.log("Total event IDs (nextEventId):", eventCount);
+
+        const eventPromises: Promise<any>[] = [];
+        // Event IDs usually start from 1 if 0 is unused or represents null
+        for (let eventId = 1; eventId < eventCount; eventId++) {
+          eventPromises.push(
+            (async () => {
+              try {
+                // Fetch core data and options concurrently
+                const [eventData, eventOptions] = await Promise.all([
+                  betContract.methods.getEvent(eventId).call(),
+                  betContract.methods.getEventOptions(eventId).call(),
+                ]);
+
+                // Fetch metadata from your backend API
+                let backendData = {};
+                try {
+                  // Use the backendBaseUrl defined outside the loop
+                  const response = await fetch(
+                    `${backendBaseUrl}/api/events/${eventId}`
+                  );
+                  if (response.ok) {
+                    backendData = await response.json();
+                    // console.log(`Fetched backend data for event ${eventId}`); // Less verbose logging
+                  } else if (response.status !== 404) {
+                    console.warn(
+                      `Could not fetch backend data for event ${eventId}: ${response.statusText}`
+                    );
+                  }
+                } catch (apiError) {
+                  console.warn(
+                    `API error fetching event ${eventId}:`,
+                    apiError
+                  );
+                }
+
+                // Combine blockchain data and backend metadata
+                return {
+                  ...backendData, // Include category, volume, listedBy etc.
+                  ...eventData, // Override with blockchain state like isCompleted, winningOption
+                  options: eventOptions, // Always use blockchain options
+                  eventId: eventId, // Ensure correct ID type (number)
+                };
+              } catch (error) {
+                // Log specific error for this event fetch
+                console.warn(
+                  `Skipping event ${eventId} due to error during contract/API call:`,
+                  error
+                );
+                return null; // Return null for failed fetches
+              }
+            })()
+          );
         }
+
+        const resolvedEvents = await Promise.all(eventPromises);
+        const validEvents = resolvedEvents.filter((event) => event !== null); // Filter out nulls
+
+        // Calculate stats after fetching events
+        const now = Date.now() / 1000;
+        const ongoing = validEvents.filter(
+          (e) => !e.isCompleted && Number(e.endTime) > now
+        ).length;
+        const total = validEvents.length;
+
+        setEvents(validEvents);
+        setDashboardStats((prev) => ({
+          ...prev, // Keep hardcoded stats
+          ongoingEventsCount: ongoing,
+          totalEventsCount: total,
+        }));
+        console.log(`Loaded ${validEvents.length} valid events.`);
+      } catch (err) {
+        console.error("Error loading events list:", err); // More specific error log
+        setError("Failed to load events list.");
       }
-      setEvents(eventList);
-    } catch (err) {
-      console.error("Error loading events:", err);
-    }
-  };
+    },
+    [backendBaseUrl]
+  ); // Add backendBaseUrl as dependency
 
   const checkAdminAddress = async (betContract: any) => {
     try {
@@ -70,9 +136,8 @@ export const AdminPanel = () => {
     web3Instance: Web3
   ) => {
     try {
-      const profit = await betContract.methods.totalAdminProfit().call();
-      // Convert from wei to ether for better readability
-      const profitInEther = web3Instance.utils.fromWei(profit, "ether");
+      const profitWei = await betContract.methods.totalAdminProfit().call();
+      const profitInEther = web3Instance.utils.fromWei(profitWei, "ether");
       setAdminProfit(profitInEther);
       console.log("Total Admin Profit:", profitInEther, "ETH");
     } catch (error) {
@@ -80,65 +145,124 @@ export const AdminPanel = () => {
     }
   };
 
-  const handleEventCreated = () => {
-    if (contract && web3) {
-      loadEvents(contract);
-      fetchTotalAdminProfit(contract, web3);
+  // Main data fetching function, depends on loadEvents now
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    console.log("Initializing Web3 and Contract...");
+    try {
+      const { web3Instance, betContract } = await setupWeb3AndContract();
+      setWeb3(web3Instance);
+      setContract(betContract);
+      console.log("Web3 and Contract setup complete.");
+
+      if (betContract && web3Instance) {
+        console.log("Fetching admin address, profit, and events...");
+        // Use the loadEvents defined above which now has backendBaseUrl dependency
+        await Promise.all([
+          loadEvents(betContract), // Call the loadEvents hook depends on
+          checkAdminAddress(betContract),
+          fetchTotalAdminProfit(betContract, web3Instance),
+        ]);
+        console.log("Initial data fetch complete.");
+      } else {
+        console.error("Failed to initialize contract or web3 instance.");
+        setError("Failed to connect to blockchain services.");
+      }
+    } catch (err: any) {
+      console.error("Initialization failed:", err);
+      setError(`Failed to initialize: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [loadEvents]); // Add loadEvents as dependency here
 
-  const handleWinnerDeclared = () => {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]); // fetchData depends on loadEvents, which depends on backendBaseUrl
+
+  // Refresh handler
+  const refreshAllData = useCallback(() => {
     if (contract && web3) {
-      loadEvents(contract);
-      fetchTotalAdminProfit(contract, web3); // Update profit after winner declaration
+      console.log("Refreshing all data...");
+      setLoading(true); // Show loading indicator during refresh
+      Promise.all([
+        loadEvents(contract), // Re-use the loadEvents hook
+        fetchTotalAdminProfit(contract, web3),
+      ]).finally(() => setLoading(false));
     }
-  };
+  }, [contract, web3, loadEvents]); // loadEvents is a dependency
 
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8 text-black">
-        Admin Panel - Betting Events
-      </h1>
+  // Handlers passed down
+  const handleEventCreated = useCallback(() => {
+    console.log("Event created handler triggered.");
+    refreshAllData(); // Refresh everything after creation
+  }, [refreshAllData]);
 
-      {/* Admin Stats Section */}
-      <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-black">
-          Admin Dashboard
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-            <p className="text-sm text-gray-600 mb-1">Admin Address</p>
-            <p className="text-gray-800 font-mono text-sm break-all">
-              {adminAddress || "Loading..."}
-            </p>
+  const handleWinnerDeclared = useCallback(() => {
+    console.log("Winner declared handler triggered.");
+    refreshAllData(); // Refresh everything after declaration
+  }, [refreshAllData]);
+
+  // Loading state UI
+  if (loading && events.length === 0 && !error) {
+    // Show skeleton only on initial load
+    return (
+      <div className="flex h-screen bg-muted/40">
+        <Skeleton className="w-64 bg-background border-r h-full" />
+        <main className="flex-1 p-6 md:p-8 space-y-6">
+          <Skeleton className="h-8 w-1/4" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
           </div>
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg border border-green-200">
-            <p className="text-sm text-gray-600 mb-1">Total Admin Profit</p>
-            <p className="text-2xl font-bold text-green-700">
-              {loading ? "Loading..." : `${adminProfit} ETH`}
-            </p>
-            <p className="text-xs text-gray-500">
-              Accumulated 5% fee from all betting events
-            </p>
-          </div>
-        </div>
+          <Skeleton className="h-64 w-full" />
+        </main>
       </div>
+    );
+  }
 
-      <EventForm
-        contract={contract}
-        web3={web3}
-        onEventCreated={handleEventCreated}
-      />
+  // Error state UI
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen flex-col">
+        <p className="text-red-600 text-xl mb-4">{error}</p>
+        <Button onClick={fetchData}>Retry Connection</Button>
+      </div>
+    );
+  }
 
-      <EventList
-        events={events}
-        contract={contract}
-        web3={web3}
-        onWinnerDeclared={handleWinnerDeclared}
-      />
-
-      <DownloadReport adminProfit={adminProfit} />
-    </div>
+  // Main Render with Layout
+  return (
+    <AdminLayout>
+      {(activeSection) => (
+        <>
+          {activeSection === "dashboard" && (
+            <Dashboard
+              adminProfit={adminProfit}
+              adminAddress={adminAddress}
+              totalEvents={dashboardStats.totalEventsCount}
+              ongoingEvents={dashboardStats.ongoingEventsCount}
+              totalBetsPlaced={dashboardStats.totalBetsPlaced} // Pass down
+              totalUsers={dashboardStats.totalUsers} // Pass down
+              loading={loading} // Pass loading state
+            />
+          )}
+          {activeSection === "events" && contract && web3 && (
+            <EventsPage
+              events={events}
+              contract={contract}
+              web3={web3}
+              onWinnerDeclared={handleWinnerDeclared}
+              onEventCreated={handleEventCreated}
+            />
+          )}
+          {/* Add more sections here */}
+        </>
+      )}
+    </AdminLayout>
   );
 };
 
