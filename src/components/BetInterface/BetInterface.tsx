@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
 import Web3 from "web3";
 
+
 interface OptionOdds {
   optionName: string;
   oddsPercentage: number;
@@ -53,7 +54,7 @@ export default function BetInterface({
       return "0 ETH";
     }
   };
-
+  
   // Helper function to get odds for an option - ADDED
   const getOddsForOption = (optionName: string) => {
     if (!eventOdds) return "0%";
@@ -151,7 +152,6 @@ export default function BetInterface({
           )}
         </div>
       </div>
-
       <div className="mt-6 bg-[#1C1C27] rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Rules</h2>
         <div className="space-y-4 text-slate-400">
