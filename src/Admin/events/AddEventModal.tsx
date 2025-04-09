@@ -11,7 +11,7 @@ interface AddEventModalProps {
   web3: any;
   onEventCreated: () => void;
 }
-
+//
 export const AddEventModal: React.FC<AddEventModalProps> = ({
   isOpen,
   onClose,
