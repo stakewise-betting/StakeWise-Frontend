@@ -3,6 +3,8 @@ import Web3 from "web3";
 import BettingCard from "@/components/BettingCard/BettingCard";
 import Slider from "@/components/Slider/Slider";
 import { contractABI, contractAddress } from "@/config/contractConfig";
+import  { FilterBar } from "@/components/NewSerachBar/FilterBar";
+
 
 // Define TypeScript interface for event data
 interface EventData {
@@ -91,13 +93,14 @@ const Home = () => {
   return (
     <div>
       <Slider />
-      <div className="mt-[20px]">
+      <FilterBar />
+      <div className="mt-[10px]">
         {isLoading ? (
           <div className="flex justify-center py-8">
             <p className="text-center text-gray-400">Loading current events...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 px-20 sm:px-4 md:px-8 lg:px-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 px-5 sm:px-3 md:px-4 lg:px-20">
             {events.length === 0 ? (
               <p className="text-center col-span-full py-8">No active events found.</p>
             ) : (

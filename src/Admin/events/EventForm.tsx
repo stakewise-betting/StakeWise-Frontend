@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageUploader } from "../shared/ImageUploader"; // Adjusted path
-import { PlusCircle, XCircle } from "lucide-react"; // Icons
+import { ImageUploader } from "../shared/ImageUploader";
+import { PlusCircle, XCircle, Info, FileText } from "lucide-react"; // Added FileText
 import axios from "axios";
 import {
   Select,
@@ -13,18 +13,41 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Added Select
+} from "@/components/ui/select";
+import clsx from "clsx";
 
 interface EventFormProps {
   contract: any;
   web3: any;
-  onEventCreated: () => void; // Callback after successful creation AND saving
-  onClose: () => void; // Callback to close the modal/form container
+  onEventCreated: () => void;
+  onClose: () => void;
 }
 
-// Define categories - adjust as needed
 const eventCategories = ["Sport", "Politic", "Entertainment", "Other"];
 
+// --- (ThemedLabel, inputBaseClasses, form logic: handleInputChange, createEvent, etc. remain the same as previous version) ---
+const ThemedLabel: React.FC<{
+  htmlFor: string;
+  children: React.ReactNode;
+  required?: boolean;
+}> = ({ htmlFor, children, required }) => (
+  <Label
+    htmlFor={htmlFor}
+    className="block text-sm font-medium text-dark-secondary mb-1.5"
+  >
+    {children}
+    {required && <span className="ml-1 text-admin-danger">*</span>}
+  </Label>
+);
+
+const inputBaseClasses = `
+    block w-full bg-primary border border-gray-600/70 text-dark-primary
+    placeholder:text-dark-secondary/60 rounded-md shadow-sm
+    focus:ring-2 focus:ring-offset-0 focus:ring-secondary/50 focus:border-secondary/70
+    text-sm
+`;
+
+// --- Form Component ---
 export const EventForm: React.FC<EventFormProps> = ({
   contract,
   web3,
@@ -34,44 +57,40 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    category: "", // Added category
+    category: "",
     notificationMessage: "",
     rules: "",
   });
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
   const [uploadedNotificationImageUrl, setUploadedNotificationImageUrl] =
     useState<string>("");
-  const [options, setOptions] = useState<string[]>(["", ""]); // Start with two options
+  const [options, setOptions] = useState<string[]>(["", ""]);
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // --- (Input handlers, add/remove options, clearForm, createEvent logic remains the same) ---
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const handleCategoryChange = (value: string) => {
     setFormData({ ...formData, category: value });
   };
-
   const handleOptionChange = (index: number, value: string) => {
     const updatedOptions = [...options];
     updatedOptions[index] = value;
     setOptions(updatedOptions);
   };
-
   const addOption = () => setOptions([...options, ""]);
   const removeOption = (index: number) => {
     if (options.length > 2) {
-      // Keep at least 2 options
       setOptions(options.filter((_, i) => i !== index));
     } else {
       alert("An event must have at least two options.");
     }
   };
-
   const clearForm = () => {
     setFormData({
       name: "",
@@ -87,24 +106,18 @@ export const EventForm: React.FC<EventFormProps> = ({
     setEndTime("");
     setIsSubmitting(false);
   };
-
   const createEvent = async () => {
     setIsSubmitting(true);
     const accounts = await web3?.eth.getAccounts();
     if (!accounts || !contract) {
-      alert(
-        "Web3 provider or contract not available. Please connect your wallet."
-      );
+      alert("Web3 provider or contract not available.");
       setIsSubmitting(false);
       return;
     }
-
     const { name, rules, description, notificationMessage, category } =
       formData;
     const imageURL = uploadedImageUrl;
     const notificationImageURL = uploadedNotificationImageUrl;
-
-    // Basic Validation
     if (
       !name ||
       !description ||
@@ -119,296 +132,321 @@ export const EventForm: React.FC<EventFormProps> = ({
       !endTime
     ) {
       alert(
-        "Please fill in all required fields, upload both images, and ensure at least two non-empty options are provided."
+        "Please fill all fields, upload images, and provide >= 2 non-empty options."
       );
       setIsSubmitting(false);
       return;
     }
-
-    // Time validation
     const startTimestamp = Math.floor(new Date(startTime).getTime() / 1000);
     const endTimestamp = Math.floor(new Date(endTime).getTime() / 1000);
     const nowTimestamp = Math.floor(Date.now() / 1000);
-
     if (startTimestamp >= endTimestamp) {
-      alert("End time must be after start time.");
+      alert("End time must be after start.");
       setIsSubmitting(false);
       return;
     }
     if (endTimestamp <= nowTimestamp) {
-      alert("End time must be in the future.");
+      alert("End time must be future.");
       setIsSubmitting(false);
       return;
     }
-
     try {
-      // Fetch the next event ID *before* sending the transaction
       const nextEventIdBigInt = await contract.methods.nextEventId().call();
-      // Convert BigInt to number or string depending on usage. Be mindful of potential precision loss for very large numbers.
-      // If your event IDs won't exceed JavaScript's Number.MAX_SAFE_INTEGER, Number() is okay. Otherwise, use string.
       const eventIdForNewEvent = Number(nextEventIdBigInt);
-
-      console.log("Creating event with ID:", eventIdForNewEvent);
-      console.log("Params:", {
-        eventId: eventIdForNewEvent,
-        name,
-        description,
-        imageURL,
-        options,
-        startTimestamp,
-        endTimestamp,
-        rules,
-      });
-
-      // Blockchain Transaction
       await contract.methods
         .createEvent(
-          eventIdForNewEvent, // Ensure contract expects uint256
+          eventIdForNewEvent,
           name,
           description,
           imageURL,
-          options.map((opt) => opt.trim()), // Send trimmed options
-          startTimestamp, // Ensure contract expects uint256
-          endTimestamp, // Ensure contract expects uint256
+          options.map((opt) => opt.trim()),
+          startTimestamp,
+          endTimestamp,
           rules
         )
         .send({ from: accounts[0] });
-
-      alert("Event created on blockchain successfully!");
-
-      // Save to Backend (MongoDB via your API)
+      alert("Event created on blockchain!");
       try {
+        const backendUrl =
+          import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
         const eventDataForMongoDB = {
           eventId: eventIdForNewEvent,
-          name: name,
-          description: description,
-          category: category, // Include category
-          rules: rules,
-          imageURL: imageURL,
+          name,
+          description,
+          category,
+          rules,
+          imageURL,
           options: options.map((opt) => opt.trim()),
           startTime: startTimestamp,
           endTime: endTimestamp,
-          notificationMessage: notificationMessage,
-          notificationImageURL: notificationImageURL,
-          isCompleted: false, // Mark as not completed initially
-          winningOption: null, // No winner yet
-          // Add other fields your backend expects, like 'listedBy', 'volume' (initially 0?)
-          listedBy: "Admin", // Or fetch connected account?
+          notificationMessage,
+          notificationImageURL,
+          isCompleted: false,
+          winningOption: null,
+          listedBy: "Admin",
           volume: 0,
         };
-        await axios.post(
-          "http://localhost:5000/api/events", // Ensure this matches your backend endpoint
-          eventDataForMongoDB
-        );
-        console.log("Event data saved to backend successfully!");
-
-        // Success: Clear form, notify parent, close modal
+        await axios.post(`${backendUrl}/api/events`, eventDataForMongoDB);
         clearForm();
-        onEventCreated(); // Trigger refresh in parent
-        onClose(); // Close the modal
+        onEventCreated();
+        onClose();
       } catch (mongoDbError) {
-        console.error("Error saving event data to backend:", mongoDbError);
-        // Inform user, but the event *is* on the blockchain
-        alert(
-          "Event created on blockchain, but failed to save details to the database. Please check backend logs."
-        );
-        // Optionally: trigger refresh anyway, maybe clear form?
-        onEventCreated(); // Still refresh list
-        onClose(); // Still close modal
+        console.error("Error saving to backend:", mongoDbError);
+        alert("Blockchain OK, DB save failed.");
+        onEventCreated();
+        onClose();
       }
     } catch (err: any) {
       console.error("Error creating event:", err);
-      alert(
-        `Error creating event: ${
-          err.message || "An unexpected error occurred."
-        }`
-      );
+      alert(`Error: ${err.message || "Unknown"}`);
     } finally {
       setIsSubmitting(false);
     }
   };
+  // --- End unchanged logic ---
 
-  // Layout inspired by reference image
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        createEvent();
-      }}
-      className="space-y-6 p-1 max-h-[80vh] overflow-y-auto"
+    // Main container with background, padding, rounding, and scrollbar styling
+    <div
+      className="bg-card text-dark-primary rounded-lg shadow-xl max-h-[90vh] flex flex-col
+                   overflow-hidden" // Use overflow-hidden here
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: Details */}
-        <div className="md:col-span-2 space-y-4">
-          <div>
-            <Label htmlFor="name">
-              Event Name <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="e.g., F1 2024 Drivers Champion"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="category">
-              Category <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              name="category"
-              value={formData.category}
-              onValueChange={handleCategoryChange}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {eventCategories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="description">
-              Event Description <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Detailed description of the event"
-              required
-            />
-          </div>
-
-          <div>
-            <Label>
-              Options (Betting Choices){" "}
-              <span className="text-destructive">*</span>
-            </Label>
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center space-x-2 mb-2">
-                <Input
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Option ${index + 1}`}
-                  required
-                />
-                {options.length > 2 && (
-                  <Button
-                    type="button" // Prevent form submission
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive/80"
-                    onClick={() => removeOption(index)}
-                    aria-label="Remove Option"
-                  >
-                    <XCircle className="h-5 w-5" />
-                  </Button>
-                )}
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addOption}
-              className="mt-1"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" /> Add Option
-            </Button>
-          </div>
-
-          <div>
-            <Label htmlFor="rules">
-              Event Rules <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="rules"
-              name="rules"
-              value={formData.rules}
-              onChange={handleInputChange}
-              placeholder="Specific rules for betting and settlement"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="startTime">
-                Start Time <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="startTime"
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="endTime">
-                End Time <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="endTime"
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="notificationMessage">
-              Notification Message <span className="text-destructive">*</span>
-            </Label>
-            <Textarea
-              id="notificationMessage"
-              name="notificationMessage"
-              value={formData.notificationMessage}
-              onChange={handleInputChange}
-              placeholder="Message sent to users when event is created/goes live"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Images */}
-        <div className="space-y-4">
-          <ImageUploader
-            label="Event Image *"
-            onImageUploaded={setUploadedImageUrl}
-            previewUrl={uploadedImageUrl}
-            idSuffix="Event"
-          />
-          <ImageUploader
-            label="Notification Image *"
-            onImageUploaded={setUploadedNotificationImageUrl}
-            previewUrl={uploadedNotificationImageUrl}
-            idSuffix="Notification"
-          />
-        </div>
+      {/* --- Integrated Header --- */}
+      <div className="p-6 border-b border-gray-700/60">
+        <h3 className="text-xl font-semibold text-dark-primary flex items-center gap-2 mb-1.5">
+          <FileText className="w-5 h-5 text-secondary" />
+          Create New Betting Event
+        </h3>
+        <p className="text-sm text-dark-secondary">
+          Fill in the details below to create a new event. Fields marked with{" "}
+          <span className="text-admin-danger">*</span> are required.
+        </p>
       </div>
 
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3 pt-4 border-t">
+      {/* --- Form Content Area (Scrollable) --- */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          createEvent();
+        }}
+        // Padding for form content, make it scrollable, apply scrollbar styles
+        className="flex-grow p-6 space-y-6 overflow-y-auto
+                     scrollbar-thin scrollbar-thumb-secondary/60 scrollbar-track-primary/50
+                     hover:scrollbar-thumb-secondary/80" // Make thumb darker on hover
+      >
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+          {/* Left Column: Details */}
+          <div className="md:col-span-2 space-y-5">
+            {/* Event Name */}
+            <div>
+              <ThemedLabel htmlFor="name" required>
+                Event Name
+              </ThemedLabel>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="e.g., F1 2024 Drivers Champion"
+                required
+                className={inputBaseClasses}
+              />
+            </div>
+
+            {/* Category */}
+            <div>
+              <ThemedLabel htmlFor="category" required>
+                Category
+              </ThemedLabel>
+              <Select
+                name="category"
+                value={formData.category}
+                onValueChange={handleCategoryChange}
+                required
+              >
+                <SelectTrigger
+                  className={clsx(inputBaseClasses, "text-left justify-start")}
+                >
+                  <SelectValue
+                    placeholder="Select event category"
+                    className="text-dark-primary placeholder:text-dark-secondary/60"
+                  />
+                </SelectTrigger>
+                <SelectContent className="bg-card border border-gray-600/70 text-dark-primary">
+                  {eventCategories.map((cat) => (
+                    <SelectItem
+                      key={cat}
+                      value={cat}
+                      className="focus:bg-secondary/15 focus:text-secondary hover:bg-secondary/10"
+                    >
+                      {" "}
+                      {cat}{" "}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Description */}
+            <div>
+              <ThemedLabel htmlFor="description" required>
+                Event Description
+              </ThemedLabel>
+              <Textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Provide a clear description..."
+                required
+                rows={4}
+                className={inputBaseClasses}
+              />
+            </div>
+
+            {/* Options */}
+            <div>
+              <ThemedLabel htmlFor="options" required>
+                Options (Betting Choices)
+              </ThemedLabel>
+              <div className="space-y-2">
+                {options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Input
+                      value={option}
+                      onChange={(e) =>
+                        handleOptionChange(index, e.target.value)
+                      }
+                      placeholder={`Option ${index + 1}`}
+                      required
+                      className={clsx(inputBaseClasses, "flex-grow")}
+                    />
+                    {options.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-admin-danger hover:text-admin-danger/80 hover:bg-admin-danger/10 p-1 rounded-full flex-shrink-0"
+                        onClick={() => removeOption(index)}
+                        aria-label="Remove Option"
+                      >
+                        <XCircle className="h-5 w-5" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addOption}
+                className="mt-3 border-secondary/60 text-secondary hover:bg-secondary/10 hover:text-secondary"
+              >
+                <PlusCircle className="h-4 w-4 mr-2" /> Add Option
+              </Button>
+            </div>
+
+            {/* Rules */}
+            <div>
+              <ThemedLabel htmlFor="rules" required>
+                Event Rules
+              </ThemedLabel>
+              <Textarea
+                id="rules"
+                name="rules"
+                value={formData.rules}
+                onChange={handleInputChange}
+                placeholder="Specify conditions, settlement..."
+                required
+                rows={3}
+                className={inputBaseClasses}
+              />
+            </div>
+
+            {/* Start/End Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+              <div>
+                <ThemedLabel htmlFor="startTime" required>
+                  Start Time
+                </ThemedLabel>
+                <Input
+                  id="startTime"
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
+                  className={inputBaseClasses}
+                  style={{ colorScheme: "dark" }}
+                />
+              </div>
+              <div>
+                <ThemedLabel htmlFor="endTime" required>
+                  End Time
+                </ThemedLabel>
+                <Input
+                  id="endTime"
+                  type="datetime-local"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  required
+                  className={inputBaseClasses}
+                  style={{ colorScheme: "dark" }}
+                />
+              </div>
+            </div>
+
+            {/* Notification Message */}
+            <div>
+              <ThemedLabel htmlFor="notificationMessage" required>
+                Notification Message
+              </ThemedLabel>
+              <Textarea
+                id="notificationMessage"
+                name="notificationMessage"
+                value={formData.notificationMessage}
+                onChange={handleInputChange}
+                placeholder="Concise message for notifications..."
+                required
+                rows={2}
+                className={inputBaseClasses}
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Images */}
+          <div className="md:col-span-1 space-y-6 md:pt-1">
+            <div className="bg-primary p-4 rounded-lg border border-gray-700/60">
+              <ImageUploader
+                label="Event Image"
+                onImageUploaded={setUploadedImageUrl}
+                previewUrl={uploadedImageUrl}
+                idSuffix="Event"
+              />
+            </div>
+            <div className="bg-primary p-4 rounded-lg border border-gray-700/60">
+              <ImageUploader
+                label="Notification Image"
+                onImageUploaded={setUploadedNotificationImageUrl}
+                previewUrl={uploadedNotificationImageUrl}
+                idSuffix="Notification"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Form Actions are now outside the scrollable area, but inside the main container */}
+      </form>
+
+      {/* --- Form Actions (Sticky Footer) --- */}
+      <div className="p-4 border-t border-gray-700/60 bg-card flex justify-end space-x-3">
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
           disabled={isSubmitting}
+          className="border-gray-600 text-dark-secondary hover:bg-gray-700/50 hover:text-dark-primary hover:border-gray-500"
         >
           Cancel
         </Button>
@@ -417,13 +455,31 @@ export const EventForm: React.FC<EventFormProps> = ({
           variant="ghost"
           onClick={clearForm}
           disabled={isSubmitting}
+          className="text-dark-secondary hover:bg-gray-700/50 hover:text-dark-primary"
         >
           Clear Form
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating Event..." : "Create Event"}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          // Attach the submit action to the form attribute
+          form="event-main-form" // Add an ID to the <form> tag
+          className={clsx(
+            "bg-secondary text-white hover:bg-orange-600 focus-visible:ring-secondary/50",
+            isSubmitting && "opacity-70 cursor-not-allowed"
+          )}
+        >
+          {isSubmitting ? "Creating..." : "Create Event"}
         </Button>
       </div>
-    </form>
+      {/* Add form ID here */}
+      <form
+        id="event-main-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          createEvent();
+        }}
+      ></form>
+    </div> // End Main Container
   );
 };
