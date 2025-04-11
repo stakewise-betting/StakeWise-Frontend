@@ -1,6 +1,5 @@
 import React from "react";
 import { Globe } from "lucide-react";
-import { SocialIcons } from "./SocialIcons";
 import { Link } from "react-router-dom";
 
 export const FooterBottom: React.FC = () => {

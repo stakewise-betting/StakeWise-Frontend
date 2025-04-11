@@ -1,13 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { StakewiseLogo } from "./StakewiseLogo";
+// import { StakewiseLogo } from "./StakewiseLogo";
 import { SocialIcons } from "./SocialIcons";
+import TeamLogo from '../../assets/team-logo.svg';
 
 export const FooterHeader: React.FC = () => {
   return (
     <div className="flex justify-between items-start pb-8 max-sm:flex-col max-sm:gap-8">
       <div className="flex gap-2.5 items-center">
-        <StakewiseLogo />
+        <img
+        src={TeamLogo}
+        alt="Team Logo"
+        className="logo-icon w-[51px] h-[42px]"
+        />
         <h1 className="font-saira-stencil text-3xl text-white">STAKEWISE</h1>
       </div>
       <nav className="flex gap-24 max-md:gap-12 max-sm:flex-col max-sm:gap-8">

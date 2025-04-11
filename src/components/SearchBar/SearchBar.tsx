@@ -11,9 +11,9 @@ const BarComponent = () => {
   };
 
   return (
-    <div className="bg-primary flex items-center px-4 py-2 gap-2 w-full overflow-x-auto whitespace-nowrap border-b border-gray-700">
+    <div className="bg-primary flex items-center px-16 py-5 gap-2 w-full overflow-x-auto whitespace-nowrap border-gray-700">
       {/* Fire Icon Button */}
-      <button className="flex items-center px-3 py-2 bg-secondary text-black rounded-md text-sm font-semibold">
+      <button className="flex items-center px-3 py-2 bg-secondary text-[#ffffff] rounded-md text-sm font-semibold">
         <FaFire className="mr-1" /> Top
       </button>
 
@@ -50,7 +50,7 @@ const BarComponent = () => {
 
       {/* Forward Arrow */}
       <button className="flex items-center px-3 py-2 bg-card rounded-md text-sm text-accent border border-gray-600">
-        <IoIosArrowForward />
+        <IoIosArrowForward className="text-xl"/>
       </button>
     </div>
   );
