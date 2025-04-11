@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,32 +10,100 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Wallet } from "lucide-react";
 import SettingsCard from "./SettingsCard";
 
-interface UserData {
-  email: string;
-  phone: string;
-  [key: string]: string;
-}
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useContext, useState, useEffect } from "react";
+import { AppContext } from "@/context/AppContext";
 
-interface ContactInfoFormProps {
-  userData: UserData;
-  updateUserData: (field: string, value: string) => void;
-}
+const ContactInfoForm = () => {
+  const navigate = useNavigate();
+  const { userData, backendUrl, getUserData } = useContext(AppContext)!;
 
-export default function ContactInfoForm({
-  userData,
-  updateUserData,
-}: ContactInfoFormProps) {
-  const handleSubmit = (e: FormEvent) => {
+  const [phone, setPhone] = useState(userData?.phone || "");
+  const [language, setLanguage] = useState(userData?.language || "en");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Contact info updated:", {
-      email: userData.email,
-      phone: userData.phone,
-    });
-    // API call would go here
+    setIsSubmitting(true);
+
+    try {
+      const updates = [];
+
+      // Phone update (only if modified)
+      if (phone.trim() !== "" && phone !== userData?.phone) {
+        updates.push({
+          field: "updatePhone",
+          key: "phone",
+          value: phone,
+        });
+      }
+
+      // Language update (always send if modified)
+      if (language !== userData?.language) {
+        updates.push({
+          field: "updateLanguage",
+          key: "language",
+          value: language,
+        });
+      }
+
+      // Return early if no changes
+      if (updates.length === 0) {
+        toast.info("No changes to save");
+        return;
+      }
+
+      const requests = updates.map(({ field, key, value }) =>
+        axios.post(
+          `${backendUrl}/api/user-update/${field}`,
+          { [key]: value },
+          { withCredentials: true }
+        )
+      );
+
+      const responses = await Promise.all(requests);
+
+      if (responses.every((res) => res.data.success)) {
+        toast.success("Profile updated successfully");
+        getUserData(); // Refresh user data
+      } else {
+        toast.error("Some updates failed. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("API Error:", error.response?.status, error.response?.data);
+      toast.error(error.response?.data?.message || "Update failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleVerification = async () => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/sendVerifyOtp`,
+        {},
+        { withCredentials: true }
+      );
+      if (data.success) {
+        navigate("/email-verify");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Verification failed");
+    }
+  };
+
+  useEffect(() => {
+    if (userData) {
+      setPhone(userData.phone || "");
+      setLanguage(userData.language || "en");
+    }
+  }, [userData]);
 
   return (
     <SettingsCard
@@ -43,115 +112,158 @@ export default function ContactInfoForm({
       form
       onSubmit={handleSubmit}
       footer={
-        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
-          Save Changes
+        <Button
+          type="submit"
+          className="bg-emerald-600 hover:bg-emerald-700"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       }
     >
       <div className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="email">Email Address</Label>
-            <span className="text-xs bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded">
-              Verified
-            </span>
-          </div>
-          <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400">
-            <Mail className="h-4 w-4 text-zinc-400" />
-            <input
-              id="email"
-              type="email"
-              value={userData.email}
-              onChange={(e) => updateUserData("email", e.target.value)}
-              className="w-full bg-transparent text-sm px-2 py-1 focus:outline-none"
-              placeholder="Enter your email"
-            />
-          </div>
+        {userData?.walletAddress ? (
+          <WalletSection userData={userData} />
+        ) : (
+          <EmailSection
+            userData={userData}
+            handleVerification={handleVerification}
+          />
+        )}
 
-          <p className="text-sm text-zinc-400">
-            We'll send a verification email if you change this
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="phone">Phone Number</Label>
-            <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-1 rounded">
-              Unverified
-            </span>
-          </div>
-          <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400">
-            <Phone className="h-4 w-4 text-zinc-400" />
-            <input
-              id="phone"
-              type="tel"
-              value={userData.phone}
-              onChange={(e) => updateUserData("phone", e.target.value)}
-              className="w-full bg-transparent text-sm px-2 py-1 focus:outline-none"
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">
-              Used for account recovery and notifications
-            </p>
-            <Button variant="link" className="text-emerald-500 p-0 h-auto">
-              Verify now
-            </Button>
-          </div>
-        </div>
-
+        <PhoneSection phone={phone} setPhone={setPhone} />
         <Separator className="bg-zinc-800" />
-
-        <div className="space-y-2">
-          <Label htmlFor="language">Preferred Language</Label>
-          <Select defaultValue="en">
-            <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <SelectValue placeholder="Select language" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#333447] border-none rounded-lg">
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Spanish</SelectItem>
-              <SelectItem value="fr">French</SelectItem>
-              <SelectItem value="de">German</SelectItem>
-              <SelectItem value="it">Italian</SelectItem>
-              <SelectItem value="pt">Portuguese</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="timezone">Timezone</Label>
-          <Select defaultValue="america-new_york">
-            <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <SelectValue placeholder="Select timezone" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#333447] border-none rounded-lg max-h-[200px]">
-              <SelectItem value="america-new_york">
-                America/New York (UTC-05:00)
-              </SelectItem>
-              <SelectItem value="america-los_angeles">
-                America/Los Angeles (UTC-08:00)
-              </SelectItem>
-              <SelectItem value="america-chicago">
-                America/Chicago (UTC-06:00)
-              </SelectItem>
-              <SelectItem value="europe-london">
-                Europe/London (UTC+00:00)
-              </SelectItem>
-              <SelectItem value="europe-paris">
-                Europe/Paris (UTC+01:00)
-              </SelectItem>
-              <SelectItem value="asia-tokyo">Asia/Tokyo (UTC+09:00)</SelectItem>
-              <SelectItem value="australia-sydney">
-                Australia/Sydney (UTC+10:00)
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-zinc-400">
-            Used for displaying event times and schedules
-          </p>
-        </div>
+        <LanguageSection language={language} setLanguage={setLanguage} />
       </div>
     </SettingsCard>
   );
-}
+};
+
+// Sub-components for better readability
+const WalletSection = ({ userData }: { userData: any }) => (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <Label>Wallet Address</Label>
+    </div>
+    <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2">
+      <Wallet className="h-4 w-4 text-zinc-400" />
+      <div className="w-full text-sm px-2 py-1">{userData?.walletAddress}</div>
+    </div>
+    <p className="text-sm text-zinc-400">
+      You are using this wallet address to log in
+    </p>
+  </div>
+);
+
+const EmailSection = ({
+  userData,
+  handleVerification,
+}: {
+  userData: any;
+  handleVerification: () => void;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <Label>Email Address</Label>
+      {userData?.isAccountVerified ? (
+        <VerifiedBadge />
+      ) : userData ? (
+        <UnverifiedBadge />
+      ) : (
+        <LoadingBadge />
+      )}
+    </div>
+    <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2">
+      <Mail className="h-4 w-4 text-zinc-400" />
+      <div className="w-full text-sm px-2 py-1">{userData?.email}</div>
+    </div>
+    <div className="flex items-center justify-between">
+      <p className="text-sm text-zinc-400">Your account login email</p>
+      {!userData?.isAccountVerified && (
+        <Button
+          variant="link"
+          className="text-emerald-500 p-0 h-auto"
+          onClick={handleVerification}
+        >
+          Verify now
+        </Button>
+      )}
+    </div>
+  </div>
+);
+
+const PhoneSection = ({
+  phone,
+  setPhone,
+}: {
+  phone: string;
+  setPhone: (value: string) => void;
+}) => (
+  <div className="space-y-2">
+    <Label htmlFor="phone">Phone Number</Label>
+    <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2">
+      <Phone className="h-4 w-4 text-zinc-400" />
+      <input
+        id="phone"
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="Enter phone number (optional)"
+        className="w-full bg-transparent text-sm px-2 py-1 focus:outline-none"
+      />
+    </div>
+  </div>
+);
+
+const LanguageSection = ({
+  language,
+  setLanguage,
+}: {
+  language: string;
+  setLanguage: (value: string) => void;
+}) => (
+  <div className="space-y-2">
+    <Label htmlFor="language">Preferred Language</Label>
+    <Select value={language} onValueChange={setLanguage}>
+      <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg">
+        <SelectValue placeholder="Select language" />
+      </SelectTrigger>
+      <SelectContent className="bg-[#333447] border-none rounded-lg">
+        {["en", "es", "fr", "de", "it", "pt"].map((lang) => (
+          <SelectItem key={lang} value={lang}>
+            {languageNames[lang]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
+
+const VerifiedBadge = () => (
+  <span className="text-xs bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded">
+    Verified
+  </span>
+);
+
+const UnverifiedBadge = () => (
+  <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-1 rounded">
+    Unverified
+  </span>
+);
+
+const LoadingBadge = () => (
+  <span className="text-xs bg-gray-500/20 text-gray-500 px-2 py-1 rounded">
+    Loading...
+  </span>
+);
+
+const languageNames: { [key: string]: string } = {
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  pt: "Portuguese",
+};
+
+export default ContactInfoForm;

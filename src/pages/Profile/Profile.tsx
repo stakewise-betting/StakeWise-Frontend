@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ProfilePicture from "@/components/ProfileCom/ProfilePicture";
 import PersonalInfoForm from "@/components/ProfileCom/PersonalInfoForm";
 import ContactInfoForm from "@/components/ProfileCom/ContactInfoForm";
@@ -9,19 +8,6 @@ import DangerZone from "@/components/ProfileCom/DangerZone";
 import { motion } from "framer-motion";
 
 export default function ProfileSettings() {
-  // Shared state could be lifted here if needed across components
-  const [userData, setUserData] = useState({
-    firstName: "John",
-    lastName: "Smith",
-    username: "johnsmith",
-    email: "john.smith@example.com",
-    phone: "+1 (555) 123-4567",
-  });
-
-  const updateUserData = (field: string, value: string) => {
-    setUserData((prev) => ({ ...prev, [field]: value }));
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -38,18 +24,9 @@ export default function ProfileSettings() {
           </div>
 
           <div className="grid gap-8">
-            <ProfilePicture
-              firstName={userData.firstName}
-              lastName={userData.lastName}
-            />
-            <PersonalInfoForm
-              userData={userData}
-              updateUserData={updateUserData}
-            />
-            <ContactInfoForm
-              userData={userData}
-              updateUserData={updateUserData}
-            />
+            <ProfilePicture />
+            <PersonalInfoForm />
+            <ContactInfoForm />
             <AccountPreferences />
             <PrivacySettings />
             <PasswordSecurity />

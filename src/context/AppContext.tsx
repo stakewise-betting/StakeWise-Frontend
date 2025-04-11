@@ -9,6 +9,7 @@ interface UserData {
   lname: string;
   username: string;
   email: string;
+  authProvider: string;
   isAccountVerified: boolean;
   walletAddress: string;
   gender: string;
@@ -17,6 +18,7 @@ interface UserData {
   birthday: string;
   country: string;
   picture: string;
+  language: string;
 }
 
 // Define context type

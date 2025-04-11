@@ -8,14 +8,15 @@ import {
   FaBell,
   FaBars,
   FaWallet,
+  FaUserCircle, // Added for default icon
 } from "react-icons/fa";
 import { AppContext } from "@/context/AppContext";
 import { toast } from "react-toastify";
 import axios from "axios";
-import logo from "../../assets/images/logo.png";
-import { ButtonOutline } from "../Buttons/Buttons";
+import logo from "../../assets/images/logo.png"; // Ensure this path is correct
+import { ButtonOutline } from "../Buttons/Buttons"; // Ensure this path is correct
 import Web3 from "web3";
-import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
+import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg"; // Ensure this path is correct
 
 // Define an interface for Notification object
 interface Notification {
@@ -28,10 +29,20 @@ interface Notification {
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const context = useContext(AppContext);
+
+  // Add null checks for context values
+  if (!context) {
+    // Handle the case where context is null, maybe return a loading indicator or null
+    console.error("AppContext is null");
+    return null; // Or some fallback UI
+  }
+
   const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
-    useContext(AppContext)!;
+    context;
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false); // Add logic to actually toggle dark mode if needed
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -41,81 +52,117 @@ const Navbar: React.FC = () => {
   const [picture, setPicture] = useState(userData?.picture || "");
   const ws = useRef<WebSocket | null>(null);
 
+  const profileRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // --- Close dropdowns when clicking outside ---
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // Count unread notifications
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Function to mark all notifications as read
-  const markAllAsRead = () => {
+  // Function to mark all notifications as read (using API if available, otherwise local)
+  const markAllAsRead = async () => {
+    // Optimistic UI update
     setNotifications((prevNotifications) =>
       prevNotifications.map((notification) => ({
         ...notification,
         read: true,
       }))
     );
+
+    // Optional: Send request to backend to mark all as read
+    if (isLoggedin && userData?.id) {
+      try {
+        await axios.post(
+          `${backendUrl}/api/notifications/read-all`,
+          {},
+          {
+            withCredentials: true,
+            headers: { "user-id": userData.id }, // Ensure backend expects this header
+          }
+        );
+        // console.log("Marked all notifications as read on backend.");
+      } catch (error) {
+        console.error("Error marking notifications as read on backend:", error);
+        // Optionally revert the optimistic update or show an error toast
+        toast.error("Failed to sync read status with server.");
+        // Re-fetch to get the correct state if the API call failed
+        // fetchNotifications();
+      }
+    }
   };
 
   // Mark notifications as read when panel is opened
   useEffect(() => {
     if (notificationsOpen && unreadCount > 0) {
+      // Maybe add a small delay before marking as read, or mark on close?
       markAllAsRead();
     }
-  }, [notificationsOpen]);
+  }, [notificationsOpen]); // Dependency on unreadCount removed to avoid loop if API call fails
 
-  // Load initial notifications from API
-  useEffect(() => {
-    if (isLoggedin && userData?.id) {
-      fetchNotifications();
-    }
-  }, [isLoggedin, userData]);
-
-  // Fetch notifications from backend
+  // --- Fetch initial notifications ---
   const fetchNotifications = async () => {
+    if (!isLoggedin || !userData?.id) {
+      console.log("User not logged in or no ID, skipping notification fetch.");
+      setNotifications([]); // Clear notifications if user logs out
+      return;
+    }
+
     try {
-      // Check if the user is properly authenticated before making the request
-      if (!userData?.id) {
-        console.log(
-          "User not authenticated or missing ID, skipping notification fetch"
-        );
-        return;
-      }
-
-      console.log(
-        "Fetching notifications for user ID:",
-        userData.id,
-        "from:",
-        `${backendUrl}/api/notifications`
+      console.log(`Fetching notifications for user ID: ${userData.id}`);
+      const { data } = await axios.get<{ notifications: any[] }>(
+        `${backendUrl}/api/notifications`,
+        {
+          withCredentials: true,
+          timeout: 10000,
+          headers: {
+            "Content-Type": "application/json",
+            "user-id": userData.id, // Send user ID in header
+          },
+          // No need for params if using header, unless backend requires both
+          // params: { userId: userData.id }
+        }
       );
-
-      // Explicitly pass the user ID both in query params and headers for robustness
-      const { data } = await axios.get(`${backendUrl}/api/notifications`, {
-        withCredentials: true,
-        timeout: 10000,
-        headers: {
-          "Content-Type": "application/json",
-          "user-id": userData.id, // Add user ID in header
-        },
-        params: {
-          userId: userData.id, // Also add as query parameter
-        },
-      });
 
       console.log("Notifications response:", data);
 
       if (data.notifications && Array.isArray(data.notifications)) {
-        const formattedNotifications = data.notifications.map((n: any) => ({
-          id: n._id || `temp-${Date.now()}`,
-          message: n.message || "New notification",
-          notificationImageURL: n.image,
-          timestamp: n.createdAt ? new Date(n.createdAt).getTime() : Date.now(),
-          read: n.read ? true : false, // Handle different read status formats
-        }));
+        const formattedNotifications = data.notifications
+          .map((n: any) => ({
+            id: n._id || `temp-${Date.now()}-${Math.random()}`, // Ensure unique ID
+            message: n.message || "Notification content missing.", // Provide clearer default
+            notificationImageURL: n.image || n.notificationImageURL, // Check both possible fields
+            timestamp: n.createdAt
+              ? new Date(n.createdAt).getTime()
+              : Date.now(),
+            read: !!n.read, // Ensure boolean
+          }))
+          .sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
 
         setNotifications(formattedNotifications);
       } else {
-        console.log(
-          "No notifications found in response or invalid format:",
-          data
-        );
+        console.log("No notifications found or invalid format:", data);
         setNotifications([]);
       }
     } catch (error: any) {
@@ -123,46 +170,88 @@ const Navbar: React.FC = () => {
       if (error.response) {
         console.error("Response error data:", error.response.data);
         console.error("Response error status:", error.response.status);
+        // Handle specific statuses like 401/403 (Unauthorized) perhaps by logging out
+        if (error.response.status === 401 || error.response.status === 403) {
+          toast.error("Authentication error fetching notifications.");
+          // handleLogout(); // Consider logging out if auth fails
+        }
       } else if (error.request) {
         console.error("No response received:", error.request);
+        toast.error("Network error fetching notifications.");
       } else {
         console.error("Request setup error:", error.message);
       }
+      setNotifications([]); // Clear notifications on error
     }
   };
-  // WebSocket connection
-  // WebSocket connection in Navbar.tsx
+
+  // Load initial notifications on login/user change
   useEffect(() => {
-    if (!isLoggedin || !userData?.id) return;
+    fetchNotifications();
+  }, [isLoggedin, userData?.id]); // Rerun if user logs in/out or ID changes
+
+  // --- WebSocket connection ---
+  useEffect(() => {
+    if (!isLoggedin || !userData?.id) {
+      // Close existing connection if user logs out
+      if (ws.current) {
+        console.log(
+          "Closing WebSocket connection due to logout or missing user ID."
+        );
+        ws.current.close();
+        ws.current = null;
+      }
+      return;
+    }
+
+    // Avoid reconnecting if already connected
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      console.log("WebSocket already connected.");
+      return;
+    }
 
     const websocketUrl =
       import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:5000";
-
-    // Include user ID in WebSocket connection URL
-    const wsUrl = `${websocketUrl}?userId=${userData.id}`;
-    console.log("Connecting to WebSocket:", wsUrl);
+    const wsUrl = `${websocketUrl}?userId=${userData.id}`; // Pass userId for targeted messages
+    console.log("Attempting to connect to WebSocket:", wsUrl);
 
     ws.current = new WebSocket(wsUrl);
+
+    ws.current.onopen = () => {
+      console.log("WebSocket connected successfully");
+    };
 
     ws.current.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
         console.log("WebSocket message received:", message);
 
+        // Ensure the message is intended for this user if backend doesn't filter
+        // if (message.targetUserId && message.targetUserId !== userData.id) return;
+
         if (message.type === "notification" || message.type === "newEvent") {
-          // Add new notification and mark as unread
-          const newNotification = {
-            id: message.id || Date.now().toString(),
+          const newNotification: Notification = {
+            id:
+              message.id || message._id || `ws-${Date.now()}-${Math.random()}`, // Use provided ID or generate
             message:
               message.message ||
               message.notificationMessage ||
-              "New notification",
-            notificationImageURL: message.notificationImageURL || message.image,
-            read: false, // Mark new notifications as unread
-            timestamp: message.timestamp || Date.now(),
+              "New notification received.", // Clearer default
+            notificationImageURL: message.image || message.notificationImageURL,
+            read: false, // New notifications are always unread
+            timestamp:
+              message.timestamp || message.createdAt
+                ? new Date(message.createdAt || message.timestamp).getTime()
+                : Date.now(),
           };
 
-          setNotifications((prev) => [newNotification, ...prev]);
+          // Add to the beginning of the list and prevent duplicates by ID
+          setNotifications((prev) => {
+            if (prev.some((n) => n.id === newNotification.id)) {
+              return prev; // Avoid adding duplicate if message received again
+            }
+            return [newNotification, ...prev];
+          });
 
           // Show toast for new notification
           toast.info(newNotification.message, {
@@ -171,45 +260,56 @@ const Navbar: React.FC = () => {
           });
         }
       } catch (error) {
-        console.error("WebSocket message error:", error);
+        console.error("Error processing WebSocket message:", error);
+        console.error("Received data:", event.data);
       }
     };
 
-    ws.current.onopen = () => {
-      console.log("WebSocket connected successfully");
-    };
-
-    ws.current.onclose = () => {
-      console.log("WebSocket disconnected");
+    ws.current.onclose = (event) => {
+      console.log("WebSocket disconnected:", event.code, event.reason);
+      ws.current = null; // Clear ref on close
+      // Optional: Implement reconnect logic here if needed
     };
 
     ws.current.onerror = (error) => {
       console.error("WebSocket error:", error);
+      toast.error("WebSocket connection error.");
+      ws.current = null; // Clear ref on error
     };
 
+    // Cleanup function
     return () => {
       if (ws.current) {
-        console.log("Closing WebSocket connection");
+        console.log(
+          "Closing WebSocket connection on component unmount or dependency change."
+        );
+        ws.current.onclose = null; // Prevent close handler from running during manual close
+        ws.current.onerror = null;
         ws.current.close();
+        ws.current = null;
       }
     };
-  }, [isLoggedin, userData]);
+  }, [isLoggedin, userData?.id]); // Reconnect if login status or user ID changes
 
-  // Check wallet connection and get balance
+  // --- Wallet Connection & Balance ---
   useEffect(() => {
     const checkWalletConnection = async () => {
       if (window.ethereum) {
         try {
           const web3 = new Web3(window.ethereum);
-          const accounts = await window.ethereum.request({
+          const accounts = (await window.ethereum.request({
             method: "eth_accounts",
-          });
+          })) as string[];
 
-          if (accounts.length > 0) {
+          if (accounts && accounts.length > 0) {
             setWalletConnected(true);
             const balanceWei = await web3.eth.getBalance(accounts[0]);
             const balanceEth = web3.utils.fromWei(balanceWei, "ether");
             setWalletBalance(parseFloat(balanceEth).toFixed(4));
+            // Optionally update wallet address in userData if needed/possible
+            // if (userData && !userData.walletAddress) {
+            //    // setUserData({...userData, walletAddress: accounts[0] }); // Be careful with context updates here
+            // }
           } else {
             setWalletConnected(false);
             setWalletBalance("0.00");
@@ -217,28 +317,41 @@ const Navbar: React.FC = () => {
         } catch (error) {
           console.error("Error checking wallet connection:", error);
           setWalletConnected(false);
+          setWalletBalance("0.00");
         }
+      } else {
+        // MetaMask not installed
+        setWalletConnected(false);
+        setWalletBalance("0.00");
       }
     };
 
     checkWalletConnection();
 
     // Listen for account changes
+    const handleAccountsChanged = (accounts: string[]) => {
+      console.log("Wallet accounts changed:", accounts);
+      checkWalletConnection(); // Re-check connection and balance
+    };
+
     if (window.ethereum) {
-      window.ethereum.on("accountsChanged", checkWalletConnection);
+      // Use the recommended way to add listeners
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
     }
 
+    // Cleanup listener
     return () => {
-      if (window.ethereum) {
+      if (window.ethereum?.removeListener) {
+        // Check if removeListener exists
         window.ethereum.removeListener(
           "accountsChanged",
-          checkWalletConnection
+          handleAccountsChanged
         );
       }
     };
-  }, []);
+  }, [userData]); // Rerun if userData changes (e.g., after login)
 
-  // Fetch ETH price from CoinGecko API
+  // --- Fetch ETH Price ---
   useEffect(() => {
     const fetchEthPrice = async () => {
       try {
@@ -249,101 +362,143 @@ const Navbar: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (data && data.ethereum) {
+        if (data?.ethereum?.usd) {
           setEthPrice(data.ethereum.usd);
+        } else {
+          console.warn("Could not extract ETH price from API response:", data);
         }
       } catch (error) {
         console.error("Error fetching ETH price:", error);
+        // Don't reset price to 0 on temporary fetch error, keep the last known value
       }
     };
 
-    fetchEthPrice();
-    // Set up interval to refresh price every minute
-    const priceInterval = setInterval(fetchEthPrice, 60000);
+    fetchEthPrice(); // Initial fetch
+    const priceInterval = setInterval(fetchEthPrice, 60000); // Refresh every minute
 
-    // Clean up interval on component unmount
-    return () => clearInterval(priceInterval);
+    return () => clearInterval(priceInterval); // Cleanup interval
   }, []);
 
   // Calculate USD value
   const usdValue = (parseFloat(walletBalance) * ethPrice).toFixed(2);
 
-  // Connect wallet function
+  // --- Connect Wallet Function ---
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
-        // Balance will be updated via the accountsChanged event listener
-      } catch (error) {
+        // Balance and connection state will update via the 'accountsChanged' listener effect
+        toast.success("Wallet connected successfully!");
+      } catch (error: any) {
         console.error("Error connecting to wallet:", error);
-        toast.error("Failed to connect wallet");
+        if (error.code === 4001) {
+          toast.info("Wallet connection request rejected.");
+        } else {
+          toast.error("Failed to connect wallet. See console for details.");
+        }
       }
     } else {
-      toast.error("MetaMask is not installed");
+      toast.error(
+        "MetaMask is not installed. Please install it to connect your wallet."
+      );
+      // Optionally provide a link to MetaMask website
     }
   };
 
-  // User actions
+  // --- User Actions ---
   const handleVerification = async () => {
+    // Close profile dropdown first
+    setProfileOpen(false);
     try {
+      // Show loading toast
+      const loadingToast = toast.loading("Sending verification email...");
       const { data } = await axios.post(
         `${backendUrl}/api/auth/sendVerifyOtp`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
+      toast.dismiss(loadingToast); // Dismiss loading toast
+
       if (data.success) {
-        navigate("/email-verify");
+        toast.success("Verification email sent! Please check your inbox.");
+        navigate("/email-verify"); // Navigate to verification page
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to send verification email.");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Verification failed");
+      toast.dismiss(); // Ensure loading toast is dismissed on error
+      console.error("Verification email sending error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "An error occurred during verification."
+      );
     }
   };
 
   const handleLogout = async () => {
+    // Close profile dropdown first
+    setProfileOpen(false);
     try {
+      const loadingToast = toast.loading("Logging out...");
       const { data } = await axios.post(
         `${backendUrl}/api/auth/logout`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
+      toast.dismiss(loadingToast);
+
       if (data.success) {
         setUserData(null);
         setIsLoggedin(false);
-        navigate("/");
+        setWalletConnected(false); // Reset wallet state on logout
+        setWalletBalance("0.00");
+        setNotifications([]); // Clear notifications
+        if (ws.current) {
+          // Close WebSocket on logout
+          ws.current.close();
+          ws.current = null;
+        }
+        toast.success("Logged out successfully!");
+        navigate("/"); // Navigate to home page
+      } else {
+        toast.error(data.message || "Logout failed.");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Logout failed");
+      toast.dismiss();
+      console.error("Logout error:", error);
+      toast.error(
+        error.response?.data?.message || "An error occurred during logout."
+      );
+      // Force state clear even if API fails?
+      // setUserData(null);
+      // setIsLoggedin(false);
+      // navigate("/");
     }
   };
 
+  // --- Update Profile Picture State ---
+  // This effect ensures the 'picture' state updates if userData changes AFTER initial load
   useEffect(() => {
-    if (userData?.picture) {
-      setTimeout(() => {
-        setPicture(userData.picture);
-      }, 100); // Short delay to allow React to process updates
-    }
-  }, [userData]);
+    setPicture(userData?.picture || "");
+  }, [userData?.picture]);
 
-  // Navigation links
+  // --- Navigation Links ---
   const navLinks = [
     { to: "/home", label: "Home", icon: <FaHome /> },
     { to: "/upcoming", label: "Upcoming Events", icon: <FaCalendarAlt /> },
     { to: "/results", label: "Results", icon: <FaPoll /> },
+    // Conditionally add Dashboard link if logged in
     ...(isLoggedin
       ? [{ to: "/dashboard", label: "Dashboard", icon: <FaPoll /> }]
       : []),
   ];
 
-  // Format timestamp to relative time
+  // --- Format Timestamp Helper ---
   const formatTimestamp = (timestamp: number): string => {
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    const now = Date.now();
+    const seconds = Math.floor((now - timestamp) / 1000);
 
+    if (seconds < 5) return `just now`;
     if (seconds < 60) return `${seconds} sec ago`;
 
     const minutes = Math.floor(seconds / 60);
@@ -353,22 +508,29 @@ const Navbar: React.FC = () => {
     if (hours < 24) return `${hours} hr ago`;
 
     const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} day ago`;
+    if (days === 1) return `yesterday`;
+    if (days < 7) return `${days} days ago`;
 
+    // For older dates, show the actual date
     const date = new Date(timestamp);
-    return date.toLocaleDateString();
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    // Or full date: return date.toLocaleDateString();
   };
 
+  // --- Render ---
   return (
-    <nav className="bg-primary px-4 py-3 sticky top-0 z-50 shadow-lg">
+    <nav className="bg-primary px-4 py-3 sticky top-0 z-50 shadow-lg text-white">
+      {" "}
+      {/* Assuming white text on primary bg */}
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Branding */}
         <div className="flex items-center space-x-3">
-          <img src={logo} alt="Logo" className="h-9 w-auto" />
+          {logo && <img src={logo} alt="Logo" className="h-9 w-auto" />}{" "}
+          {/* Conditionally render logo */}
           <Link
             to="/"
             onClick={() => window.scrollTo(0, 0)}
-            className="text-2xl font-bold text-accent hover:text-secondary transition"
+            className="text-2xl font-bold text-accent hover:text-secondary transition duration-200"
           >
             STAKEWISE
           </Link>
@@ -383,14 +545,14 @@ const Navbar: React.FC = () => {
                 key={to}
                 to={to}
                 onClick={() => window.scrollTo(0, 0)}
-                className={({
-                  isActive,
-                }) => `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 font-medium
                   ${
                     isActive
-                      ? "text-secondary bg-secondary/10"
-                      : "text-sub hover:bg-secondary/10"
-                  }`}
+                      ? "text-secondary bg-secondary/10" // Active link style
+                      : "text-gray-300 hover:text-white hover:bg-white/10" // Inactive link style (adjust text-sub if needed)
+                  }`
+                }
               >
                 {icon}
                 <span>{label}</span>
@@ -398,149 +560,209 @@ const Navbar: React.FC = () => {
             ))}
           </div>
 
-          {/* User Section */}
-          {isLoggedin ? (
-            <div className="flex items-center space-x-6">
-              {/* Wallet Balance Display */}
-              {walletConnected && (
-                <div className="flex items-center space-x-2 text-white">
-                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-white/70">Cash</span>
-                    <span className="font-medium text-green-400">
+          {/* User Section (Logged In) */}
+          {isLoggedin && userData ? (
+            <div className="flex items-center space-x-4 lg:space-x-6">
+              {/* Wallet Display & Deposit Button */}
+              {walletConnected ? (
+                <div className="flex items-center space-x-3 bg-black/20 px-3 py-1.5 rounded-lg">
+                  <FaWallet className="text-green-400 text-lg" />
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-xs text-gray-400">Cash</span>
+                    <span className="font-semibold text-green-400 text-sm">
                       ${usdValue}
                     </span>
                   </div>
-                  <ButtonOutline onClick={() => navigate("/deposit")}>
+                  <ButtonOutline
+                    onClick={() => navigate("/deposit")}
+                    small // Use smaller button variant if available
+                    className="ml-2" // Add margin if needed
+                  >
                     Deposit
                   </ButtonOutline>
                 </div>
+              ) : (
+                // Show Connect Wallet button if logged in but wallet not connected
+                <ButtonOutline onClick={connectWallet} small>
+                  Connect Wallet
+                </ButtonOutline>
               )}
 
-              {/* Notifications */}
-              <div className="relative">
+              {/* Notifications Bell */}
+              <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="text-2xl text-sub hover:text-secondary relative"
+                  aria-label="Toggle Notifications"
+                  className="text-2xl text-gray-300 hover:text-white transition duration-200 relative"
                 >
                   <FaBell />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount > 99 ? "99+" : unreadCount}
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center border-2 border-primary">
+                      {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
                 </button>
 
+                {/* Notifications Dropdown */}
                 {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-primary border border-secondary rounded-lg shadow-xl">
-                    <div className="p-4 flex justify-between items-center border-b border-secondary">
-                      <span className="font-bold">Notifications</span>
-                      {notifications.length > 0 && (
+                  <div className="absolute right-0 mt-3 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                    {" "}
+                    {/* Darker dropdown */}
+                    <div className="p-3 flex justify-between items-center border-b border-gray-700">
+                      <span className="font-semibold text-white">
+                        Notifications
+                      </span>
+                      {notifications.some((n) => !n.read) && ( // Show only if there are unread messages
                         <button
-                          onClick={markAllAsRead}
-                          className="text-xs text-secondary hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent closing dropdown
+                            markAllAsRead();
+                          }}
+                          className="text-xs text-blue-400 hover:underline"
+                          disabled={unreadCount === 0} // Disable if no unread
                         >
                           Mark all as read
                         </button>
                       )}
                     </div>
-                    <div className="max-h-60 overflow-y-auto">
+                    <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                      {" "}
+                      {/* Custom scrollbar */}
                       {notifications.length > 0 ? (
                         notifications.map((n) => (
                           <div
                             key={n.id}
-                            className={`p-4 flex items-start space-x-3 hover:bg-secondary/10 ${
-                              !n.read ? "bg-secondary/5" : ""
+                            className={`p-3 flex items-start space-x-3 transition-colors duration-150 border-b border-gray-700/50 ${
+                              !n.read
+                                ? "bg-blue-900/20"
+                                : "hover:bg-gray-700/50" // Highlight unread, hover effect
                             }`}
                           >
-                            <div className="flex-shrink-0">
+                            {/* Icon/Image */}
+                            <div className="flex-shrink-0 w-8 h-8 mt-0.5">
                               {n.notificationImageURL ? (
                                 <img
                                   src={n.notificationImageURL}
-                                  className="w-8 h-8 rounded-full"
-                                  alt="Notification"
+                                  className="w-full h-full rounded-full object-cover"
+                                  alt="Notification source"
+                                  onError={(e) => (e.currentTarget.src = logo)} // Fallback image on error
                                 />
                               ) : (
-                                <div className="w-8 h-8 rounded-full bg-secondary/30 flex items-center justify-center">
-                                  <FaBell className="text-white text-xs" />
+                                <div className="w-full h-full rounded-full bg-gray-600 flex items-center justify-center">
+                                  <FaBell className="text-gray-300 text-sm" />
                                 </div>
                               )}
                             </div>
-                            <div className="flex-1">
-                              <div className="text-sm">{n.message}</div>
-                              <div className="text-xs text-sub mt-1">
+                            {/* Message and Timestamp */}
+                            <div className="flex-1 min-w-0">
+                              {" "}
+                              {/* min-w-0 prevents overflow issues */}
+                              <div className="text-sm text-gray-100 leading-snug">
+                                {n.message}
+                              </div>
+                              <div className="text-xs text-gray-400 mt-1">
                                 {formatTimestamp(n.timestamp)}
                               </div>
                             </div>
+                            {/* Unread Indicator */}
                             {!n.read && (
-                              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></span>
+                              <span
+                                className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0 mt-1.5"
+                                aria-label="Unread"
+                                title="Unread"
+                              ></span>
                             )}
                           </div>
                         ))
                       ) : (
-                        <div className="p-4 text-center text-sub">
-                          No notifications
+                        <div className="p-6 text-center text-gray-400 text-sm">
+                          You're all caught up!
                         </div>
                       )}
                     </div>
+                    {/* Optional: View All link */}
+                    {/* <div className="p-2 text-center border-t border-gray-700">
+                        <Link to="/notifications" onClick={() => setNotificationsOpen(false)} className="text-sm text-blue-400 hover:underline">
+                            View All
+                        </Link>
+                     </div> */}
                   </div>
                 )}
               </div>
 
-              {/* User Profile */}
-              <div className="relative">
+              {/* User Profile Dropdown */}
+              <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center space-x-3 group"
+                  aria-label="Toggle User Menu"
+                  className="flex items-center space-x-2 group transition duration-200"
                 >
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
-                    {userData?.picture ? (
+                  <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white font-bold overflow-hidden border-2 border-transparent group-hover:border-accent transition">
+                    {picture ? (
                       <img
-                        key={picture}
+                        key={picture} // Re-render if picture changes
                         src={picture}
                         alt="User profile"
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-full h-full object-cover"
+                        onError={(e) =>
+                          (e.currentTarget.style.display = "none")
+                        } // Hide if image fails
                       />
-                    ) : userData?.fname ? (
-                      userData.fname[0].toUpperCase()
-                    ) : userData?.walletAddress ? (
+                    ) : // Display initials or icon if picture fails or isn't set
+                    userData.fname ? (
+                      <span className="text-lg">
+                        {userData.fname[0].toUpperCase()}
+                      </span>
+                    ) : userData.walletAddress ? (
                       <img
-                        src={MetamaskLogo}
-                        alt="MetaMask Logo"
-                        className="w-3/4 h-3/4 object-contain rounded-full"
+                        src={MetamaskLogo} // Specific logo for MetaMask user without profile pic
+                        alt="MetaMask User"
+                        className="w-3/4 h-3/4 object-contain p-0.5" // Adjust padding/size as needed
                       />
                     ) : (
-                      ""
+                      <FaUserCircle className="w-full h-full text-gray-400" /> // Generic fallback
+                    )}
+                    {/* Fallback if image failed and other conditions not met */}
+                    {!picture && !userData.fname && !userData.walletAddress && (
+                      <FaUserCircle className="w-full h-full text-gray-400" />
                     )}
                   </div>
+                  {/* Optional: Show name next to avatar */}
+                  {/* <span className="text-sm font-medium text-gray-300 group-hover:text-white hidden lg:block">
+                      {userData.fname || userData.walletAddress?.slice(0, 6)}
+                   </span>
+                   <FaCaretDown className="text-gray-400 group-hover:text-white hidden lg:block" /> */}
                 </button>
 
+                {/* Profile Dropdown Content */}
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
-                    <div className="p-4 border-b border-secondary">
-                      <div className="font-bold">
-                        {userData?.fname ||
-                          (userData?.walletAddress ? "MetaMask User" : "User")}
+                  <div className="absolute right-0 mt-3 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
+                    <div className="p-3 border-b border-gray-700">
+                      <div className="font-semibold text-white truncate">
+                        {userData.fname ||
+                          (userData.walletAddress ? "Wallet User" : "User")}
                       </div>
-                      <div className="text-sm text-sub">
-                        {userData?.email ||
-                          (userData?.walletAddress
-                            ? userData.walletAddress.slice(0, 6) +
-                              "..." +
-                              userData.walletAddress.slice(-4)
-                            : "")}
+                      <div className="text-sm text-gray-400 truncate">
+                        {userData.email ||
+                          (userData.walletAddress
+                            ? `${userData.walletAddress.slice(
+                                0,
+                                6
+                              )}...${userData.walletAddress.slice(-4)}`
+                            : "No details")}
                       </div>
                     </div>
 
-                    <div className="p-2 space-y-1">
+                    <div className="py-2">
                       <Link
                         to="/profile"
                         onClick={() => {
                           window.scrollTo(0, 0);
                           setProfileOpen(false);
                         }}
-                        className="block px-4 py-2 rounded hover:bg-secondary/10"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
                       >
-                        Profile
+                        Profile Settings
                       </Link>
                       <Link
                         to="/watchlist"
@@ -548,27 +770,36 @@ const Navbar: React.FC = () => {
                           window.scrollTo(0, 0);
                           setProfileOpen(false);
                         }}
-                        className="block px-4 py-2 rounded hover:bg-secondary/10"
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
                       >
-                        Watchlist
+                        My Watchlist
                       </Link>
+                      {/* Dark Mode Toggle - Implement actual logic */}
                       <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        className="w-full text-left px-4 py-2 rounded hover:bg-secondary/10"
+                        onClick={() => {
+                          setIsDarkMode(!isDarkMode);
+                          // Add logic here to toggle dark mode class on body/html
+                          // e.g., document.documentElement.classList.toggle('dark');
+                          setProfileOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
                       >
-                        {isDarkMode ? "Light" : "Dark"} Mode
+                        Toggle {isDarkMode ? "Light" : "Dark"} Mode
                       </button>
-                      {!userData?.isAccountVerified && (
+                      {/* Verification Button */}
+                      {!userData.isAccountVerified && (
                         <button
-                          onClick={handleVerification}
-                          className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
+                          onClick={handleVerification} // Use the function here
+                          className="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-yellow-900/30 transition-colors duration-150"
                         >
                           Verify Account
                         </button>
                       )}
+                      <div className="my-1 border-t border-gray-700"></div>{" "}
+                      {/* Separator */}
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
+                        className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 transition-colors duration-150"
                       >
                         Logout
                       </button>
@@ -578,12 +809,26 @@ const Navbar: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex space-x-4">
-              {/* Removed Connect Wallet here for not logged in state on desktop */}
-              <ButtonOutline onClick={() => navigate("/login")}>
+            // User Section (Logged Out)
+            <div className="flex items-center space-x-3">
+              {/* Connect Wallet button visible even when logged out */}
+              {/* Decide if you want this - maybe only show after login? */}
+              {/* <ButtonOutline onClick={connectWallet} small>
+                   Connect Wallet
+                 </ButtonOutline> */}
+              <ButtonOutline
+                onClick={() => navigate("/login")}
+                small
+                className="text-sm" // Ensure text size is appropriate
+              >
                 Login
               </ButtonOutline>
-              <ButtonOutline onClick={() => navigate("/signup")}>
+              <ButtonOutline
+                onClick={() => navigate("/signup")}
+                variant="secondary" // Example: Use a different style for Sign Up
+                small
+                className="text-sm"
+              >
                 Sign Up
               </ButtonOutline>
             </div>
@@ -591,10 +836,27 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Menu Trigger */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center space-x-4">
+          {/* Notification bell for mobile when logged in */}
+          {isLoggedin && (
+            <div className="relative">
+              <Link
+                to="/notifications"
+                className="text-2xl text-gray-300 hover:text-white transition duration-200 relative"
+              >
+                <FaBell />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center border-2 border-primary">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          )}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="text-2xl text-sub"
+            aria-label="Toggle Menu"
+            className="text-2xl text-gray-300 hover:text-white transition duration-200"
           >
             <FaBars />
           </button>
@@ -602,46 +864,56 @@ const Navbar: React.FC = () => {
       </div>
       {/* Mobile Menu Content */}
       {menuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-primary border-t border-secondary">
-          <div className="p-4 space-y-4">
-            {/* Wallet Balance for Mobile - Conditionally render when logged in and wallet connected */}
-            {isLoggedin && walletConnected && (
-              <div className="flex justify-between items-center p-3 bg-secondary/10 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <FaWallet className="text-secondary" />
-                  <div>
-                    <div className="text-xs text-sub">Balance</div>
-                    <div className="font-medium text-green-400">
-                      ${usdValue}
+        <div className="md:hidden absolute top-full left-0 right-0 w-full bg-primary border-t border-gray-700 shadow-lg">
+          <div className="p-4 space-y-3 flex flex-col">
+            {/* Wallet Info & Deposit/Connect (Mobile) */}
+            {isLoggedin &&
+              (walletConnected ? (
+                <div className="flex justify-between items-center p-3 bg-black/20 rounded-lg mb-2">
+                  <div className="flex items-center space-x-2">
+                    <FaWallet className="text-green-400" />
+                    <div>
+                      <div className="text-xs text-gray-400">Balance</div>
+                      <div className="font-medium text-green-400">
+                        ${usdValue}
+                      </div>
                     </div>
                   </div>
+                  <ButtonOutline
+                    onClick={() => {
+                      navigate("/deposit");
+                      setMenuOpen(false);
+                    }}
+                    small
+                  >
+                    Deposit
+                  </ButtonOutline>
                 </div>
+              ) : (
                 <ButtonOutline
+                  fullWidth
                   onClick={() => {
-                    navigate("/deposit");
+                    connectWallet();
                     setMenuOpen(false);
                   }}
-                  small
+                  className="mb-2"
                 >
-                  Deposit
+                  Connect Wallet
                 </ButtonOutline>
-              </div>
-            )}
+              ))}
 
-            {/* Conditionally render Connect Wallet in mobile menu when logged in but wallet not connected */}
-            {isLoggedin && !walletConnected && (
-              <ButtonOutline fullWidth onClick={connectWallet} className="mb-4">
-                Connect Wallet
-              </ButtonOutline>
-            )}
-
+            {/* Mobile Nav Links */}
             {navLinks.map(({ to, label, icon }) => (
               <NavLink
-                key={to}
+                key={`mobile-${to}`}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center space-x-2 p-3 rounded-lg
-            ${isActive ? "bg-secondary/10 text-secondary" : "text-sub"}`
+                  `flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200 font-medium
+                  ${
+                    isActive
+                      ? "bg-secondary/10 text-secondary"
+                      : "text-gray-300 hover:bg-white/10 hover:text-white"
+                  }`
                 }
                 onClick={() => setMenuOpen(false)}
               >
@@ -650,46 +922,76 @@ const Navbar: React.FC = () => {
               </NavLink>
             ))}
 
-            {isLoggedin ? (
-              <div className="pt-4 border-t border-secondary">
-                {/* Conditionally render Deposit button when logged in but wallet not connected in mobile menu */}
-                {!walletConnected && (
-                  <ButtonOutline
-                    fullWidth
-                    onClick={() => {
-                      navigate("/deposit");
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Deposit
-                  </ButtonOutline>
-                )}
-
+            {/* Mobile User Actions */}
+            {isLoggedin && userData ? (
+              <div className="pt-3 border-t border-gray-700 space-y-2">
+                {/* Mobile Profile Link */}
                 <Link
-                  to="/notifications"
-                  className="flex items-center justify-between w-full p-3 rounded-lg hover:bg-secondary/10 mt-2"
+                  to="/profile"
+                  className="flex items-center space-x-3 p-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <div className="flex items-center space-x-2">
-                    <FaBell />
-                    <span>Notifications</span>
-                  </div>
-                  {unreadCount > 0 && (
-                    <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  )}
+                  <FaUserCircle />
+                  <span>Profile Settings</span>
                 </Link>
 
-                <button
-                  onClick={handleLogout}
-                  className="w-full p-3 text-left text-red-500 hover:bg-red-500/10 rounded-lg mt-3"
+                {/* Mobile Watchlist Link */}
+                <Link
+                  to="/watchlist"
+                  className="flex items-center space-x-3 p-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMenuOpen(false)}
                 >
-                  Logout
+                  {/* Replace FaPoll with a more appropriate icon like FaStar if needed */}
+                  <FaPoll />
+                  <span>My Watchlist</span>
+                </Link>
+
+                {/* Mobile Notifications Link (already visible near hamburger) - redundant here? */}
+                {/* <Link
+                    to="/notifications"
+                    className="flex items-center justify-between w-full p-3 rounded-lg text-gray-300 hover:bg-white/10 hover:text-white"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                     <div className="flex items-center space-x-3">
+                       <FaBell />
+                       <span>Notifications</span>
+                     </div>
+                     {unreadCount > 0 && (
+                       <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                         {unreadCount > 9 ? "9+" : unreadCount}
+                       </span>
+                     )}
+                 </Link> */}
+
+                {/* Verify Account Button (Mobile) */}
+                {!userData.isAccountVerified && (
+                  <button
+                    onClick={() => {
+                      handleVerification();
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center space-x-3 w-full p-3 rounded-lg text-yellow-400 hover:bg-yellow-900/30 transition-colors duration-150"
+                  >
+                    {/* Add an icon e.g. <FaExclamationTriangle /> */}
+                    <span>Verify Account</span>
+                  </button>
+                )}
+
+                {/* Mobile Logout */}
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center space-x-3 w-full p-3 rounded-lg text-red-400 hover:bg-red-900/30 transition-colors duration-150"
+                >
+                  {/* Add an icon e.g. <FaSignOutAlt /> */}
+                  <span>Logout</span>
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col space-y-3 pt-4 border-t border-secondary">
+              // Mobile Login/Signup Buttons
+              <div className="flex flex-col space-y-3 pt-3 border-t border-gray-700">
                 <ButtonOutline
                   fullWidth
                   onClick={() => {
@@ -701,6 +1003,7 @@ const Navbar: React.FC = () => {
                 </ButtonOutline>
                 <ButtonOutline
                   fullWidth
+                  variant="secondary"
                   onClick={() => {
                     navigate("/signup");
                     setMenuOpen(false);
