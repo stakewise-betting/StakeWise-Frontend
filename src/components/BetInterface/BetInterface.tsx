@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
 import Web3 from "web3";
+import CommentSection from "../CommentSection";
 
 interface OptionOdds {
   optionName: string;
