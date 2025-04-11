@@ -1,6 +1,8 @@
 // config/contractConfig.ts
 
-export const contractAddress = "0x3987177272727E6B6Ae242e646f3A5dA28A2ebdf";
+
+export const contractAddress = "0x17aaBF8aa75ff8ee12E641cA768981AcD81Ac933";
+
 
 export const contractABI = [
   {
@@ -160,7 +162,7 @@ export const contractABI = [
       },
       {
         "internalType": "string",
-        "name": "notificationMessage",
+        "name": "rules",
         "type": "string"
       }
     ],
@@ -171,6 +173,20 @@ export const contractABI = [
   {
     "inputs": [],
     "name": "nextEventId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "totalAdminProfit",
     "outputs": [
       {
         "internalType": "uint256",
@@ -221,7 +237,7 @@ export const contractABI = [
       },
       {
         "internalType": "string",
-        "name": "_notificationMessage",
+        "name": "_rules",
         "type": "string"
       }
     ],
@@ -329,7 +345,7 @@ export const contractABI = [
       },
       {
         "internalType": "string",
-        "name": "notificationMessage",
+        "name": "rules",
         "type": "string"
       }
     ],
@@ -403,6 +419,20 @@ export const contractABI = [
         "internalType": "struct BettingEvents.OptionOdds[]",
         "name": "",
         "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getTotalAdminProfit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

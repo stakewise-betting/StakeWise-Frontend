@@ -1,15 +1,22 @@
-import { useState, type ChangeEvent } from "react"
+import { useState, useContext, type ChangeEvent } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Camera, Check } from "lucide-react"
 import SettingsCard from "./SettingsCard"
+import { AppContext } from "@/context/AppContext"
+import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
+
 
 interface ProfilePictureProps {
   firstName: string
   lastName: string
 }
 
-export default function ProfilePicture({ firstName, lastName }: ProfilePictureProps) {
+export default function ProfilePicture({}: ProfilePictureProps) {
+
+  const { userData } = useContext(AppContext)!;
+
+
   const [avatarSrc, setAvatarSrc] = useState("/placeholder.svg?height=128&width=128")
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -24,17 +31,35 @@ export default function ProfilePicture({ firstName, lastName }: ProfilePicturePr
     <SettingsCard title="Profile Picture" description="Your profile picture will be visible to other users">
       <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
         <div className="relative group">
-          <Avatar className="h-32 w-32 border-2 border-zinc-800">
+        <Avatar className="h-32 w-32 border-2 border-zinc-800">
             <AvatarImage src={avatarSrc} alt="Profile" />
             <AvatarFallback className="bg-zinc-800 text-zinc-100 text-4xl">
-              {firstName.charAt(0)}
-              {lastName.charAt(0)}
+            {userData?.picture ? (
+              <img
+                src={userData.picture}
+                alt="User profile"
+                width={115}
+                height={115}
+                className="bject-cover rounded-full"
+              />
+            ) : userData?.fname ? (
+              userData.fname[0].toUpperCase()
+            ) : userData?.walletAddress ? (
+              <img
+                src={MetamaskLogo}
+                alt="MetaMask Logo"
+                width={115}
+                height={115}
+                className="object-contain rounded-full"
+              />
+            ) : (
+              ""
+            )}
             </AvatarFallback>
           </Avatar>
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
             <label htmlFor="avatar-upload" className="cursor-pointer p-2 rounded-full bg-zinc-800 hover:bg-zinc-700">
               <Camera className="h-6 w-6" />
-              <span className="sr-only">Upload new avatar</span>
             </label>
             <input id="avatar-upload" type="file" className="hidden" accept="image/*" onChange={handleAvatarChange} />
           </div>

@@ -5,10 +5,17 @@ import axios from "axios";
 // Define UserData type
 interface UserData {
   id: string;
-  name: string;
+  fname: string;
+  lname: string;
+  username: string;
   email: string;
   isAccountVerified: boolean;
   walletAddress: string;
+  gender: string;
+  avatarSrc: string;
+  phone: string;
+  birthday: string;
+  country: string;
   picture: string;
 }
 
@@ -28,7 +35,9 @@ interface AppContextProviderProps {
   children: ReactNode;
 }
 
-export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children }) => {
+export const AppContextProvider: React.FC<AppContextProviderProps> = ({
+  children,
+}) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL as string;
   const [isLoggedin, setIsLoggedin] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -36,7 +45,9 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
   const getUserData = async (): Promise<void> => {
     try {
       console.log("Fetching user data..."); // Debugging
-      const { data } = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
+      const { data } = await axios.get(`${backendUrl}/api/user/data`, {
+        withCredentials: true,
+      });
       console.log("User data:", data);
       if (data.success) {
         setUserData(data.userData);
@@ -48,17 +59,19 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       toast.error(error.response?.data?.message || "Failed to fetch user data");
     }
   };
-  
 
   const getAuthState = async (): Promise<void> => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/auth/isAuthenticated`, {
-        withCredentials: true,
-      });
-  
+      const { data } = await axios.get(
+        `${backendUrl}/api/auth/isAuthenticated`,
+        {
+          withCredentials: true,
+        }
+      );
+
       console.log("Auth State:", data); // Debugging log
       setIsLoggedin(data.success);
-  
+
       if (data.success) {
         await getUserData();
       } else {
@@ -66,13 +79,15 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({ children
       }
     } catch (error: any) {
       setIsLoggedin(false);
-      toast.error(error.response?.data?.message || "Failed to check auth state");
+      toast.error(
+        error.response?.data?.message || "Failed to check auth state"
+      );
     }
   };
-  
+
   useEffect(() => {
     getAuthState();
-  }, []); 
+  }, []);
 
   const value: AppContextType = {
     backendUrl,
