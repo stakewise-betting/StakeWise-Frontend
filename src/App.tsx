@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
-import Footer from "./components/Footer/Footer";
+import Footer from "./components/NewFooter/Footer";
 import HomePage from "./pages/HomePage/HomePage";
 import Upcoming from "./pages/Upcoming/Upcoming";
 import Results from "./pages/Results/Results";
@@ -18,8 +18,10 @@ import AdminPanel from "./Admin/AdminPanel";
 import BetDetails from "./pages/BetDetails/BetDetails";
 import DepositPage from "./pages/DepositPage/Deposit";
 import Profile from "./pages/Profile/Profile";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.css"; 
 import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
@@ -45,6 +47,8 @@ function Layout() {
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/results" element={<Results />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-use" element={<TermsOfUse />} />
         <Route path="/contactus" element={<ContactUs />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
