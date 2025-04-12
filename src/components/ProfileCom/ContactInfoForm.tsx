@@ -172,7 +172,7 @@ const EmailSection = ({ userData, handleVerification }: { userData: any, handleV
     </div>
     <div className="flex items-center justify-between">
       <p className="text-sm text-zinc-400">
-        Your account login email
+      You are using this email address to log in
       </p>
       {!userData?.isAccountVerified && (
         <Button
