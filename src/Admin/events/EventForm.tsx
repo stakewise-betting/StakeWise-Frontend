@@ -59,6 +59,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     description: "",
     category: "",
     notificationMessage: "",
+    notificationImageURL: "",
     rules: "",
   });
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string>("");
@@ -98,6 +99,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       category: "",
       notificationMessage: "",
       rules: "",
+      notificationImageURL: "",
     });
     setUploadedImageUrl("");
     setUploadedNotificationImageUrl("");
@@ -162,7 +164,9 @@ export const EventForm: React.FC<EventFormProps> = ({
           options.map((opt) => opt.trim()),
           startTimestamp,
           endTimestamp,
-          rules
+          rules,
+          notificationImageURL,
+          notificationMessage
         )
         .send({ from: accounts[0] });
       alert("Event created on blockchain!");
