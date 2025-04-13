@@ -90,16 +90,16 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
   };
 
   return (
-    <div className="group bg-[#1C1C27] hover:bg-[#2A2A3A] transition-colors duration-300 rounded-none" style={{ borderTop: "1px solid #8488AC" }}>
+    <div className="bg-[#1C1C27] rounded-none" style={{ borderTop: "1px solid #8488AC" }}>
       <CardContent className="p-6">
         <div className="grid gap-6 md:grid-cols-[240px,1fr]">
-          <div className="relative overflow-hidden rounded-lg">
+          <div className="relative">
             <img
               src={image}
               alt={title}
               width={240}
               height={240}
-              className="rounded-lg object-cover w-full h-[240px] transition duration-500 group-hover:scale-105"
+              className="rounded-lg object-cover w-full h-[240px]"
             />
             <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-xs font-medium">
               {formatTimeRemaining()}

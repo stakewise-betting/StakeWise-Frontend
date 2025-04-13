@@ -8,7 +8,6 @@ import DangerZone from "@/components/ProfileCom/DangerZone";
 import { motion } from "framer-motion";
 
 export default function ProfileSettings() {
-
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -25,9 +24,9 @@ export default function ProfileSettings() {
           </div>
 
           <div className="grid gap-8">
-            <ProfilePicture/>
-            <PersonalInfoForm/>
-            <ContactInfoForm/>
+            <ProfilePicture />
+            <PersonalInfoForm />
+            <ContactInfoForm />
             <AccountPreferences />
             <PrivacySettings />
             <PasswordSecurity />
