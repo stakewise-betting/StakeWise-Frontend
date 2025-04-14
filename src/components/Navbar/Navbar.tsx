@@ -123,7 +123,7 @@ const Navbar: React.FC = () => {
 
   // Define NavLinks (could be moved to constants file)
   const navLinks = [
-    { to: "/home", label: "Home", icon: <FaHome /> },
+    { to: "/", label: "Home", icon: <FaHome /> },
     { to: "/upcoming", label: "Upcoming Events", icon: <FaCalendarAlt /> },
     { to: "/results", label: "Results", icon: <FaPoll /> },
     ...(isLoggedin

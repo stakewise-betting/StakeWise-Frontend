@@ -166,7 +166,8 @@ export const EventForm: React.FC<EventFormProps> = ({
           endTimestamp,
           rules,
           notificationImageURL,
-          notificationMessage
+          notificationMessage,
+          category
         )
         .send({ from: accounts[0] });
       alert("Event created on blockchain!");
