@@ -1,5 +1,4 @@
 // components/admin/EventForm.tsx
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageUploader } from "./ImageUploader";
 import axios from "axios";
 // import { contractABI } from "@/config/contractConfig";
+import { useContext, useState} from "react";
+import { AppContext } from "@/context/AppContext";
 
 interface EventFormProps {
   contract: any;
@@ -30,6 +31,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [options, setOptions] = useState<string[]>([""]);
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
+  const { backendUrl } =
+      useContext(AppContext)!;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,7 +111,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           notificationImageURL: notificationImageURL,
         };
         await axios.post(
-          "http://localhost:5000/api/events",
+          `${backendUrl}/api/events`,
           eventDataForMongoDB
         );
         console.log("Event data saved to MongoDB successfully!");

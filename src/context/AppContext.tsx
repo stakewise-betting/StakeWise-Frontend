@@ -19,6 +19,7 @@ interface UserData {
   country: string;
   picture: string;
   language: string;
+  isActive: boolean;
 }
 
 // Define context type
