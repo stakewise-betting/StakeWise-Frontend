@@ -9,6 +9,7 @@ import footer02 from "@/assets/images/footer02.png";
 import footer03 from "@/assets/images/footer03.png";
 import { Link } from "react-router-dom";
 
+
 const Footer = () => {
   return (
     <footer className="text-base my-10">
@@ -115,12 +116,12 @@ const Footer = () => {
         <div className="pb-10 flex sm:flex-row flex-col gap-5 sm:justify-between items-center">
           <p>StakeWise @ 2024. All rights reserved.</p>
           <div className="flex gap-12">
-            <a href="#" className="hover:underline">
+            <Link to="/privacy-policy" onClick={() => window.scrollTo(0, 0)}>
               Privacy Policy
-            </a>
-            <a href="#" className="hover:underline">
+            </Link>
+            <Link to="/terms-of-use" onClick={() => window.scrollTo(0, 0)}>
               Terms of Service
-            </a>
+            </Link>
             <a href="#" className="hover:underline flex gap-2 items-center">
               <TbWorld />
               EN

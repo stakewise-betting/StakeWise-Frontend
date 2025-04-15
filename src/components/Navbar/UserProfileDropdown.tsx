@@ -1,226 +1,208 @@
 // src/components/navbar/UserProfileDropdown.tsx
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+import { User, ChevronDown, Moon, LogOut, Eye, BarChart3 } from "lucide-react"; // Using lucide-react icons
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AppContext } from "@/context/AppContext"; // Adjust path as needed
 import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg"; // Adjust path as needed
 
 const UserProfileDropdown: React.FC = () => {
-  const navigate = useNavigate();
-  const context = useContext(AppContext);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false); // Add real dark mode logic if needed
-  const [picture, setPicture] = useState("");
-  const profileRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+    const context = useContext(AppContext);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false); // Add real dark mode logic if needed
+    const [picture, setPicture] = useState("");
+    const profileRef = useRef<HTMLDivElement>(null);
 
-  if (!context) {
-    console.error("AppContext is null in UserProfileDropdown");
-    return null;
-  }
-  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
-    context;
+    if (!context) {
+        console.error("AppContext is null in UserProfileDropdown");
+        return null;
+    }
+    const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
+        context;
 
-  // Update local picture state when userData changes
-  useEffect(() => {
-    setPicture(userData?.picture || "");
-  }, [userData?.picture]);
+    // Update local picture state when userData changes
+    useEffect(() => {
+        setPicture(userData?.picture || "");
+    }, [userData?.picture]);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                profileRef.current &&
+                !profileRef.current.contains(event.target as Node)
+            ) {
+                setProfileOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    // --- User Actions ---
+    const handleVerification = async () => {
         setProfileOpen(false);
-      }
+        const loadingToast = toast.loading("Sending verification email...");
+        try {
+            const { data } = await axios.post(
+                `${backendUrl}/api/auth/sendVerifyOtp`,
+                {},
+                { withCredentials: true }
+            );
+            toast.dismiss(loadingToast);
+            if (data.success) {
+                toast.success("Verification email sent! Please check your inbox.");
+                navigate("/email-verify");
+            } else {
+                toast.error(data.message || "Failed to send verification email.");
+            }
+        } catch (error: any) {
+            toast.dismiss(loadingToast);
+            console.error("Verification email sending error:", error);
+            toast.error(error.response?.data?.message || "An error occurred.");
+        }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+
+    const handleLogout = async () => {
+        setProfileOpen(false);
+        const loadingToast = toast.loading("Logging out...");
+        try {
+            const { data } = await axios.post(
+                `${backendUrl}/api/auth/logout`,
+                {},
+                { withCredentials: true }
+            );
+            toast.dismiss(loadingToast);
+            if (data.success) {
+                setUserData(null);
+                setIsLoggedin(false);
+                // Wallet and notification state will reset based on isLoggedin changes in their components
+                toast.success("Logged out successfully!");
+                navigate("/");
+            } else {
+                toast.error(data.message || "Logout failed.");
+            }
+        } catch (error: any) {
+            toast.dismiss(loadingToast);
+            console.error("Logout error:", error);
+            toast.error(error.response?.data?.message || "An error occurred.");
+            // Optional: Force logout locally even if API fails
+            // setUserData(null);
+            // setIsLoggedin(false);
+            // navigate("/");
+        }
     };
-  }, []);
 
-  // --- User Actions ---
-  const handleVerification = async () => {
-    setProfileOpen(false);
-    const loadingToast = toast.loading("Sending verification email...");
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/sendVerifyOtp`,
-        {},
-        { withCredentials: true }
-      );
-      toast.dismiss(loadingToast);
-      if (data.success) {
-        toast.success("Verification email sent! Please check your inbox.");
-        navigate("/email-verify");
-      } else {
-        toast.error(data.message || "Failed to send verification email.");
-      }
-    } catch (error: any) {
-      toast.dismiss(loadingToast);
-      console.error("Verification email sending error:", error);
-      toast.error(error.response?.data?.message || "An error occurred.");
+    const toggleDarkMode = () => {
+        setIsDarkMode(!isDarkMode);
+        // Implement your actual dark mode switching logic here
+        // e.g., document.documentElement.classList.toggle('dark');
+        // localStorage.setItem('darkMode', !isDarkMode);
+        console.log("Dark mode toggled (implement actual logic)");
+        setProfileOpen(false);
+    };
+
+    // Render nothing if user not logged in
+    if (!isLoggedin || !userData) {
+        return null;
     }
-  };
 
-  const handleLogout = async () => {
-    setProfileOpen(false);
-    const loadingToast = toast.loading("Logging out...");
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-      toast.dismiss(loadingToast);
-      if (data.success) {
-        setUserData(null);
-        setIsLoggedin(false);
-        // Wallet and notification state will reset based on isLoggedin changes in their components
-        toast.success("Logged out successfully!");
-        navigate("/");
-      } else {
-        toast.error(data.message || "Logout failed.");
-      }
-    } catch (error: any) {
-      toast.dismiss(loadingToast);
-      console.error("Logout error:", error);
-      toast.error(error.response?.data?.message || "An error occurred.");
-      // Optional: Force logout locally even if API fails
-      // setUserData(null);
-      // setIsLoggedin(false);
-      // navigate("/");
-    }
-  };
+    return (
+        <DropdownMenu onOpenChange={setProfileOpen} open={profileOpen}>
+            <DropdownMenuTrigger asChild>
+                <button className="flex items-center space-x-1 rounded-full p-1 hover:bg-gray-700 transition"> {/* Adjusted button style to match My-Nav Bar */}
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold">
+                        {userData?.picture ? (
+                            <img
+                                key={picture}
+                                src={picture}
+                                alt="User profile"
+                                className="w-full h-full object-cover rounded-full"
+                            />
+                        ) : userData?.fname ? (
+                            <div className="w-full h-full rounded-full flex items-center justify-center bg-[#b4b11e] text-[#1a1a2e]">
+                                {userData.fname[0].toUpperCase()}
+                            </div>
+                        ) : userData?.walletAddress ? (
+                            <img
+                                src={MetamaskLogo}
+                                alt="MetaMask Logo"
+                                className="w-3/4 h-3/4 object-contain rounded-full"
+                            />
+                        ) : (
+                            <User className="h-4 w-4" />
+                        )}
+                    </div>
+                    <ChevronDown className={`h-6 w-6 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-[#1C1C27] text-white border-gray-700"> {/* Adjusted dropdown style to match My-Nav Bar */}
+                <DropdownMenuItem
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                        navigate("/profile");
+                        setProfileOpen(false);
+                    }}
+                >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                        navigate("/watchlist");
+                        setProfileOpen(false);
+                    }}
+                >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Watch List
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                        navigate("/dashboard");
+                        setProfileOpen(false);
+                    }}
+                >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Dashboard
+                </DropdownMenuItem>
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Implement your actual dark mode switching logic here
-    // e.g., document.documentElement.classList.toggle('dark');
-    // localStorage.setItem('darkMode', !isDarkMode);
-    console.log("Dark mode toggled (implement actual logic)");
-    setProfileOpen(false);
-  };
+                <DropdownMenuItem
+                    className="flex items-center cursor-pointer"
+                    onClick={() => toggleDarkMode()}
+                >
+                    <Moon className="h-4 w-4 mr-2" />
+                    {isDarkMode ? "Light" : "Dark"} Mode
+                    <div className={`ml-auto w-8 h-4 rounded-full ${isDarkMode ? "bg-orange-500" : "bg-gray-600"} relative`}>
+                        <div
+                            className={`absolute top-0.5 ${isDarkMode ? "right-0.5" : "left-0.5"} w-3 h-3 bg-white rounded-full transition-all`}
+                        ></div>
+                    </div>
+                </DropdownMenuItem>
 
-  // Render nothing if user not logged in
-  if (!isLoggedin || !userData) {
-    return null;
-  }
-
-  return (
-    <div className="relative" ref={profileRef}>
-      <button
-        onClick={() => setProfileOpen(!profileOpen)}
-        aria-label="Toggle User Menu"
-        className="flex items-center space-x-2 group transition duration-200"
-      >
-        <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white font-bold overflow-hidden border-2 border-transparent group-hover:border-accent transition">
-          {
-            picture ? (
-              <img
-                key={picture} // Re-render if picture changes
-                src={picture}
-                alt="User profile"
-                className="w-full h-full object-cover"
-                // Basic error handling: hide broken image icon
-                onError={(e) => (e.currentTarget.style.display = "none")}
-              />
-            ) : null /* Placeholder element needed if image fails/not present */
-          }
-
-          {/* Fallbacks shown if `picture` is falsy OR if the img above failed onError */}
-          {!picture &&
-            (userData.fname ? (
-              <span className="text-lg">{userData.fname[0].toUpperCase()}</span>
-            ) : userData.walletAddress ? (
-              <img
-                src={MetamaskLogo}
-                alt="MetaMask User"
-                className="w-3/4 h-3/4 object-contain p-0.5"
-              />
-            ) : (
-              <FaUserCircle className="w-full h-full text-gray-400" /> // Generic fallback
-            ))}
-        </div>
-      </button>
-
-      {profileOpen && (
-        <div className="absolute right-0 mt-3 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-50">
-          {" "}
-          {/* Ensure high z-index */}
-          <div className="p-3 border-b border-gray-700">
-            <div className="font-semibold text-white truncate">
-              {userData.fname ||
-                (userData.walletAddress ? "Wallet User" : "User")}
-            </div>
-            <div className="text-sm text-gray-400 truncate">
-              {userData.email ||
-                (userData.walletAddress
-                  ? `${userData.walletAddress.slice(
-                      0,
-                      6
-                    )}...${userData.walletAddress.slice(-4)}`
-                  : "No details")}
-            </div>
-          </div>
-          <div className="py-2">
-            <Link
-              to="/profile"
-              onClick={() => {
-                window.scrollTo(0, 0);
-                setProfileOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
-            >
-              {" "}
-              Profile Settings{" "}
-            </Link>
-            <Link
-              to="/watchlist"
-              onClick={() => {
-                window.scrollTo(0, 0);
-                setProfileOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
-            >
-              {" "}
-              My Watchlist{" "}
-            </Link>
-            <button
-              onClick={toggleDarkMode}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors duration-150"
-            >
-              {" "}
-              Toggle {isDarkMode ? "Light" : "Dark"} Mode{" "}
-            </button>
-
-            {!userData.isAccountVerified && (
-              <button
-                onClick={handleVerification}
-                className="block w-full text-left px-4 py-2 text-sm text-yellow-400 hover:bg-yellow-900/30 transition-colors duration-150"
-              >
-                {" "}
-                Verify Account{" "}
-              </button>
-            )}
-
-            <div className="my-1 border-t border-gray-700"></div>
-            <button
-              onClick={handleLogout}
-              className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 transition-colors duration-150"
-            >
-              {" "}
-              Logout{" "}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+                <DropdownMenuSeparator className="bg-[#8488AC]" />
+                <DropdownMenuItem
+                    className="flex items-center cursor-pointer text-red-400"
+                    onClick={handleLogout}
+                >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Log out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
 };
 
 export default UserProfileDropdown;
