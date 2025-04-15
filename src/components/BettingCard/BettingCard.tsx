@@ -36,7 +36,9 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
   const endTime = new Date(Number(event.endTime) * 1000);
   const currentTime = Math.floor(Date.now() / 1000);
 
-  const isEventActive = Number(event.startTime) <= currentTime && Number(event.endTime) > currentTime;
+  const isEventActive =
+    Number(event.startTime) <= currentTime &&
+    Number(event.endTime) > currentTime;
   const isEventExpired = Number(event.endTime) <= currentTime;
 
   const getStatusInfo = () => {
@@ -75,8 +77,12 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
               className="w-12 h-12 rounded-md object-cover"
             />
             <div>
-              <h3 className="font-semibold text-sm leading-tight">{event.name}</h3>
-              <div className={`text-[10px] ${statusInfo.color}`}>{statusInfo.label}</div>
+              <h3 className="font-semibold text-sm leading-tight">
+                {event.name}
+              </h3>
+              <div className={`text-[10px] ${statusInfo.color}`}>
+                {statusInfo.label}
+              </div>
             </div>
           </div>
           <div className="flex gap-2 text-[#8488AC]">
@@ -94,7 +100,10 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
         <ScrollArea className="h-[70px] pr-2 overflow-hidden">
           <div className="space-y-0">
             {event.options.map((option, index) => (
-              <div key={index} className="flex items-center justify-between h-[22px]">
+              <div
+                key={index}
+                className="flex items-center justify-between h-[22px]"
+              >
                 <span className="text-sm text-gray-200">{option}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400 w-8 text-right">
@@ -103,9 +112,11 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
                   <Button
                     variant="secondary"
                     className={`text-[#00BD58] hover:text-white text-[9px] px-1 py-0 h-[14px] rounded
-                      ${isEventExpired
-                        ? "bg-gray-500 hover:bg-gray-600 cursor-not-allowed"
-                        : "bg-[#3b7846] hover:bg-[#00BD58]"}`}
+                      ${
+                        isEventExpired
+                          ? "bg-gray-500 hover:bg-gray-600 cursor-not-allowed"
+                          : "bg-[#3b7846] hover:bg-[#00BD58]"
+                      }`}
                     onClick={() => {
                       if (!isEventExpired) {
                         navigate(`/bet/${event.eventId}`);
@@ -127,7 +138,9 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
               <Clock className="h-3 w-3" />
               <span>{endTime.toLocaleString()}</span>
             </div>
-            <span className="text-xs text-right">{formattedPrizePool()} Vol.</span>
+            <span className="text-xs text-right">
+              {formattedPrizePool()} Vol.
+            </span>
           </div>
         </div>
       </CardContent>

@@ -24,24 +24,24 @@ export default function ProfilePicture() {
   const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const file = e.target.files?.[0];
-  
+
     if (!file) return;
 
     if (!allowedTypes.includes(file.type)) {
       toast.error("Only JPEG, PNG, and WEBP images are allowed");
       return;
     }
-  
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size exceeds 5MB");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("avatar", file);
-  
+
     setIsUploading(true);
-  
+
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/user-update/updateProfilePicture`,
@@ -51,7 +51,7 @@ export default function ProfilePicture() {
           // Remove manual Content-Type header - let browser set it with boundary
         }
       );
-  
+
       if (data?.success) {
         toast.success("Profile picture updated successfully");
         setAvatarSrc(data.avatarUrl);
@@ -67,7 +67,6 @@ export default function ProfilePicture() {
       setIsUploading(false);
     }
   };
-  
 
   // const handleResetAvatar = async () => {
   //   setIsUploading(true);
@@ -101,7 +100,7 @@ export default function ProfilePicture() {
           <Avatar className="h-32 w-32 border-2 border-zinc-800">
             <AvatarImage alt="Profile" src={avatarSrc} />
             <AvatarFallback className="bg-zinc-800 text-zinc-100 text-4xl">
-            {userData?.picture ? (
+              {userData?.picture ? (
                 <img
                   src={userData.picture}
                   alt="Google Profile"
@@ -143,7 +142,9 @@ export default function ProfilePicture() {
         </div>
         <div className="space-y-4 flex-1">
           <div>
-            <h3 className="font-medium text-zinc-100">Profile Picture Guidelines</h3>
+            <h3 className="font-medium text-zinc-100">
+              Profile Picture Guidelines
+            </h3>
             <ul className="mt-2 text-sm text-zinc-400 space-y-1">
               <li className="flex items-center">
                 <Check className="h-4 w-4 mr-2 text-emerald-500" />

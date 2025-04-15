@@ -7,10 +7,10 @@ export const FooterBottom: React.FC = () => {
     <div className="flex justify-between items-center pt-5 max-sm:flex-col max-sm:gap-5 max-sm:items-center max-sm:text-center">
       <p className="text-base">Stakewise @ 2024. All rights reserved.</p>
       <div className="flex gap-5 max-sm:flex-col max-sm:items-center">
-        <Link to="/privacy-policy" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer">
+        <Link to="/privacy-policy" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
         Privacy Policy
         </Link>
-        <Link to="/terms-of-use" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer">
+        <Link to="/terms-of-use" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
         Terms of Use
         </Link>
         
