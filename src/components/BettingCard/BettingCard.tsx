@@ -41,7 +41,7 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
 
   const getStatusInfo = () => {
     if (isEventExpired) return { label: "Expired", color: "text-red-500" };
-    if (isEventActive) return { label: "Active", color: "text-green-500" };
+    if (isEventActive) return { label: "Active", color: "text-green" };
     return { label: "Upcoming", color: "text-yellow-500" };
   };
 
