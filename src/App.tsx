@@ -23,6 +23,8 @@ import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
 import Reward from "./pages/Reward/Reward";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 
 function Layout() {
   const location = useLocation();
@@ -50,6 +52,8 @@ function Layout() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/email-verify" element={<EmailVerify />} />
         <Route path="/reward" element={<Reward />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-use" element={<TermsOfUse />} /> 
       </Routes>
 
       {/* Hide footer on specific routes */}
