@@ -1,4 +1,3 @@
-import * as React from "react";
 import { TermsHeader } from "@/components/Terms/TermsHeader";
 import { TermsSection } from "@/components/Terms/TermsSection";
 import { TermsList } from "@/components/Terms/TermsList";

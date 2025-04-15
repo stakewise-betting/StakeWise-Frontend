@@ -72,13 +72,15 @@ const Home = () => {
       const oddsArray: OptionOdds[] = [];
 
       // Get total bets for this event (implementation depends on your contract)
-      const totalBets = await betContract.methods.getTotalBetsForEvent(eventId).call();
+      const totalBets = await betContract.methods
+        .getTotalBetsForEvent(eventId)
+        .call();
 
       // If no bets yet, return equal odds
       if (parseInt(totalBets) === 0) {
-        return options.map(option => ({
+        return options.map((option) => ({
           optionName: option,
-          oddsPercentage: 100 / options.length
+          oddsPercentage: 100 / options.length,
         }));
       }
 
@@ -86,21 +88,23 @@ const Home = () => {
       for (const option of options) {
         try {
           // Get bets for this option (implementation depends on your contract)
-          const optionBets = await betContract.methods.getBetsForOption(eventId, option).call();
+          const optionBets = await betContract.methods
+            .getBetsForOption(eventId, option)
+            .call();
 
           // Calculate percentage
           const percentage = (parseInt(optionBets) / parseInt(totalBets)) * 100;
 
           oddsArray.push({
             optionName: option,
-            oddsPercentage: percentage
+            oddsPercentage: percentage,
           });
         } catch (error) {
           console.error(`Error calculating odds for ${option}:`, error);
           // Add default value if calculation fails
           oddsArray.push({
             optionName: option,
-            oddsPercentage: 0
+            oddsPercentage: 0,
           });
         }
       }
@@ -134,7 +138,7 @@ const Home = () => {
             endTime: eventData.endTime || "0",
             startTime: eventData.startTime || "0",
             createdAt: eventData.createdAt || "0",
-            prizePool: eventData.prizePool || "0"
+            prizePool: eventData.prizePool || "0",
           };
 
           // Only show events where startTime is in the past or present
@@ -190,13 +194,17 @@ const Home = () => {
       <div className="flex flex-col w-full items-center mt-2">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <p className="text-center text-gray-400">Loading current events...</p>
+            <p className="text-center text-gray-400">
+              Loading current events...
+            </p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 px-5 sm:px-3 md:px-4 lg:px-20 w-full">
               {displayedEvents.length === 0 ? (
-                <p className="text-center col-span-full py-8">No active events found.</p>
+                <p className="text-center col-span-full py-8">
+                  No active events found.
+                </p>
               ) : (
                 displayedEvents.map((event, index) => (
                   <BettingCard
@@ -208,10 +216,10 @@ const Home = () => {
                 ))
               )}
             </div>
-            
+
             {hasMoreEvents && (
               <div className="flex justify-center w-full my-6">
-                <Button 
+                <Button
                   onClick={toggleShowAllEvents}
                   className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-2 rounded-md"
                 >

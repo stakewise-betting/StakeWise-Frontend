@@ -16,13 +16,17 @@ interface AutoSliderProps {
 
 // Default slides if none are provided via props
 const defaultSlides = [
-    { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
-    { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
-    { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
-    { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
+  { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
+  { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
+  { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
+  { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
 ];
 
-const AutoSlider = ({ slides = defaultSlides, interval = 5000, height = 400 }: AutoSliderProps) => {
+const AutoSlider = ({
+  slides = defaultSlides,
+  interval = 5000,
+  height = 400,
+}: AutoSliderProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);

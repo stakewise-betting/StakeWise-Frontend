@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/NewFooter/Footer";
-import HomePage from "./pages/HomePage/HomePage";
 import Upcoming from "./pages/Upcoming/Upcoming";
 import Results from "./pages/Results/Results";
 import Politics from "./pages/Politics/Politics";
@@ -18,14 +17,14 @@ import AdminPanel from "./Admin/AdminPanel";
 import BetDetails from "./pages/BetDetails/BetDetails";
 import DepositPage from "./pages/DepositPage/Deposit";
 import Profile from "./pages/Profile/Profile";
-import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
-import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; 
+import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
 import Reward from "./pages/Reward/Reward";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 
 function Layout() {
   const location = useLocation();
@@ -35,27 +34,26 @@ function Layout() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<HomePage />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route
           path="/bet/:eventId"
           element={<BetDetails onCancel={() => console.log("Bet canceled")} />}
         />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/deposit" element={<DepositPage />} />
         <Route path="/politics" element={<Politics />} />
         <Route path="/sports" element={<Sports />} />
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/results" element={<Results />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-of-use" element={<TermsOfUse />} />
         <Route path="/contactus" element={<ContactUs />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/email-verify" element={<EmailVerify />} />
         <Route path="/reward" element={<Reward />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-use" element={<TermsOfUse />} />
        
       </Routes>
 
