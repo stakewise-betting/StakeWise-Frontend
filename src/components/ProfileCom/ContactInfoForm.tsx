@@ -178,7 +178,9 @@ const EmailSection = ({
       <div className="w-full text-sm px-2 py-1">{userData?.email}</div>
     </div>
     <div className="flex items-center justify-between">
-      <p className="text-sm text-zinc-400">Your account login email</p>
+      <p className="text-sm text-zinc-400">
+      You are using this email address to log in
+      </p>
       {!userData?.isAccountVerified && (
         <Button
           variant="link"
