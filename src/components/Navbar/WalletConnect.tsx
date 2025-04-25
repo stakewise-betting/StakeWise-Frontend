@@ -2,82 +2,50 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWallet } from "react-icons/fa";
-import Web3 from "web3";
 import { toast } from "react-toastify";
-import { ButtonOutline } from "../Buttons/Buttons"; // Adjust path as needed
+import { ButtonOutline } from "../Buttons/Buttons";
+import { useWallet } from "../../context/WalletContext";
 
 interface WalletConnectProps {
   isLoggedin: boolean;
-  // Add userData prop if specific user info is needed for wallet actions later
-  // userData: User | null;
 }
 
 const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
   const navigate = useNavigate();
-  const [walletBalance, setWalletBalance] = useState("0.00");
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [ethPrice, setEthPrice] = useState(0);
+  const { isConnected, walletAddress, connectWallet, web3, isConnecting } = useWallet();
+  const [walletBalance, setWalletBalance] = useState<string>("0.00");
+  const [ethPrice, setEthPrice] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // --- Wallet Connection & Balance ---
+  // Fetch wallet balance when connection state changes
   useEffect(() => {
-    const checkWalletConnection = async () => {
-      if (window.ethereum) {
+    const fetchBalance = async () => {
+      if (isConnected && walletAddress && web3) {
         try {
-          const web3 = new Web3(window.ethereum);
-          const accounts = (await window.ethereum.request({
-            method: "eth_accounts",
-          })) as string[];
-
-          if (accounts && accounts.length > 0) {
-            setWalletConnected(true);
-            const balanceWei = await web3.eth.getBalance(accounts[0]);
-            const balanceEth = web3.utils.fromWei(balanceWei, "ether");
-            setWalletBalance(parseFloat(balanceEth).toFixed(4));
-          } else {
-            setWalletConnected(false);
-            setWalletBalance("0.00");
-          }
+          const balanceWei = await web3.eth.getBalance(walletAddress);
+          const balanceEth = web3.utils.fromWei(balanceWei, "ether");
+          setWalletBalance(parseFloat(balanceEth).toFixed(4));
         } catch (error) {
-          console.error("Error checking wallet connection:", error);
-          setWalletConnected(false);
+          console.error("Error fetching wallet balance:", error);
           setWalletBalance("0.00");
         }
       } else {
-        setWalletConnected(false);
         setWalletBalance("0.00");
       }
     };
 
-    // Only check/listen if user is logged in (or adjust logic if needed otherwise)
     if (isLoggedin) {
-      checkWalletConnection();
-
-      const handleAccountsChanged = (accounts: string[]) => {
-        console.log("Wallet accounts changed:", accounts);
-        checkWalletConnection(); // Re-check connection and balance
-      };
-
-      if (window.ethereum) {
-        window.ethereum.on("accountsChanged", handleAccountsChanged);
-      }
-
-      // Cleanup listener
-      return () => {
-        if (window.ethereum?.removeListener) {
-          window.ethereum.removeListener(
-            "accountsChanged",
-            handleAccountsChanged
-          );
-        }
-      };
+      fetchBalance();
+      
+      // Set up interval to update balance periodically
+      const balanceInterval = setInterval(fetchBalance, 30000); // Every 30 seconds
+      return () => clearInterval(balanceInterval);
     } else {
-      // Reset state if user logs out
-      setWalletConnected(false);
       setWalletBalance("0.00");
     }
-  }, [isLoggedin]); // Rerun check if login status changes
+  }, [isConnected, walletAddress, web3, isLoggedin]);
 
-  // --- Fetch ETH Price ---
+  // Fetch ETH Price
   useEffect(() => {
     const fetchEthPrice = async () => {
       try {
@@ -98,38 +66,41 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
       }
     };
 
-    // Only fetch price if wallet might be connected (or always if needed)
     if (isLoggedin) {
-      fetchEthPrice(); // Initial fetch
-      const priceInterval = setInterval(fetchEthPrice, 60000); // Refresh every minute
-      return () => clearInterval(priceInterval); // Cleanup interval
+      fetchEthPrice();
+      const priceInterval = setInterval(fetchEthPrice, 60000);
+      return () => clearInterval(priceInterval);
     } else {
-      setEthPrice(0); // Reset price if logged out
+      setEthPrice(0);
     }
-  }, [isLoggedin]); // Rerun if login status changes
+  }, [isLoggedin]);
 
   // Calculate USD value
   const usdValue = (parseFloat(walletBalance) * ethPrice).toFixed(2);
 
-  // --- Connect Wallet Function ---
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        // Balance and connection state will update via the 'accountsChanged' listener effect
-        toast.success("Wallet connected successfully!");
-      } catch (error: any) {
-        console.error("Error connecting to wallet:", error);
-        if (error.code === 4001) {
-          toast.info("Wallet connection request rejected.");
-        } else {
-          toast.error("Failed to connect wallet. See console for details.");
-        }
+  // Handle wallet connection with toast notifications
+  const handleConnectWallet = async () => {
+    if (isConnecting || isLoading) {
+      toast.info("Connection already in progress. Please check MetaMask popup.");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      await connectWallet();
+      toast.success("Wallet connected successfully!");
+    } catch (error: any) {
+      console.error("Error connecting to wallet:", error);
+      if (error.code === 4001) {
+        toast.info("Wallet connection request rejected.");
+      } else if (error.code === -32002) {
+        toast.info("Connection request already pending. Please check MetaMask.");
+      } else {
+        toast.error(error.message || "Failed to connect wallet. See console for details.");
       }
-    } else {
-      toast.error(
-        "MetaMask is not installed. Please install it to connect your wallet."
-      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,13 +110,19 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
   }
 
   // Render connect button or wallet info
-  return walletConnected ? (
+  return isConnected ? (
     <div className="flex items-center space-x-3 bg-black/20 px-3 py-1.5 rounded-lg">
       <FaWallet className="text-green-400 text-lg" />
       <div className="flex flex-col items-start leading-tight">
         <span className="text-xs text-gray-400">Cash</span>
         <span className="font-semibold text-green-400 text-sm">
           ${usdValue}
+        </span>
+      </div>
+      <div className="text-xs text-gray-400 flex flex-col items-end">
+        <span>{walletBalance} ETH</span>
+        <span className="truncate max-w-[80px]">
+          {walletAddress ? `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : ''}
         </span>
       </div>
       <ButtonOutline
@@ -157,8 +134,12 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
       </ButtonOutline>
     </div>
   ) : (
-    <ButtonOutline onClick={connectWallet} small>
-      Connect Wallet
+    <ButtonOutline 
+      onClick={handleConnectWallet} 
+      small
+      disabled={isConnecting || isLoading}
+    >
+      {isConnecting || isLoading ? "Connecting..." : "Connect Wallet"}
     </ButtonOutline>
   );
 };
