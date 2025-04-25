@@ -1,4 +1,3 @@
-// src/components/navbar/WalletConnect.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWallet } from "react-icons/fa";
