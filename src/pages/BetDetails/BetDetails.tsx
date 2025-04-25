@@ -43,7 +43,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { eventId } = useParams<{ eventId: string }>();
+  const { eventId } = useParams<{ eventId: string }>(); // for comment section
 
   // Access AppContext and get currentUserId
   const appContext = useContext(AppContext);
