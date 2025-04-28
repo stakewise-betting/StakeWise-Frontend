@@ -25,6 +25,7 @@ import EmailVerify from "./pages/userAuth/EmailVerify";
 import Reward from "./pages/Reward/Reward";
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
+import WatchList from "./pages/WatchList/WatchList";
 import SelfAssessmentPage from "./pages/SelfAssessment/SelfAssessmentPage";
 
 function Layout() {
@@ -55,6 +56,7 @@ function Layout() {
         <Route path="/reward" element={<Reward />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-use" element={<TermsOfUse />} /> 
+        <Route path="/watchlist" element={<WatchList />} />
         <Route path="/self-assessment" element={<SelfAssessmentPage />} /> 
       </Routes>
 

@@ -18,7 +18,7 @@ const CategoryTag: React.FC<CategoryTagProps> = ({
       className={cn(
         "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors",
         isActive 
-          ? "bg-theme-orange text-white" 
+          ? "bg-theme-orange text-[#ffffff]" 
           : "bg-[#333447] text-white/80 hover:bg-gray-700"
       )}
     >

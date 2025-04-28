@@ -18,32 +18,32 @@ export const FooterHeader: React.FC = () => {
       <nav className="flex gap-24 max-md:gap-12 max-sm:flex-col max-sm:gap-8">
         <div className="flex flex-col gap-4">
           <h2 className="mb-2.5 text-base font-bold">Market</h2>
-          <a href="#" className="text-base text-white cursor-pointer">
+          <Link to="/politics" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             Politics
-          </a>
-          <a href="#" className="text-base text-white cursor-pointer">
+          </Link>
+          <Link to="/sports" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             Sports
-          </a>
-          <a href="#" className="text-base text-white cursor-pointer">
+          </Link>
+          <Link to="/upcoming" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             Upcoming Events
-          </a>
-          <a href="#" className="text-base text-white cursor-pointer">
+          </Link>
+          <Link to="/" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             All
-          </a>
+          </Link>
         </div>
         <div className="flex flex-col gap-4">
           <h2 className="mb-2.5 text-base font-bold">Resources</h2>
           <Link
             to="/contactus"
             onClick={() => window.scrollTo(0, 0)}
-            className="text-base text-white cursor-pointer"
+            className="text-base text-white cursor-pointer hover:underline"
           >
             Contact Us
           </Link>
           <Link
             to="/results"
             onClick={() => window.scrollTo(0, 0)}
-            className="text-base text-white cursor-pointer"
+            className="text-base text-white cursor-pointer hover:underline"
           >
             Results
           </Link>
