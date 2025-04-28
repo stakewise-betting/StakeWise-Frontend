@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
-import CountdownTimer from "@/components/CountdownTimer"; // Import the new component
+import CountdownTimer from "@/components/CountdownTimer";
+import DepositLimitTracker from "@/components/DepositLimitTracker"; // Import our new component
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import CommentSection from "@/components/CommentSection";
-import { AppContext } from "@/context/AppContext"; // Adjust path to your AppContext
+import { AppContext } from "@/context/AppContext";
+import responsibleGamblingService from "@/services/responsibleGamblingApiService";
 
 interface OptionOdds {
   optionName: string;
@@ -17,7 +19,7 @@ interface EventData {
   eventId: number;
   name: string;
   description: string;
-  rules: string; // <-- Add this missing property
+  rules: string;
   imageURL: string;
   options: string[];
   startTime: number;
@@ -44,18 +46,15 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
+  const [limitExceeded, setLimitExceeded] = useState<boolean>(false);
+  const [limitExceededMessage, setLimitExceededMessage] = useState<string>("");
 
   // Access AppContext and get currentUserId
   const appContext = useContext(AppContext);
   const currentUserId = appContext?.userData?.id || undefined;
-  console.log(appContext); // Get userId from AppContext, default to undefined if not available
-  console.log(currentUserId); // Debugging
 
   useEffect(() => {
-    console.log("BetDetails.tsx useEffect - eventIdParam:", eventIdParam);
-
     const init = async () => {
-      console.log("BetDetails.tsx init - eventIdParam:", eventIdParam);
       if ((window as any).ethereum) {
         try {
           const web3Instance = new Web3((window as any).ethereum);
@@ -71,6 +70,9 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           setError("Failed to initialize Web3. Please check console.");
           setLoading(false);
         }
+      } else {
+        setError("Ethereum wallet not detected. Please install MetaMask.");
+        setLoading(false);
       }
     };
     init();
@@ -80,7 +82,6 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
     betContract: any,
     eventIdParam: string | undefined
   ) => {
-    console.log("BetDetails.tsx loadEventData - eventIdParam:", eventIdParam);
     try {
       if (!eventIdParam) {
         console.error("Event ID is missing (inside loadEventData).");
@@ -90,8 +91,6 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       }
       const event = await betContract.methods.getEvent(eventIdParam).call();
       const odds = await betContract.methods.getEventOdds(eventIdParam).call();
-      console.log("loadEventData - event fetched from contract:", event);
-      console.log("loadEventData - odds fetched from contract:", odds);
       setEventData(event);
       setEventOdds(odds);
       setLoading(false);
@@ -105,8 +104,19 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
     }
   };
 
+  const handleLimitExceeded = (isExceeded: boolean, message?: string) => {
+    setLimitExceeded(isExceeded);
+    setLimitExceededMessage(message || "");
+  };
+
   const handleBet = async () => {
     if (!web3 || !contract || !eventData || !selectedOption || !amount) return;
+
+    // Don't proceed if limit is exceeded
+    if (limitExceeded) {
+      alert("Cannot place bet - would exceed your deposit limits.");
+      return;
+    }
 
     try {
       const accounts = await web3.eth.getAccounts();
@@ -114,8 +124,12 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         from: accounts[0],
         value: web3.utils.toWei(amount, "ether"),
       });
+      // Record the bet in your database for deposit limit tracking
+      await responsibleGamblingService.recordBet(parseFloat(amount));
       alert("Bet placed successfully!");
       await loadEventData(contract, eventIdParam);
+      // Reset amount after successful bet
+      setAmount("");
     } catch (betError: any) {
       console.error("Failed to place bet:", betError);
       setError("Bet placement failed. Please check console for details.");
@@ -166,7 +180,6 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         {`< Back to Events`}
       </button>
 
-      {/* Add countdown timer after the back button */}
       <div className="max-w-7xl mx-auto mb-6">
         <CountdownTimer endTime={Number(eventData.endTime)} />
       </div>
@@ -179,16 +192,23 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           setSelectedOption={setSelectedOption}
           web3={web3}
         />
-        <BetSlip
-          eventData={eventData}
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
-          amount={amount}
-          setAmount={setAmount}
-          onBet={handleBet}
-          onCancel={onCancel}
-        />
-        {/* Pass currentUserId from AppContext to CommentSection */}
+        <div className="space-y-6">
+          <BetSlip
+            eventData={eventData}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            amount={amount}
+            setAmount={setAmount}
+            onBet={handleBet}
+            onCancel={onCancel}
+            disableBet={limitExceeded}
+            limitExceededMessage={limitExceededMessage}
+          />
+          <DepositLimitTracker
+            amount={amount}
+            onLimitExceeded={handleLimitExceeded}
+          />
+        </div>
         <CommentSection betId={eventId || ""} currentUserId={currentUserId} />
       </div>
     </div>

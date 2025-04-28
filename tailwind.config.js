@@ -26,7 +26,6 @@ module.exports = {
         
         // UI element colors
         card: "#333447", // card background for dark mode
-        green: "#00BD58", // Green for success actions
         orange: {
           500: "#E27625", // Orange for button actions (default shade)
           600: "#d46222", // Orange for button actions (hover shade)
