@@ -133,8 +133,8 @@ const Navbar: React.FC = () => {
 
   const navItems: NavItem[] = [
     {
-      name: "HOME",
-      href: "/home",
+      name: "POLITICS",
+      href: "/polictics",
       icon: <Building2 className="h-4 w-4 mr-2" />,
       breakpoint: "always",
     },
@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
         </Link>
       </div>
 
-      <div className="hidden md:flex items-center space-x-8 ml-10 text-[13px] font-bold">
+      <div className="hidden md:flex items-center space-x-8 mt-2 ml-10 text-[13px] font-bold">
         {navItems.map((item) => (
           <NavLink
             key={item.name}

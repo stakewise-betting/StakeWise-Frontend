@@ -1,7 +1,6 @@
 import { FlameIcon, SearchIcon } from 'lucide-react'
-
 const categories = [
-  'New',
+  'Crypto',
   'La Liga',
   'Trump Presidency',
   'Breaking News',
@@ -21,7 +20,7 @@ export const FilterBar = () => {
         <div className="flex gap-[10px] items-center">
           <button className="text-sm flex items-center gap-2 bg-[#E27625] text-white px-4 py-2 rounded-lg transition-colors hover:border border-[#9747FF]">
             <FlameIcon size={15} />
-            <span>Top</span>
+            <span>New</span>
           </button>
           <div className="relative flex-1 md:w-64">
             <SearchIcon
@@ -30,7 +29,7 @@ export const FilterBar = () => {
             />
             <input
               type="text"
-              placeholder="Search by market"
+              placeholder="Search Here"
               className="text-sm w-full pl-10 pr-4 py-2 bg-[#1C1C27] text-white rounded-lg border border-[#8488AC] placeholder-[#8488AC] focus:outline-none focus:ring-2 focus:ring-[#F15A2B]"
             />
           </div>
