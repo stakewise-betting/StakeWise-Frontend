@@ -16,8 +16,7 @@ import { useContext, useState, useEffect } from "react";
 import { AppContext } from "@/context/AppContext";
 
 const PersonalInfoForm = () => {
-  const { userData, backendUrl, setIsLoggedin, getUserData } =
-    useContext(AppContext)!;
+  const { userData, backendUrl } = useContext(AppContext)!;
   const [fname, setFname] = useState(userData?.fname || "");
   const [lname, setLname] = useState(userData?.lname || "");
   const [username, setUsername] = useState(userData?.username || "");
@@ -27,12 +26,12 @@ const PersonalInfoForm = () => {
   // Extract day, month, and year from `birthday`
   const getDateParts = (dateString: string) => {
     if (!dateString) return { day: "", month: "", year: "" };
-  
+
     const [year, month, day] = dateString.split("-");
-    return { 
-      day: day ? parseInt(day, 10).toString() : "", 
-      month: month ? parseInt(month, 10).toString() : "", 
-      year: year || "" 
+    return {
+      day: day ? parseInt(day, 10).toString() : "",
+      month: month ? parseInt(month, 10).toString() : "",
+      year: year || "",
     };
   };
 
@@ -81,8 +80,6 @@ const PersonalInfoForm = () => {
       const responses = await Promise.all(requests); // call all API requests
 
       if (responses.every((res) => res.data.success)) {
-        setIsLoggedin(true);
-        getUserData();
         toast.success("Profile updated successfully");
       } else {
         toast.error("Some updates failed. Please try again.");
