@@ -156,6 +156,12 @@ const Navbar: React.FC = () => {
       icon: <BarChart3 className="h-4 w-4 mr-2" />,
       breakpoint: "xl",
     },
+    {
+      name: "NEWS",
+      href: "/news",
+      icon: <BarChart3 className="h-4 w-4 mr-2" />,
+      breakpoint: "xl",
+    },
     ...(isLoggedin
       ? [
           {
