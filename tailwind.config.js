@@ -14,7 +14,7 @@ module.exports = {
 		  LFprimary: "#000000", // Dark mode primary font color
 		  LFsecondary: "#5F5F5F", // Dark mode secondary font color
 		  card: "#333447", // card background for dark mode
-		  green: "#00BD58", // Green for success actions
+		  //green: "#00BD58", // Green for success actions
 		  orange500: "#E27625", // Orange for button actions (default shade)
 		  orange600: "#d46222" // Orange for button actions (hover shade)
 		  

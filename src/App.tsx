@@ -23,6 +23,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
+import AdminPanelnew from "@/Admin/components/AdminPanel";
 
 function Layout() {
   const location = useLocation();
@@ -50,6 +51,7 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/email-verify" element={<EmailVerify />} />
+        <Route path="/adminpanelnew" element={<AdminPanelnew />} />
       </Routes>
 
       {/* Hide footer on specific routes */}
