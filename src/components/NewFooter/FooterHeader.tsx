@@ -34,18 +34,23 @@ export const FooterHeader: React.FC = () => {
         <div className="flex flex-col gap-4">
           <h2 className="mb-2.5 text-base font-bold">Resources</h2>
           <Link
-            to="/contactus"
-            onClick={() => window.scrollTo(0, 0)}
-            className="text-base text-white cursor-pointer hover:underline"
-          >
-            Contact Us
+            to="/reward" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
+            Rewards
           </Link>
-          <Link
-            to="/results"
-            onClick={() => window.scrollTo(0, 0)}
-            className="text-base text-white cursor-pointer hover:underline"
-          >
+          <Link to="/results" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             Results
+          </Link>
+          <Link to="/news" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
+            News
+          </Link>
+        </div>
+        <div className="flex flex-col gap-4">
+          <h2 className="mb-2.5 text-base font-bold">Company</h2>
+          <Link to="/#" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
+            About STAKEWISE
+          </Link>
+          <Link to="/contactus" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
+            Contact Us
           </Link>
         </div>
         <div className="flex flex-col gap-4">
