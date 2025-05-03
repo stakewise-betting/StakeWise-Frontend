@@ -1,6 +1,8 @@
 // config/contractConfig.ts
 
-export const contractAddress = "0x1fd888F3132CF45b3ddf8DfB98B5C03e59aE442f";
+
+export const contractAddress = "0x683DB408fda4a9B68c1945b4818c6Ce93005d0FD";
+
 
 export const contractABI = [
   {
@@ -111,6 +113,26 @@ export const contractABI = [
         "type": "uint256"
       }
     ],
+    "name": "eventIds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "name": "events",
     "outputs": [
       {
@@ -160,6 +182,16 @@ export const contractABI = [
       },
       {
         "internalType": "string",
+        "name": "rules",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "notificationImageURL",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
         "name": "notificationMessage",
         "type": "string"
       }
@@ -176,6 +208,69 @@ export const contractABI = [
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "totalAdminProfit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_eventId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserBet",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getAllEventIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
       }
     ],
     "stateMutability": "view",
@@ -218,6 +313,16 @@ export const contractABI = [
         "internalType": "uint256",
         "name": "_endTime",
         "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_rules",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_notificationImageURL",
+        "type": "string"
       },
       {
         "internalType": "string",
@@ -278,59 +383,76 @@ export const contractABI = [
     "name": "getEvent",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "eventId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "imageURL",
-        "type": "string"
-      },
-      {
-        "internalType": "string[]",
-        "name": "options",
-        "type": "string[]"
-      },
-      {
-        "internalType": "uint256",
-        "name": "startTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "endTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "isCompleted",
-        "type": "bool"
-      },
-      {
-        "internalType": "string",
-        "name": "winningOption",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "prizePool",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "notificationMessage",
-        "type": "string"
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "eventId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "imageURL",
+            "type": "string"
+          },
+          {
+            "internalType": "string[]",
+            "name": "options",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCompleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "string",
+            "name": "winningOption",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prizePool",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "rules",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "notificationImageURL",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "notificationMessage",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct BettingEvents.BetEventView",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -403,6 +525,20 @@ export const contractABI = [
         "internalType": "struct BettingEvents.OptionOdds[]",
         "name": "",
         "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "getTotalAdminProfit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

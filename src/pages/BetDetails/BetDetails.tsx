@@ -1,9 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
+import CountdownTimer from "@/components/CountdownTimer";
+import DepositLimitTracker from "@/components/DepositLimitTracker"; // Import our new component
 import { contractABI, contractAddress } from "@/config/contractConfig";
+import CommentSection from "@/components/CommentSection";
+import { AppContext } from "@/context/AppContext";
+import responsibleGamblingService from "@/services/responsibleGamblingApiService";
 
 interface OptionOdds {
   optionName: string;
@@ -14,6 +19,7 @@ interface EventData {
   eventId: number;
   name: string;
   description: string;
+  rules: string;
   imageURL: string;
   options: string[];
   startTime: number;
@@ -34,17 +40,21 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any>(null);
   const [eventData, setEventData] = useState<EventData | null>(null);
-  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null); // State for event odds - ADDED
+  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { eventId } = useParams<{ eventId: string }>();
+  const [limitExceeded, setLimitExceeded] = useState<boolean>(false);
+  const [limitExceededMessage, setLimitExceededMessage] = useState<string>("");
+
+  // Access AppContext and get currentUserId
+  const appContext = useContext(AppContext);
+  const currentUserId = appContext?.userData?.id || undefined;
 
   useEffect(() => {
-    console.log("BetDetails.tsx useEffect - eventIdParam:", eventIdParam);
-
     const init = async () => {
-      console.log("BetDetails.tsx init - eventIdParam:", eventIdParam);
       if ((window as any).ethereum) {
         try {
           const web3Instance = new Web3((window as any).ethereum);
@@ -60,6 +70,9 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           setError("Failed to initialize Web3. Please check console.");
           setLoading(false);
         }
+      } else {
+        setError("Ethereum wallet not detected. Please install MetaMask.");
+        setLoading(false);
       }
     };
     init();
@@ -69,7 +82,6 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
     betContract: any,
     eventIdParam: string | undefined
   ) => {
-    console.log("BetDetails.tsx loadEventData - eventIdParam:", eventIdParam);
     try {
       if (!eventIdParam) {
         console.error("Event ID is missing (inside loadEventData).");
@@ -78,11 +90,9 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         return;
       }
       const event = await betContract.methods.getEvent(eventIdParam).call();
-      const odds = await betContract.methods.getEventOdds(eventIdParam).call(); // Fetch event odds - ADDED
-      console.log("loadEventData - event fetched from contract:", event);
-      console.log("loadEventData - odds fetched from contract:", odds); // Log fetched odds - ADDED
+      const odds = await betContract.methods.getEventOdds(eventIdParam).call();
       setEventData(event);
-      setEventOdds(odds); // Set event odds state - ADDED
+      setEventOdds(odds);
       setLoading(false);
     } catch (error: any) {
       console.error("Failed to load event data:", error);
@@ -94,8 +104,19 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
     }
   };
 
+  const handleLimitExceeded = (isExceeded: boolean, message?: string) => {
+    setLimitExceeded(isExceeded);
+    setLimitExceededMessage(message || "");
+  };
+
   const handleBet = async () => {
     if (!web3 || !contract || !eventData || !selectedOption || !amount) return;
+
+    // Don't proceed if limit is exceeded
+    if (limitExceeded) {
+      alert("Cannot place bet - would exceed your deposit limits.");
+      return;
+    }
 
     try {
       const accounts = await web3.eth.getAccounts();
@@ -103,8 +124,12 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
         from: accounts[0],
         value: web3.utils.toWei(amount, "ether"),
       });
+      // Record the bet in your database for deposit limit tracking
+      await responsibleGamblingService.recordBet(parseFloat(amount));
       alert("Bet placed successfully!");
-      await loadEventData(contract, eventIdParam); // Refetch event data and odds after bet - ADDED odds refetch
+      await loadEventData(contract, eventIdParam);
+      // Reset amount after successful bet
+      setAmount("");
     } catch (betError: any) {
       console.error("Failed to place bet:", betError);
       setError("Bet placement failed. Please check console for details.");
@@ -154,23 +179,37 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       >
         {`< Back to Events`}
       </button>
+
+      <div className="max-w-7xl mx-auto mb-6">
+        <CountdownTimer endTime={Number(eventData.endTime)} />
+      </div>
+
       <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
         <BetInterface
           eventData={eventData}
-          eventOdds={eventOdds} // Pass eventOdds to BetInterface - ADDED
+          eventOdds={eventOdds}
           selectedOption={selectedOption}
           setSelectedOption={setSelectedOption}
           web3={web3}
         />
-        <BetSlip
-          eventData={eventData}
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
-          amount={amount}
-          setAmount={setAmount}
-          onBet={handleBet}
-          onCancel={onCancel}
-        />
+        <div className="space-y-6">
+          <BetSlip
+            eventData={eventData}
+            selectedOption={selectedOption}
+            setSelectedOption={setSelectedOption}
+            amount={amount}
+            setAmount={setAmount}
+            onBet={handleBet}
+            onCancel={onCancel}
+            disableBet={limitExceeded}
+            limitExceededMessage={limitExceededMessage}
+          />
+          <DepositLimitTracker
+            amount={amount}
+            onLimitExceeded={handleLimitExceeded}
+          />
+        </div>
+        <CommentSection betId={eventId || ""} currentUserId={currentUserId} />
       </div>
     </div>
   );

@@ -1,17 +1,20 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 interface BetSlipProps {
   eventData: {
-    options: string[]
-  }
-  selectedOption: string
-  setSelectedOption: (option: string) => void
-  amount: string
-  setAmount: (amount: string) => void
-  onBet: () => Promise<void>
-  onCancel: () => void
+    options: string[];
+  };
+  selectedOption: string;
+  setSelectedOption: (option: string) => void;
+  amount: string;
+  setAmount: (amount: string) => void;
+  onBet: () => Promise<void>;
+  onCancel: () => void;
+  disableBet?: boolean; // Add this prop to handle deposit limit restrictions
+  limitExceededMessage?: string; // Optional message explaining why bet is disabled
 }
 
 export default function BetSlip({
@@ -21,9 +24,12 @@ export default function BetSlip({
   amount,
   setAmount,
   onBet,
-  onCancel
+  onCancel,
+  disableBet = false,
+  limitExceededMessage,
 }: BetSlipProps) {
-  const isValidAmount = Number(amount) >= 5.0
+  const isValidAmount = Number(amount) >= 5.0;
+  const isBetDisabled = !isValidAmount || disableBet;
 
   return (
     <div className="bg-[#1C1C27] rounded-lg p-6 h-fit border border-[#8488AC]">
@@ -32,10 +38,7 @@ export default function BetSlip({
       <div className="space-y-6">
         <div>
           <label className="block text-sm text-slate-400 mb-2">Options</label>
-          <Select
-            value={selectedOption}
-            onValueChange={setSelectedOption}
-          >
+          <Select value={selectedOption} onValueChange={setSelectedOption}>
             <SelectTrigger>
               <SelectValue>{selectedOption || "Select an option"}</SelectValue>
             </SelectTrigger>
@@ -63,10 +66,19 @@ export default function BetSlip({
           />
         </div>
 
+        {disableBet && amount && Number(amount) > 0 && (
+          <div className="flex items-start gap-2 p-3 bg-red-900/30 border border-red-800/50 rounded-md">
+            <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-300">
+              {limitExceededMessage || "This bet would exceed your deposit limits."}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Button
             className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-[#333447]"
-            disabled={!isValidAmount}
+            disabled={isBetDisabled}
             onClick={onBet}
           >
             Bet Now
@@ -86,5 +98,5 @@ export default function BetSlip({
         </p>
       </div>
     </div>
-  )
+  );
 }

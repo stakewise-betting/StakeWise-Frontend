@@ -5,8 +5,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
-import Footer from "./components/Footer/Footer";
-import HomePage from "./pages/HomePage/HomePage";
+import Footer from "./components/NewFooter/Footer";
 import Upcoming from "./pages/Upcoming/Upcoming";
 import Results from "./pages/Results/Results";
 import Politics from "./pages/Politics/Politics";
@@ -23,7 +22,12 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/userAuth/Login";
 import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
-import AdminPanelnew from "@/Admin/components/AdminPanel";
+import News from "./pages/News/News";
+import Reward from "./pages/Reward/Reward";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
+import WatchList from "./pages/WatchList/WatchList";
+import SelfAssessmentPage from "./pages/SelfAssessment/SelfAssessmentPage";
 
 function Layout() {
   const location = useLocation();
@@ -33,13 +37,12 @@ function Layout() {
     <>
       <Navbar />
       <Routes>
-        <Route path="/" element={<HomePage />} />
         <Route path="/admin" element={<AdminPanel />} />
         <Route
           path="/bet/:eventId"
           element={<BetDetails onCancel={() => console.log("Bet canceled")} />}
         />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/deposit" element={<DepositPage />} />
         <Route path="/politics" element={<Politics />} />
         <Route path="/sports" element={<Sports />} />
@@ -51,7 +54,12 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/email-verify" element={<EmailVerify />} />
-        <Route path="/adminpanelnew" element={<AdminPanelnew />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/reward" element={<Reward />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-use" element={<TermsOfUse />} />
+        <Route path="/watchlist" element={<WatchList />} />
+        <Route path="/self-assessment" element={<SelfAssessmentPage />} />
       </Routes>
 
       {/* Hide footer on specific routes */}

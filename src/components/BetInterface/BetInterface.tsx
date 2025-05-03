@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
 import Web3 from "web3";
+import CommentSection from "../CommentSection";
 
 interface OptionOdds {
   optionName: string;
@@ -13,6 +14,7 @@ interface BetInterfaceProps {
     eventId: number;
     name: string;
     description: string;
+    rules: string; // Added rules field
     imageURL: string;
     options: string[];
     startTime: number;
@@ -22,7 +24,7 @@ interface BetInterfaceProps {
     prizePool: string;
     notificationMessage: string;
   };
-  eventOdds: OptionOdds[] | null; // Receive eventOdds as prop - ADDED
+  eventOdds: OptionOdds[] | null;
   selectedOption: string;
   setSelectedOption: (option: string) => void;
   web3: Web3 | null;
@@ -30,12 +32,16 @@ interface BetInterfaceProps {
 
 export default function BetInterface({
   eventData,
-  eventOdds, // Destructure eventOdds from props - ADDED
+  eventOdds,
   selectedOption,
   setSelectedOption,
   web3,
 }: BetInterfaceProps) {
   const [showMore, setShowMore] = useState(false);
+  const [activeTab, setActiveTab] = useState<"description" | "rules">(
+    "description"
+  );
+
   const displayedOptions = showMore
     ? eventData.options
     : eventData.options.slice(0, 3);
@@ -54,7 +60,6 @@ export default function BetInterface({
     }
   };
 
-  // Helper function to get odds for an option - ADDED
   const getOddsForOption = (optionName: string) => {
     if (!eventOdds) return "0%";
     const optionOdd = eventOdds.find((odd) => odd.optionName === optionName);
@@ -75,6 +80,9 @@ export default function BetInterface({
             />
             <div>
               <h1 className="text-2xl font-bold">{eventData.name}</h1>
+              <p className="mt-1 text-sm text-gray-400">
+                {eventData.description}
+              </p>
             </div>
           </div>
 
@@ -106,8 +114,7 @@ export default function BetInterface({
             <div className="flex justify-between px-4 text-sm text-gray-400">
               <span>OUTCOME</span>
               <span>OPTION</span>
-              <span className="text-right">ODDS</span>{" "}
-              {/* Added ODDS header - ADDED */}
+              <span className="text-right">ODDS</span>
             </div>
 
             {displayedOptions.map((option, index) => (
@@ -132,8 +139,7 @@ export default function BetInterface({
                 </div>
                 <div className="text-right w-16">
                   {getOddsForOption(option)}
-                </div>{" "}
-                {/* Display odds here - ADDED */}
+                </div>
               </div>
             ))}
           </div>
@@ -153,9 +159,47 @@ export default function BetInterface({
       </div>
 
       <div className="mt-6 bg-[#1C1C27] rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Rules</h2>
+        <div className="flex border-b border-gray-700 mb-4">
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "rules"
+                ? "text-[#00BD58] border-b-2 border-[#00BD58]"
+                : "text-gray-400"
+            }`}
+            onClick={() => setActiveTab("rules")}
+          >
+            Rules
+          </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "description"
+                ? "text-[#00BD58] border-b-2 border-[#00BD58]"
+                : "text-gray-400"
+            }`}
+            onClick={() => setActiveTab("description")}
+          >
+            Details
+          </button>
+        </div>
+
         <div className="space-y-4 text-slate-400">
-          <p>{eventData.description}</p>
+          {activeTab === "rules" && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Event Rules
+              </h2>
+              <p>{eventData.rules}</p>
+            </div>
+          )}
+
+          {activeTab === "description" && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4 text-white">
+                Full Description
+              </h2>
+              <p>{eventData.description}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

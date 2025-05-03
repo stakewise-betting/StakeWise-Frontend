@@ -1,360 +1,324 @@
-import { useState, useEffect, useRef, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import { FaHome, FaCalendarAlt, FaPoll, FaBell, FaBars } from "react-icons/fa";
+import React, { useState, useContext, useCallback } from "react";
+import { useNavigate, NavLink, Link } from "react-router-dom";
+import {
+  Menu,
+  Building2,
+  Trophy,
+  Calendar,
+  BarChart3,
+  Gift,
+  Moon,
+  MessageSquare,
+} from "lucide-react";
+
 import { AppContext } from "@/context/AppContext";
+import TeamLogo from "../../assets/team-logo.svg";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import WalletConnect from "./WalletConnect";
+import NotificationsBell from "./NotificationsBell";
+import UserProfileDropdown from "./UserProfileDropdown";
+import MobileMenu from "./MobileMenu";
 import { toast } from "react-toastify";
 import axios from "axios";
-import logo from "../../assets/images/logo.png";
-import { NavLink, Link } from "react-router-dom";
-import { ButtonOutline } from "../Buttons/Buttons";
-import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
-// Define an interface for Notification object
-interface Notification {
-  message: string;
-  notificationImageURL?: string; // Optional as it might not always be present
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  breakpoint: "always" | "xl" | "lg" | "md" | "sm";
 }
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const { userData, backendUrl, setUserData, setIsLoggedin, isLoggedin } =
-    useContext(AppContext)!;
+  const appContext = useContext(AppContext);
+
+  if (!appContext) {
+    return null; // Safeguard if context is unavailable
+  }
+
+  const {
+    backendUrl,
+    isLoggedin,
+    setUserData,
+    setIsLoggedin,
+  } = appContext;
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [picture, setPicture] = useState(userData?.picture || "");
-  const ws = useRef<WebSocket | null>(null);
+  const [localWalletConnected, setLocalWalletConnected] = useState(false);
+  const [localUsdValue, setLocalUsdValue] = useState("0.00");
+  const [mobileUnreadCount, setMobileUnreadCount] = useState(0);
 
-  // WebSocket connection
-  useEffect(() => {
-    if (!isLoggedin) return;
-
-    const websocketUrl =
-      import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:5000";
-    ws.current = new WebSocket(websocketUrl);
-
-    ws.current.onmessage = (event) => {
+  const connectWalletForMobile = async () => {
+    if (window.ethereum) {
       try {
-        const message = JSON.parse(event.data);
-        if (message.type === "notification" || message.type === "newEvent") {
-          setNotifications((prev) => [
-            {
-              message: message.message || message.notificationMessage,
-              notificationImageURL: message.notificationImageURL,
-            },
-            ...prev,
-          ]);
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        toast.success("Wallet connected successfully!");
+      } catch (error: any) {
+        console.error("Error connecting to wallet (from Navbar):", error);
+        if (error.code === 4001) {
+          toast.info("Wallet connection request rejected.");
+        } else {
+          toast.error("Failed to connect wallet.");
         }
-      } catch (error) {
-        console.error("WebSocket message error:", error);
       }
-    };
-
-    return () => ws.current?.close();
-  }, [isLoggedin]);
-
-  // User actions
-  const handleVerification = async () => {
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/sendVerifyOtp`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      data.success ? navigate("/email-verify") : toast.error(data.message);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Verification failed");
+    } else {
+      toast.error("MetaMask is not installed.");
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogoutForMobile = useCallback(async () => {
+    const loadingToast = toast.loading("Logging out...");
     try {
+      if (!backendUrl) {
+        toast.error("Backend URL is not configured.");
+        return;
+      }
       const { data } = await axios.post(
         `${backendUrl}/api/auth/logout`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
+      toast.dismiss(loadingToast);
       if (data.success) {
         setUserData(null);
         setIsLoggedin(false);
+        toast.success("Logged out successfully!");
         navigate("/");
+        setMenuOpen(false);
+      } else {
+        toast.error(data.message || "Logout failed.");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Logout failed");
+      toast.dismiss(loadingToast);
+      toast.error(error.response?.data?.message || "An error occurred.");
     }
-  };
+  }, [backendUrl, navigate, setUserData, setIsLoggedin]);
 
-  useEffect(() => {
-    if (userData?.picture) {
-      setTimeout(() => {
-        setPicture(userData.picture);
-      }, 100); // Short delay to allow React to process updates
+  const handleVerificationForMobile = useCallback(async () => {
+    const loadingToast = toast.loading("Sending verification email...");
+    try {
+      if (!backendUrl) {
+        toast.error("Backend URL is not configured.");
+        return;
+      }
+      const { data } = await axios.post(
+        `${backendUrl}/api/auth/sendVerifyOtp`,
+        {},
+        { withCredentials: true }
+      );
+      toast.dismiss(loadingToast);
+      if (data.success) {
+        toast.success("Verification email sent! Please check your inbox.");
+        navigate("/email-verify");
+        setMenuOpen(false);
+      } else {
+        toast.error(data.message || "Failed to send verification email.");
+      }
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error(error.response?.data?.message || "An error occurred.");
     }
-  }, [userData]);
-  
+  }, [backendUrl, navigate]);
 
-  // Navigation links
-  const navLinks = [
-    { to: "/home", label: "Home", icon: <FaHome /> },
-    { to: "/upcoming", label: "Upcoming Events", icon: <FaCalendarAlt /> },
-    { to: "/results", label: "Results", icon: <FaPoll /> },
+  const closeMobileMenu = () => setMenuOpen(false);
+
+  const navItems: NavItem[] = [
+    {
+      name: "POLITICS",
+      href: "/polictics",
+      icon: <Building2 className="h-4 w-4 mr-2" />,
+      breakpoint: "always",
+    },
+    {
+      name: "SPORTS",
+      href: "/sports",
+      icon: <Trophy className="h-4 w-4 mr-2" />,
+      breakpoint: "always",
+    },
+    {
+      name: "UPCOMING EVENTS",
+      href: "/upcoming",
+      icon: <Calendar className="h-4 w-4 mr-2" />,
+      breakpoint: "lg",
+    },
+    {
+      name: "RESULTS",
+      href: "/results",
+      icon: <BarChart3 className="h-4 w-4 mr-2" />,
+      breakpoint: "xl",
+    },
+    {
+      name: "NEWS",
+      href: "/news",
+      icon: <BarChart3 className="h-4 w-4 mr-2" />,
+      breakpoint: "xl",
+    },
     ...(isLoggedin
-      ? [{ to: "/dashboard", label: "Dashboard", icon: <FaPoll /> }]
+      ? [
+          {
+            name: "REWARDS",
+            href: "/reward",
+            icon: <Gift className="h-4 w-4 mr-2" />,
+            breakpoint: "xl" as const,
+          },
+        ]
       : []),
   ];
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   return (
-    <nav className="bg-primary px-4 py-3 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Branding */}
-        <div className="flex items-center space-x-3">
-          <img src={logo} alt="Logo" className="h-9 w-auto" />
-          <Link
-            to="/"
-            onClick={() => window.scrollTo(0, 0)}
-            className="text-2xl font-bold text-accent hover:text-secondary transition"
-          >
-            STAKEWISE
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
-          {/* Main Links */}
-          <div className="flex space-x-6">
-            {navLinks.map(({ to, label, icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => window.scrollTo(0, 0)}
-                className={({
-                  isActive,
-                }) => `flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors
-                  ${
-                    isActive
-                      ? "text-secondary bg-secondary/10"
-                      : "text-sub hover:bg-secondary/10"
-                  }`}
-              >
-                {icon}
-                <span>{label}</span>
-              </NavLink>
-            ))}
-          </div>
-
-          {/* User Section */}
-          {isLoggedin ? (
-            <div className="flex items-center space-x-6">
-              {/* Notifications */}
-              <div className="relative">
-                <button
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className="text-2xl text-sub hover:text-secondary relative"
-                >
-                  <FaBell />
-                  {notifications.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {notifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-primary border border-secondary rounded-lg shadow-xl">
-                    <div className="p-4 font-bold border-b border-secondary">
-                      Notifications
-                    </div>
-                    <div className="max-h-60 overflow-y-auto">
-                      {notifications.map((n, i) => (
-                        <div
-                          key={i}
-                          className="p-4 flex items-center space-x-3 hover:bg-secondary/10"
-                        >
-                          {n.notificationImageURL && (
-                            <img
-                              src={n.notificationImageURL}
-                              className="w-8 h-8 rounded-full"
-                              alt="Notification"
-                            />
-                          )}
-                          <span>{n.message}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* User Profile */}
-              <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center space-x-3 group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-lg">
-                    {userData?.picture ? (
-                      <img
-                        key={picture}
-                        src={picture}
-                        alt="User profile"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : userData?.fname ? (
-                      userData.fname[0].toUpperCase()
-                    ) : userData?.walletAddress ? (
-                      <img
-                        src={MetamaskLogo}
-                        alt="MetaMask Logo"
-                        className="w-3/4 h-3/4 object-contain rounded-full"
-                      />
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                </button>
-
-                {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-primary border border-secondary rounded-lg shadow-xl">
-                    <div className="p-4 border-b border-secondary">
-                      <div className="font-bold">
-                        {userData?.fname ||
-                          (userData?.walletAddress ? "MetaMask User" : "User")}
-                      </div>
-                      <div className="text-sm text-sub">
-                        {userData?.email ||
-                          (userData?.walletAddress
-                            ? userData.walletAddress.slice(0, 6) +
-                              "..." +
-                              userData.walletAddress.slice(-4)
-                            : "")}
-                      </div>
-                    </div>
-
-                    <div className="p-2 space-y-1">
-                      <Link
-                        to="/profile"
-                        onClick={() => window.scrollTo(0, 0)}
-                        className="block px-4 py-2 rounded hover:bg-secondary/10"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/watchlist"
-                        onClick={() => window.scrollTo(0, 0)}
-                        className="block px-4 py-2 rounded hover:bg-secondary/10"
-                      >
-                        Watchlist
-                      </Link>
-                      <button
-                        onClick={() => setIsDarkMode(!isDarkMode)}
-                        className="w-full text-left px-4 py-2 rounded hover:bg-secondary/10"
-                      >
-                        {isDarkMode ? "Light" : "Dark"} Mode
-                      </button>
-                      {!userData?.isAccountVerified && (
-                        <button
-                          onClick={handleVerification}
-                          className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
-                        >
-                          Verify Account
-                        </button>
-                      )}
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/10"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="flex space-x-4">
-              <ButtonOutline onClick={() => navigate("/login")}>
-                Login
-              </ButtonOutline>
-              <ButtonOutline onClick={() => navigate("/signup")}>
-                Sign Up
-              </ButtonOutline>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Menu Trigger */}
-        <div className="md:hidden">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="text-2xl text-sub"
-          >
-            <FaBars />
-          </button>
-        </div>
+    <nav className="bg-[#1C1C27] text-white h-16 px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+      <div className="flex items-center px-2">
+        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center">
+          <span className="text-3xl mr-3 font-saira-stencil">STAKEWISE</span>
+          <img src={TeamLogo} alt="Team Logo" className="logo-icon w-[42px] h-[34px]" />
+        </Link>
       </div>
 
-      {/* Mobile Menu Content */}
-      {menuOpen && (
-        <div className="md:hidden absolute top-full w-full bg-primary border-t border-secondary">
-          <div className="p-4 space-y-4">
-            {navLinks.map(({ to, label, icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({
-                  isActive,
-                }) => `flex items-center space-x-2 p-3 rounded-lg
-                  ${isActive ? "bg-secondary/10 text-secondary" : "text-sub"}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {icon}
-                <span>{label}</span>
-              </NavLink>
-            ))}
+      <div className="hidden md:flex items-center space-x-8 mt-2 ml-10 text-[13px] font-bold">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.href}
+            onClick={() => window.scrollTo(0, 0)}
+            className={({ isActive }) =>
+              `flex items-center ${isActive ? "text-[#E27625]" : "text-[#8488AC]"} hover:text-[#E27625] hover:border-b-[3px] hover:border-[#E27625] transition-color pb-2 ${
+                item.breakpoint === "xl"
+                  ? "hidden xl:flex"
+                  : item.breakpoint === "lg"
+                  ? "hidden lg:flex"
+                  : ""
+              }`
+            }
+          >
+            {item.icon}
+            {item.name}
+          </NavLink>
+        ))}
+      </div>
 
-            {isLoggedin ? (
-              <div className="pt-4 border-t border-secondary">
-                <button
-                  onClick={handleLogout}
-                  className="w-full p-3 text-left text-red-500 hover:bg-red-500/10 rounded-lg"
+      <div className="flex items-center space-x-6">
+        {isLoggedin ? (
+          <>
+            <WalletConnect isLoggedin={isLoggedin} />
+            <NotificationsBell />
+            <UserProfileDropdown />
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              className="hidden md:flex text-orange-500 hover:text-orange-400"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </Button>
+            <Button
+              className="hidden md:flex bg-orange-500 hover:bg-orange-600 text-white rounded-full"
+              onClick={() => navigate("/signup")}
+            >
+              Sign Up
+            </Button>
+
+            <DropdownMenu onOpenChange={setMenuOpen} open={menuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-[#ffffff] !w-8 !h-8 !p-2 hover:bg-gray-700 transition"
                 >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-3 pt-4 border-t border-secondary">
-                <ButtonOutline
-                  fullWidth
-                  onClick={() => {
-                    navigate("/login");
-                    setMenuOpen(false);
-                  }}
-                >
-                  Login
-                </ButtonOutline>
-                <ButtonOutline
-                  fullWidth
-                  onClick={() => {
-                    navigate("/signup");
-                    setMenuOpen(false);
-                  }}
-                >
-                  Sign Up
-                </ButtonOutline>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+                  <Menu className="!w-6 !h-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-[#252538] text-white border-gray-700">
+                {navItems.map((item) => (
+                  <DropdownMenuItem key={`mobile-${item.name}`} asChild className="md:hidden">
+                    <Link to={item.href} className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+                      {item.icon}
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+
+                <DropdownMenuSeparator className="md:hidden bg-gray-700" />
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Button
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full mt-2 justify-center"
+                    onClick={() => {
+                      navigate("/signup");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Sign Up
+                  </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="md:hidden">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-full mt-2 justify-center text-orange-500 border border-orange-500 hover:bg-gray-700"
+                    onClick={() => {
+                      navigate("/login");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    Login
+                  </Button>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <DropdownMenuItem asChild>
+                  <Link to="/contact" className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contact Us
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={toggleDarkMode} className="flex items-center cursor-pointer">
+                  <Moon className="h-4 w-4 mr-2" />
+                  Dark Mode
+                  <div
+                    className={`ml-auto w-8 h-4 rounded-full ${
+                      isDarkMode ? "bg-orange-500" : "bg-gray-600"
+                    } relative`}
+                  >
+                    <div
+                      className={`absolute top-0.5 ${
+                        isDarkMode ? "right-0.5" : "left-0.5"
+                      } w-3 h-3 bg-white rounded-full transition-all`}
+                    ></div>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        )}
+      </div>
+
+      <MobileMenu
+        isOpen={menuOpen}
+        closeMenu={closeMobileMenu}
+        navLinks={navItems}
+        walletConnected={localWalletConnected}
+        usdValue={localUsdValue}
+        connectWallet={connectWalletForMobile}
+        unreadCount={mobileUnreadCount}
+        handleLogout={handleLogoutForMobile}
+        handleVerification={handleVerificationForMobile}
+      />
     </nav>
   );
 };
+
 
 export default Navbar;
