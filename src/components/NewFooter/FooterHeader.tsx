@@ -47,7 +47,7 @@ export const FooterHeader: React.FC = () => {
         <div className="flex flex-col gap-4">
           <h2 className="mb-2.5 text-base font-bold">Company</h2>
           <Link to="/#" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
-            About STAKEWISE
+            About Us
           </Link>
           <Link to="/contactus" onClick={() => window.scrollTo(0, 0)} className="text-base text-white cursor-pointer hover:underline">
             Contact Us
