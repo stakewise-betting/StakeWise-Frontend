@@ -14,6 +14,9 @@ export default function OngoingTable(): JSX.Element {
   const { bets, loading, error, refreshBets } = useUserBets();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
+  // Filter bets to only show those still in progress
+  const inProgressBets = bets.filter(bet => bet.status === "In Progress");
+
   const handleRefresh = async (): Promise<void> => {
     setRefreshing(true);
     await refreshBets();
@@ -27,7 +30,7 @@ export default function OngoingTable(): JSX.Element {
           <h2 className="text-[20px] font-bold">In-Progress Bets</h2>
           <p className="text-sm font-bold text-[#A0AEC0] flex items-center gap-2">
             <FaClock className="w-3 h-3 text-[#01B574]" />
-            <span>{bets.length} bets placed</span>
+            <span>{inProgressBets.length} bets in progress</span>
           </p>
         </div>
         <button 
@@ -46,9 +49,9 @@ export default function OngoingTable(): JSX.Element {
           </div>
         ) : loading ? (
           <div className="text-center py-8 text-gray-400">Loading your bets...</div>
-        ) : bets.length === 0 ? (
+        ) : inProgressBets.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
-            You haven't placed any bets yet.
+            You don't have any active bets in progress.
           </div>
         ) : (
           <Table>
@@ -62,9 +65,9 @@ export default function OngoingTable(): JSX.Element {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bets.map((bet: UserBet, index: number) => (
+              {inProgressBets.map((bet: UserBet, index: number) => (
                 <TableRow
-                  key={index}
+                  key={`${bet.eventId}-${index}`}
                   className="border-[#56577A] hover:bg-[#252537] lg:text-sm text-xs"
                 >
                   <TableCell>{bet.eventName}</TableCell>
@@ -73,13 +76,7 @@ export default function OngoingTable(): JSX.Element {
                   <TableCell>{bet.price}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-between">
-                      <span className={
-                        bet.status === "Won" 
-                          ? "text-green-500" 
-                          : bet.status === "Lost" 
-                            ? "text-red-500" 
-                            : "text-yellow-500"
-                      }>
+                      <span className="text-yellow-500">
                         {bet.status}
                       </span>
                       <button className="w-8 h-8 rounded-full hover:bg-gray-700 flex items-center justify-center">
