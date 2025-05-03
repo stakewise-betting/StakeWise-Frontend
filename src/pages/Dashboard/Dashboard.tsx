@@ -72,7 +72,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 gap-11 sm:grid-cols-2 lg:grid-cols-4 py-10 ">
             {/* Total Earned */}
 
-            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b from-[#2E4156] to-[#4e6c8f] px-5 py-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b bg-[#333447] px-5 py-4 backdrop-blur-sm">
               <div>
                 <p className="text-sm text-[#A0AEC0]">Total Earned</p>
                 <p className="text-2xl font-bold text-white">$53,000</p>
@@ -84,7 +84,7 @@ const Dashboard = () => {
             </div>
 
             {/* Total Loss */}
-            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b from-[#2E4156] to-[#4e6c8f] px-5 py-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b bg-[#333447] px-5 py-4 backdrop-blur-sm">
               <div>
                 <p className="text-sm text-[#A0AEC0]">Total Loss</p>
                 <p className="text-2xl font-bold text-white">$53,000</p>
@@ -96,7 +96,7 @@ const Dashboard = () => {
             </div>
 
             {/* Net Profit */}
-            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b from-[#2E4156] to-[#4e6c8f] px-5 py-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b bg-[#333447] px-5 py-4 backdrop-blur-sm">
               <div>
                 <p className="text-sm text-[#A0AEC0]">Net Profit</p>
                 <p className="text-2xl font-bold text-white">$53,000</p>
@@ -108,7 +108,7 @@ const Dashboard = () => {
             </div>
 
             {/* Total Bets Placed */}
-            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b from-[#2E4156] to-[#4e6c8f] px-5 py-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b bg-[#333447] px-5 py-4 backdrop-blur-sm">
               <div>
                 <p className="text-sm text-[#A0AEC0]">Total Bets Placed</p>
                 <p className="text-2xl font-bold text-white">46</p>

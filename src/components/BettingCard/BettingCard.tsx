@@ -141,11 +141,12 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
               <Pin className="h-4 w-4" />
             </button>
             <button 
-              className={`hover:text-white transition-colors ${isInWatchlist ? ' text-yellow-400 fill-yellow-400' : ''} ${isProcessing ? 'opacity-50' : ''}`} 
+              className={`hover:text-white transition-colors ${isInWatchlist ? 'text-yellow-400 fill-yellow-400' : ''} ${isProcessing ? 'opacity-50' : ''}`} 
               onClick={handleWatchlistToggle}
               disabled={isProcessing}
             >
-              <Star className="h-4 w-4" />
+              <Star className={`h-4 w-4 ${isInWatchlist ? 'fill-yellow-400' : 'fill-none'}`} 
+              fill={isInWatchlist ? 'currentColor' : 'none'}  />
             </button>
           </div>
         </div>
