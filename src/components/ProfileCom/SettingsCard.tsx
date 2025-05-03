@@ -34,12 +34,12 @@ export default function SettingsCard({
 
   if (form) {
     return (
-      <Card className="bg-[#1C1C27] border-none shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">
+      <Card className="bg-[#333447] border-none shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">
         <form onSubmit={onSubmit}>{content}</form>
       </Card>
     )
   }
 
-  return <Card className="bg-[#1C1C27] border-none shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">{content}</Card>
+  return <Card className="bg-[#333447] border-none shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">{content}</Card>
 }
 
