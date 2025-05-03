@@ -313,7 +313,7 @@ const NotificationsBell: React.FC = () => {
             <Button
                 variant="ghost"
                 size="icon"
-                className="text-[#ffffff] !w-8 !h-8 !p-2 hover:bg-gray-700 transition relative min-h-0 h-auto" // Added min-h-0 h-auto, fixed button style - Fixes error 09
+                className="text-[#ffffff] !w-8 !h-8 !p-2 hover:bg-gray-700 transition relative min-h-0 " // Added min-h-0 h-auto, fixed button style - Fixes error 09
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 aria-label="Toggle Notifications"
             >
@@ -326,9 +326,9 @@ const NotificationsBell: React.FC = () => {
             </Button>
 
             {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-[#1C1C27] border border-[#D4D8DD] rounded-lg shadow-xl">
-                    <div className="p-4 flex justify-between items-center border-b border-[#D4D8DD]">
-                        <span className="font-bold text-xl text-white">Notifications</span>
+                <div className="absolute right-0 mt-3 w-72 bg-[#1C1C27] border border-[#8488AC] rounded-lg shadow-xl">
+                    <div className="p-3 flex justify-between items-center border-b border-[#8488AC]">
+                        <span className="font-bold text-lg text-white">Notifications</span>
                         {notifications.length > 0 && (
                             <button
                                 onClick={markAllAsRead}
@@ -343,7 +343,7 @@ const NotificationsBell: React.FC = () => {
                             notifications.map((n) => (
                                 <div
                                     key={n.id}
-                                    className={`p-4 flex items-center space-x-3 hover:bg-gray-800 ${!n.read ? "bg-gray-800/50" : ""
+                                    className={`p-2 flex items-center space-x-3 hover:bg-gray-800 ${!n.read ? "bg-gray-800/50" : ""
                                         } ${n.eventId ? "cursor-pointer" : "cursor-default"}`}
                                     onClick={() => handleNotificationClick(n)}
                                     role={n.eventId ? "link" : "listitem"}
@@ -356,7 +356,7 @@ const NotificationsBell: React.FC = () => {
                                             alt="Notification"
                                         />
                                     )}
-                                    <span className="text-white">{n.message}</span>
+                                    <span className="text-white text-sm">{n.message}</span>
                                     {!n.read && (
                                         <span className="w-2 h-2 bg-blue-500 rounded-full ml-auto"></span>
                                     )}

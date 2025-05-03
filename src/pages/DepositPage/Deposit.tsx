@@ -1,5 +1,17 @@
-import MoonPayWidget from "../../components/Moonpay/MoonPayWidget";
-import { Wallet, ArrowDownCircle, Info, Copy, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import Web3 from "web3";
+import {
+  Wallet,
+  ArrowDownCircle,
+  Info,
+  Copy,
+  AlertCircle,
+  Clock,
+  TrendingUp,
+  ChevronRight,
+  Shield,
+  RefreshCw,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,11 +22,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useState, useEffect } from "react";
-import Web3 from "web3";
+import MoonPayWidget from "../../components/Moonpay/MoonPayWidget";
 
 const DepositPage = () => {
-  const moonPayApiKey = "pk_test_DJvwdrDtU8GG2AWNFX4PRovc7AdY62"; // Replace with your actual MoonPay API key
+  const moonPayApiKey = "pk_test_DJvwdrDtU8GG2AWNFX4PRovc7AdY62";
   const [userWalletAddress, setUserWalletAddress] = useState("");
   const [walletBalance, setWalletBalance] = useState("0.00");
   const [balanceUsd, setBalanceUsd] = useState("0.00");
@@ -24,6 +35,7 @@ const DepositPage = () => {
   const [gasPrice, setGasPrice] = useState("0");
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Fetch ETH price from CoinGecko API
   const fetchEthPrice = async () => {
@@ -127,6 +139,13 @@ const DepositPage = () => {
     checkIfWalletIsConnected();
   }, []);
 
+  const refreshWalletData = async () => {
+    setIsRefreshing(true);
+    await checkIfWalletIsConnected();
+    await fetchEthPrice();
+    setTimeout(() => setIsRefreshing(false), 1000); // Minimum 1s animation
+  };
+
   const connectWallet = async () => {
     try {
       if (window.ethereum) {
@@ -180,31 +199,51 @@ const DepositPage = () => {
     };
   }, []);
 
+  // Card styling based on the admin dashboard examples
+  const cardClasses = `
+    bg-card text-dark-primary rounded-xl shadow-lg
+    border border-gray-700/60
+    transition-all duration-300 ease-in-out
+    hover:shadow-xl hover:border-secondary/50
+    hover:-translate-y-1
+    overflow-hidden relative
+    bg-noise
+    dark
+  `;
+
+  // Determine text color for price change
+  const priceChangeColor = ethPriceChange.startsWith("+")
+    ? "text-green"
+    : "text-red-500";
+
   if (!isConnected && !isLoading) {
     return (
       <div className="min-h-screen bg-primary p-6 flex flex-col items-center">
         <div className="w-full max-w-3xl">
-          <h1 className="text-3xl font-bold text-DFprimary mb-2 flex items-center">
-            <Wallet className="mr-2 text-secondary" />
+          <h1 className="text-3xl font-bold text-dark-primary mb-2 flex items-center">
+            <Wallet className="mr-3 text-secondary" />
             Deposit Funds
           </h1>
-          <p className="text-sub mb-6">
+          <p className="text-dark-secondary mb-8">
             Connect your wallet to deposit ETH quickly and securely
           </p>
 
-          <Card className="bg-card border-none shadow-lg text-center p-8">
-            <AlertCircle className="mx-auto mb-4 text-secondary" size={48} />
-            <CardTitle className="text-xl text-DFprimary mb-4">
+          <Card className={`${cardClasses} text-center p-8`}>
+            <div className="p-4 rounded-full bg-secondary/10 mx-auto mb-6">
+              <AlertCircle className="text-secondary" size={48} />
+            </div>
+            <CardTitle className="text-2xl text-dark-primary mb-4">
               Wallet Not Connected
             </CardTitle>
-            <CardDescription className="text-sub mb-6">
-              Please connect your MetaMask wallet to continue
+            <CardDescription className="text-dark-secondary mb-8 text-lg">
+              Please connect your MetaMask wallet to continue with the deposit
+              process
             </CardDescription>
             <Button
               onClick={connectWallet}
-              className="bg-secondary text-white hover:bg-secondary/90"
+              className="bg-secondary/20 border border-secondary/60 text-secondary hover:bg-secondary hover:text-white hover:border-secondary transition-all duration-300 ease-in-out px-6 py-3 text-lg font-medium"
             >
-              Connect Wallet
+              Connect Wallet <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
           </Card>
         </div>
@@ -212,36 +251,56 @@ const DepositPage = () => {
     );
   }
 
-  // Determine text color for price change
-  const priceChangeColor = ethPriceChange.startsWith("+")
-    ? "text-green"
-    : "text-red-500";
-
   return (
     <div className="min-h-screen bg-primary p-6 flex flex-col items-center">
-      <div className="w-full max-w-3xl">
-        <h1 className="text-3xl font-bold text-DFprimary mb-2 flex items-center">
-          <Wallet className="mr-2 text-secondary" />
-          Deposit Funds
-        </h1>
-        <p className="text-sub mb-6">
-          Add ETH to your wallet quickly and securely
-        </p>
+      <div className="w-full max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-dark-primary mb-2 flex items-center">
+              <Wallet className="mr-3 text-secondary" />
+              Deposit Funds
+            </h1>
+            <p className="text-dark-secondary">
+              Add ETH to your wallet quickly and securely
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Card className="bg-card text-DFprimary border-none shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Current Balance</CardTitle>
+          <Button
+            onClick={refreshWalletData}
+            disabled={isRefreshing}
+            className="bg-secondary/10 border border-secondary/40 text-secondary hover:bg-secondary/20 hover:border-secondary/60 transition-all duration-300"
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className={cardClasses}>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-lg flex items-center">
+                <div className="p-1.5 rounded-full bg-secondary/10 text-secondary mr-2">
+                  <Wallet className="h-4 w-4" />
+                </div>
+                Current Balance
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{walletBalance} ETH</p>
-              <p className="text-sub text-sm">≈ ${balanceUsd} USD</p>
+              <p className="text-dark-secondary text-sm">≈ ${balanceUsd} USD</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-card text-DFprimary border-none shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Gas Price</CardTitle>
+          <Card className={cardClasses}>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-lg flex items-center">
+                <div className="p-1.5 rounded-full bg-admin-info/10 text-admin-info mr-2">
+                  <Clock className="h-4 w-4" />
+                </div>
+                Gas Price
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">{gasPrice} Gwei</p>
@@ -249,9 +308,14 @@ const DepositPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-card text-DFprimary border-none shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">ETH Price</CardTitle>
+          <Card className={cardClasses}>
+            <CardHeader className="pb-2 pt-4">
+              <CardTitle className="text-lg flex items-center">
+                <div className="p-1.5 rounded-full bg-admin-success/10 text-admin-success mr-2">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+                ETH Price
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">${ethPrice}</p>
@@ -262,25 +326,28 @@ const DepositPage = () => {
           </Card>
         </div>
 
-        <Card className="bg-card border-none shadow-lg mb-6">
+        <Card className={cardClasses}>
           <CardHeader>
-            <CardTitle className="text-xl text-DFprimary">
+            <CardTitle className="text-xl text-dark-primary flex items-center">
+              <div className="p-2 rounded-full bg-secondary/10 text-secondary mr-2">
+                <Shield className="h-5 w-5" />
+              </div>
               Your Wallet
             </CardTitle>
-            <CardDescription className="text-sub">
+            <CardDescription className="text-dark-secondary">
               This is where your purchased ETH will be deposited
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between bg-primary p-3 rounded-lg">
-              <p className="text-DFprimary font-mono">
+            <div className="flex items-center justify-between bg-primary/60 p-4 rounded-lg border border-gray-700/30">
+              <p className="text-dark-primary font-mono">
                 {shortenAddress(userWalletAddress)}
               </p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={copyToClipboard}
-                className="text-secondary hover:text-secondary hover:bg-primary/50"
+                className="text-secondary hover:text-secondary hover:bg-secondary/10 transition-all duration-300"
               >
                 {copied ? "Copied!" : <Copy size={16} />}
               </Button>
@@ -288,36 +355,46 @@ const DepositPage = () => {
           </CardContent>
         </Card>
 
-        <Alert className="bg-card border-secondary border-l-4 mb-6">
-          <Info className="h-4 w-4 text-secondary" />
-          <AlertTitle className="text-DFprimary">Fast & Secure</AlertTitle>
-          <AlertDescription className="text-sub">
+        <Alert className="bg-card border-secondary/60 border-l-4 my-8">
+          <div className="p-1.5 rounded-full bg-secondary/10 text-secondary mr-2">
+            <Info className="h-4 w-4" />
+          </div>
+          <AlertTitle className="text-dark-primary font-semibold">
+            Fast & Secure
+          </AlertTitle>
+          <AlertDescription className="text-dark-secondary">
             MoonPay allows you to buy ETH with credit card, debit card, or bank
             transfer. Funds are sent directly to your wallet.
           </AlertDescription>
         </Alert>
 
-        <Card className="bg-card border-none shadow-lg">
+        <Card className={cardClasses}>
           <CardHeader>
-            <CardTitle className="text-xl text-DFprimary flex items-center">
-              <ArrowDownCircle className="mr-2 text-secondary" size={20} />
+            <CardTitle className="text-xl text-dark-primary flex items-center">
+              <div className="p-2 rounded-full bg-secondary/10 text-secondary mr-2">
+                <ArrowDownCircle className="h-5 w-5" />
+              </div>
               Buy ETH with MoonPay
             </CardTitle>
-            <CardDescription className="text-sub">
+            <CardDescription className="text-dark-secondary">
               Purchase ETH using credit card, debit card, or bank transfer
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="bg-primary p-4 rounded-lg">
-              <MoonPayWidget
-                apiKey={moonPayApiKey}
-                walletAddress={userWalletAddress}
-              />
-            </div>
+          <CardContent className="p-6">
+            <MoonPayWidget
+              apiKey={moonPayApiKey}
+              walletAddress={userWalletAddress}
+            />
           </CardContent>
-          <CardFooter className="text-sub text-sm">
-            Processing times may vary depending on payment method and network
-            congestion.
+          <CardFooter className="text-dark-secondary text-sm border-t border-gray-700/30 pt-4">
+            <div className="flex items-start">
+              <Info className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+              <span>
+                Processing times may vary depending on payment method and
+                network congestion. Your ETH will be automatically deposited to
+                your connected wallet.
+              </span>
+            </div>
           </CardFooter>
         </Card>
       </div>

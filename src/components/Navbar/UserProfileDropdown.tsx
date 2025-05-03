@@ -1,7 +1,7 @@
 // src/components/navbar/UserProfileDropdown.tsx
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ChevronDown, Moon, LogOut, Eye, BarChart3 } from "lucide-react"; // Using lucide-react icons
+import { User, ChevronDown, Moon, LogOut, Eye, BarChart3 , Mail ,MessageSquare } from "lucide-react"; // Using lucide-react icons
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -147,7 +147,7 @@ const UserProfileDropdown: React.FC = () => {
                     <ChevronDown className={`h-6 w-6 transition-transform ${profileOpen ? "rotate-180" : ""}`} />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-[#1C1C27] text-white border-gray-700"> {/* Adjusted dropdown style to match My-Nav Bar */}
+            <DropdownMenuContent align="end" className="w-56 bg-[#1C1C27] text-white border-gray-700 mt-3"> {/* Adjusted dropdown style to match My-Nav Bar */}
                 <DropdownMenuItem
                     className="flex items-center cursor-pointer"
                     onClick={() => {
@@ -177,6 +177,19 @@ const UserProfileDropdown: React.FC = () => {
                 >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     Dashboard
+                </DropdownMenuItem>
+
+
+                {/* contact us link was added by bhashitha */}
+                <DropdownMenuItem 
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                        navigate("/contactus");
+                        setProfileOpen(false);
+                    }}
+                >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Contact                                      
                 </DropdownMenuItem>
 
                 <DropdownMenuItem

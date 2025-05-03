@@ -10,7 +10,8 @@ interface EventsPageProps {
   contract: any;
   web3: any;
   onWinnerDeclared: () => void;
-  onEventCreated: () => void; // To refresh list after creation
+  onEventCreated: () => void;
+  isLoading?: boolean; // Added isLoading property
 }
 
 export const EventsPage: React.FC<EventsPageProps> = ({
