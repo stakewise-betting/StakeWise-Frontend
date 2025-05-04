@@ -8,6 +8,7 @@ import Pagination from "@/components/Pagination/Pagination";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 
+
 // Define TypeScript interface for event data
 interface BlockchainEvent {
   eventId: string;
@@ -21,6 +22,7 @@ interface BlockchainEvent {
   isUserInterested: boolean;
   tags: string[];
   options: string[];
+  category: string;
   onInterestedClick?: () => void;
 }
 
@@ -40,6 +42,8 @@ export default function Page() {
       { name: "Politics", count: 21 },
       { name: "Sports", count: 32 },
       { name: "Games", count: 12 },
+      { name: "Entertainment", count: 15 },
+      { name: "Other", count: 7 },
     ] },
     { title: "Locations", items: [
       { name: "USA", count: 12 },
@@ -108,8 +112,9 @@ export default function Page() {
               startTime: eventData.startTime || "0",
               endTime: eventData.endTime || "0",
               createdAt: eventData.createdAt || (Date.now() / 1000).toString(),
-              options: eventData.options || []
-            };
+              options: eventData.options || [],
+              category: eventData.category || "Event",  // "Uncategorized" || here we can't pass category from blockchain, because there is no category field in the contract
+             };
             
             eventList.push(formattedEvent);
           }
@@ -188,6 +193,8 @@ export default function Page() {
     }
   };
 
+  
+
   // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -220,8 +227,8 @@ export default function Page() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">Trending</Button>
             <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">New</Button>
+            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">Trending</Button>
           </div>
           
           {isLoading ? (
@@ -261,3 +268,4 @@ export default function Page() {
     </div>
   );
 }
+
