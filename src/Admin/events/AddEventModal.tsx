@@ -1,17 +1,17 @@
-// components/admin/events/AddEventModal.tsx (Alternative Implementation)
+// components/admin/events/AddEventModal.tsx
 import React from "react";
 import { EventForm } from "./EventForm";
 import { X } from "lucide-react"; // Using lucide-react icon for close button
-import { Button } from "@/components/ui/button"; // Keep using shadcn Button if available and working
+import { Button } from "@/components/ui/button"; // Assuming shadcn Button
 
 interface AddEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  contract: any;
-  web3: any;
+  contract: any; // Define contract type if possible
+  web3: any; // Define Web3 type if possible
   onEventCreated: () => void;
 }
-//
+
 export const AddEventModal: React.FC<AddEventModalProps> = ({
   isOpen,
   onClose,
@@ -19,79 +19,66 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   web3,
   onEventCreated,
 }) => {
-  // If the modal is not open, render nothing
   if (!isOpen) return null;
 
-  // Prevent background scroll when modal is open
+  // Effect to handle body scroll lock
   React.useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
     if (isOpen) {
       document.body.style.overflow = "hidden";
-    } else {
-      // This else might not be strictly necessary if cleanup works reliably
-      document.body.style.overflow = "unset";
     }
-    // Cleanup function to restore scroll when the component unmounts or isOpen changes to false
+    // Cleanup function
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalStyle;
     };
-  }, [isOpen]); // Re-run effect if isOpen changes
+  }, [isOpen]); // Only re-run if isOpen changes
 
   return (
-    // 1. Overlay div: covers the whole screen, semi-transparent background
+    // 1. Overlay
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-      onClick={onClose} // Close the modal if the overlay is clicked
-      aria-labelledby="modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-admin-fade-in" // Darker overlay, added padding
+      onClick={onClose} // Close on overlay click
       role="dialog"
       aria-modal="true"
+      aria-labelledby="modal-title" // EventForm now provides the element with this ID
     >
-      {/* 2. Modal Content container: stops click propagation, styled background, rounded corners, shadow */}
+      {/* 2. Modal Content container */}
       <div
-        className="relative bg-background rounded-lg shadow-xl w-full max-w-[900px] max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
+        className="relative bg-card rounded-xl shadow-2xl w-full max-w-4xl lg:max-w-5xl h-[90vh] flex flex-col overflow-hidden border border-gray-700/60" // Adjusted max-w, h-[90vh], flex col, border
+        onClick={(e) => e.stopPropagation()} // Prevent closing on modal content click
       >
-        {/* 3. Close Button: positioned absolutely in the top-right corner */}
-        <Button // Use shadcn Button if it works, otherwise use a standard button
-          variant="ghost" // Use shadcn variants if available
-          size="icon" // Use shadcn sizes if available
-          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground z-10" // Added z-index
+        {/* 3. Close Button - Positioned relative to this container */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-3 right-3 text-dark-secondary hover:text-dark-primary hover:bg-primary/50 rounded-full z-20" // Adjusted styling, increased z-index
           onClick={onClose}
-          aria-label="Close modal"
+          aria-label="Close event creation form"
         >
           <X className="h-5 w-5" />
         </Button>
 
-        {/* 4. Modal Header (Manual Implementation) */}
-        <div className="p-6 md:p-8 border-b">
-          {" "}
-          {/* Added padding and border */}
-          <h2 id="modal-title" className="text-2xl font-semibold">
-            Create New Betting Event
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Fill in the details below to create a new event on the blockchain
-            and save its metadata. Fields marked with{" "}
-            <span className="text-destructive">*</span> are required.
-          </p>
-        </div>
+        {/*
+          --- MODAL HEADER REMOVED ---
+          The header (title, description) is now part of the EventForm component itself.
+        */}
 
-        {/* 5. Modal Body: contains the EventForm */}
-        <div className="p-0">
-          {" "}
-          {/* Removed padding here, EventForm has its own */}
+        {/* 5. Modal Body - Contains the EventForm */}
+        {/* Removed padding, let EventForm handle its internal layout & scrolling */}
+        {/* Added flex-grow and overflow-hidden to ensure EventForm uses available space */}
+        <div className="flex-grow overflow-hidden">
           <EventForm
             contract={contract}
             web3={web3}
-            // Ensure onEventCreated handles closing if needed, or rely on EventForm's onClose
-            onEventCreated={onEventCreated}
-            onClose={onClose} // Pass the onClose handler to the form for its cancel button
+            onEventCreated={() => {
+              onEventCreated(); // Notify list update
+              // onClose(); // EventForm now handles closing on success
+            }}
+            onClose={onClose} // Pass onClose down for the Cancel button in EventForm
           />
         </div>
 
-        {/* Optional Footer - EventForm already has buttons */}
-        {/* <div className="p-6 border-t flex justify-end">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-        </div> */}
+        {/* Optional Footer REMOVED - EventForm has its own action buttons */}
       </div>
     </div>
   );
