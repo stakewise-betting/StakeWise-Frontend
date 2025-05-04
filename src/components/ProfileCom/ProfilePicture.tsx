@@ -98,8 +98,8 @@ export default function ProfilePicture() {
       <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
         <div className="relative group">
           <Avatar className="h-32 w-32 border-2 border-zinc-800">
-            <AvatarImage alt="Profile" src={avatarSrc} />
-            <AvatarFallback className="bg-zinc-800 text-zinc-100 text-4xl">
+            <AvatarImage alt="Profile" src={avatarSrc} className="bg-[#1C1C27]"  />
+            <AvatarFallback className="bg-zinc-800 text-zinc-100 text-xl">
               {userData?.picture ? (
                 <img
                   src={userData.picture}

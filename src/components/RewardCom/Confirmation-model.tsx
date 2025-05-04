@@ -68,8 +68,9 @@ export function ConfirmationModal({ open, onOpenChange, raffle, ticketQuantity =
           <Button
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90"
             onClick={() => onOpenChange(false)}
-          >
-            View My Tickets
+          > 
+          {/*here i have to pass the ticket details to user profile page   "View My Tickets" */}
+            View My Tickets  
           </Button>
         </div>
       </DialogContent>
