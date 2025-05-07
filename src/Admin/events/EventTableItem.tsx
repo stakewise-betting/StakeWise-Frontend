@@ -14,6 +14,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  Info, // Added for details section consistency
 } from "lucide-react";
 import { DeclareWinnerSection } from "../shared/DeclareWinnerSection";
 import Web3 from "web3";
@@ -40,7 +41,6 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
   const [isDeclaringWinner, setIsDeclaringWinner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Add debugging to verify event data
   useEffect(() => {
     if (!event) {
       console.warn("Event data is undefined or null in TableItem");
@@ -59,7 +59,7 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
   const winningOption = event?.winningOption || "";
   const listedBy = event?.listedBy || "Admin";
   const prizePool = event?.prizePool || "0";
-  const options = event?.options || [];
+  const options = Array.isArray(event?.options) ? event.options : [];
   const description = event?.description || "No description available";
 
   // Compute derived state with safe defaults
@@ -73,14 +73,18 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     (timeUntilEnd % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
   );
 
+  // --- Enhanced Status Badge Logic ---
   const getStatusBadge = () => {
+    const baseClasses =
+      "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap";
+
     if (isCompleted) {
       return (
         <Badge
           variant="default"
-          className="bg-admin-success/20 text-admin-success border border-admin-success/30 flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          className={`${baseClasses} bg-admin-success/10 text-admin-success border-admin-success/30`}
         >
-          <CheckCircle2 className="h-3 w-3" />
+          <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
           <span>Completed</span>
         </Badge>
       );
@@ -88,34 +92,37 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
       return (
         <Badge
           variant="default"
-          className="bg-admin-warning/20 text-warning-DEFAULT border border-admin-warning/30 flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          className={`${baseClasses} bg-admin-warning/10 text-admin-warning border-admin-warning/30 animate-pulse`}
         >
-          <AlertTriangle className="h-3 w-3" />
+          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
           <span>Awaiting Result</span>
         </Badge>
       );
     } else if (isOngoing) {
+      // Using admin.accent (teal) for Ongoing
       return (
         <Badge
-          variant="secondary"
-          className="bg-secondary/20 text-secondary border border-secondary/30 flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          variant="default"
+          className={`${baseClasses} bg-admin-accent/10 text-admin-accent border-admin-accent/30`}
         >
-          <Clock className="h-3 w-3" />
+          <Clock className="h-3.5 w-3.5 flex-shrink-0" />
           <span>Ongoing</span>
         </Badge>
       );
     } else {
+      // Scheduled - Neutral look
       return (
         <Badge
           variant="outline"
-          className="bg-primary/20 text-dark-secondary border border-gray-700/30 flex items-center gap-1.5 px-2 py-0.5 rounded-full"
+          className={`${baseClasses} bg-gray-500/5 text-dark-secondary border-gray-500/30`}
         >
-          <Calendar className="h-3 w-3" />
+          <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
           <span>Scheduled</span>
         </Badge>
       );
     }
   };
+  // --- End Enhanced Status Badge Logic ---
 
   const handleDeclareWinnerClick = () => setIsDeclaringWinner(true);
   const handleCancelDeclareWinner = () => setIsDeclaringWinner(false);
@@ -125,14 +132,8 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     prizePoolWei: string | undefined | null,
     web3Instance: Web3 | null
   ): string => {
-    if (!web3Instance) {
-      return "0.00 ETH";
-    }
-
-    if (!prizePoolWei || prizePoolWei === "0" || prizePoolWei === undefined) {
-      return "0.00 ETH";
-    }
-
+    if (!web3Instance) return "0.00 ETH";
+    if (!prizePoolWei || prizePoolWei === "0") return "0.00 ETH";
     try {
       const prizePoolString = String(prizePoolWei);
       const prizePoolInEther = web3Instance.utils.fromWei(
@@ -149,113 +150,143 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     }
   };
 
-  // Format date for display
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp: number): string => {
     try {
+      if (isNaN(timestamp) || timestamp <= 0) return "Invalid Date";
       return new Date(timestamp).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       });
-    } catch (error) {
+    } catch {
       return "Invalid Date";
     }
   };
 
-  // Format time for display
-  const formatTime = (timestamp: number) => {
+  const formatTime = (timestamp: number): string => {
     try {
+      if (isNaN(timestamp) || timestamp <= 0) return "Invalid Time";
       return new Date(timestamp).toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: true,
       });
-    } catch (error) {
+    } catch {
       return "Invalid Time";
     }
   };
 
+  // Helper for responsive cell labels
+  const DataLabel: React.FC<{ label: string }> = ({ label }) => (
+    <span className="md:hidden font-medium text-dark-secondary mr-2">
+      {label}:
+    </span>
+  );
+
   return (
     <>
-      {/* Main Data Row */}
+      {/* Main Data Row / Card */}
       <TableRow
-        key={eventId}
-        className={`transition-all duration-300 ${
+        className={`border-b border-gray-700/60 transition-colors duration-200 block md:table-row ${
           showDetails ? "bg-primary/30" : "hover:bg-card/50"
-        }`}
+        } ${isDeclaringWinner ? "border-l-4 border-l-secondary" : ""} relative`} // Add left border when declaring
       >
-        <TableCell className="px-4 py-3 align-middle">
+        {/* Status Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[130px] whitespace-nowrap">
+          <DataLabel label="Status" />
           {getStatusBadge()}
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle font-mono text-xs text-dark-secondary">
-          #{eventId}
+        {/* Event ID Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[110px]">
+          <DataLabel label="ID" />
+          <span className="font-mono text-xs text-dark-secondary">
+            #{eventId}
+          </span>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle">
+        {/* Event Name & Desc Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:min-w-[200px] md:max-w-[300px]">
+          <DataLabel label="Event" />
           <div className="flex flex-col">
             <span
-              className="font-medium text-dark-primary truncate max-w-[240px]"
+              className="font-medium text-dark-primary truncate"
               title={name}
             >
               {name}
             </span>
-            {event?.description && (
+            {description && (
               <span
-                className="text-xs text-dark-secondary truncate max-w-[240px]"
-                title={event.description}
+                className="text-xs text-dark-secondary truncate"
+                title={description}
               >
-                {event.description.length > 50
-                  ? `${event.description.substring(0, 50)}...`
-                  : event.description}
+                {description.length > 50
+                  ? `${description.substring(0, 50)}...`
+                  : description}
               </span>
             )}
           </div>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle">
+        {/* Category Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[150px]">
+          <DataLabel label="Category" />
           <Badge
             variant="outline"
-            className="bg-secondary/10 text-secondary border-secondary/30 flex items-center gap-1"
+            className="bg-secondary/10 text-secondary border-secondary/30 flex items-center gap-1 w-fit" // w-fit for mobile
           >
-            <Tag className="w-3 h-3" />
-            {category}
+            <Tag className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{category}</span>
           </Badge>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle text-xs text-dark-secondary">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-dark-secondary/70" />
-            {formatDate(startTime)}
+        {/* Start Time Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[160px]">
+          <DataLabel label="Start Date" />
+          <div className="flex items-center gap-1.5 text-xs text-dark-secondary whitespace-nowrap">
+            <Calendar className="w-3.5 h-3.5 text-dark-secondary/70 flex-shrink-0" />
+            <span>{formatDate(startTime)}</span>
           </div>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-admin-success" />
-            <span className="font-medium">
+        {/* Prize Pool Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[130px]">
+          <DataLabel label="Volume" />
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <TrendingUp className="w-3.5 h-3.5 text-admin-success flex-shrink-0" />
+            <span className="font-medium text-dark-primary">
               {formatPrizePool(prizePool, web3)}
             </span>
           </div>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle">
-          <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-dark-secondary/70" />
-            <span className="text-dark-secondary">{listedBy}</span>
+        {/* Listed By Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[160px]">
+          <DataLabel label="Listed By" />
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
+            <Users className="w-3.5 h-3.5 text-dark-secondary/70 flex-shrink-0" />
+            <span className="text-dark-secondary truncate">{listedBy}</span>
           </div>
         </TableCell>
 
-        <TableCell className="px-4 py-3 align-middle text-right">
-          <div className="flex items-center justify-end gap-2">
-            <TooltipProvider>
+        {/* Actions Cell */}
+        <TableCell className="p-3 md:px-4 md:py-3 align-middle block md:table-cell md:w-[180px] text-left md:text-right">
+          {/* <DataLabel label="Actions" /> */} {/* Label not needed here */}
+          <div className="flex items-center md:justify-end gap-2 flex-wrap">
+            {" "}
+            {/* flex-wrap for mobile */}
+            <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon" // Use icon size for consistency
                     onClick={toggleDetails}
-                    className="text-dark-secondary hover:text-dark-primary hover:bg-primary/50 p-1 h-8 w-8"
+                    className="text-dark-secondary hover:text-dark-primary hover:bg-primary/50 h-8 w-8"
                   >
+                    <span className="sr-only">
+                      {showDetails ? "Hide" : "Show"} details
+                    </span>
                     {showDetails ? (
                       <ChevronUp className="w-4 h-4" />
                     ) : (
@@ -268,107 +299,137 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
+            {/* "View" button can link to a dedicated event page if needed */}
             <Button
               variant="ghost"
               size="sm"
               className="text-dark-secondary hover:text-dark-primary hover:bg-primary/50"
+              // onClick={() => navigate(`/event/${eventId}`)} // Example navigation
             >
-              <Eye className="w-4 h-4 mr-1" />
+              <Eye className="w-4 h-4 mr-1.5" />
               View
             </Button>
-
             {!isCompleted && isAwaitingResult && !isDeclaringWinner && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleDeclareWinnerClick}
-                className="bg-secondary/20 border-secondary/60 text-secondary hover:bg-secondary/30"
+                className="bg-admin-warning/10 border-admin-warning/40 text-admin-warning hover:bg-admin-warning/20 hover:border-admin-warning/60"
               >
-                <Award className="h-4 w-4 mr-1" /> Declare
+                <Award className="h-4 w-4 mr-1.5" /> Declare
               </Button>
             )}
           </div>
-
           {isCompleted && winningOption && (
-            <p
-              className="text-xs text-admin-success font-semibold mt-1 truncate"
-              title={`Winner: ${winningOption}`}
-            >
-              Winner: {winningOption}
-            </p>
+            <div className="mt-2 text-left md:text-right">
+              {" "}
+              {/* Align winner text */}
+              <p
+                className="text-xs text-admin-success font-semibold truncate inline-flex items-center gap-1"
+                title={`Winner: ${winningOption}`}
+              >
+                <CheckCircle2 className="h-3 w-3" /> Winner: {winningOption}
+              </p>
+            </div>
           )}
         </TableCell>
       </TableRow>
 
-      {/* Details Row (conditional) */}
+      {/* Details Row / Section (conditional) */}
       {showDetails && (
-        <TableRow className="bg-primary/30">
-          <TableCell colSpan={8} className="p-0 border-t-0">
-            <div className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase text-dark-secondary">
-                    Event Details
+        <TableRow className="bg-primary/20 block md:table-row">
+          {/* On mobile, this cell spans the full width. On desktop, it spans all columns */}
+          <TableCell colSpan={8} className="p-0 block md:table-cell">
+            <div className="p-4 m-2 md:m-0 md:p-5 space-y-4 border-t border-gray-700/60 md:border-t-0">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                {/* Event Details */}
+                <div className="space-y-3 p-3 bg-primary/30 rounded-lg border border-gray-700/40">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold uppercase text-dark-secondary tracking-wide">
+                    <Info className="w-4 h-4" /> Event Details
                   </h4>
-                  <p className="text-sm text-dark-primary">{description}</p>
-                  <div className="flex items-center gap-2 text-sm">
+                  <p className="text-sm text-dark-primary leading-relaxed">
+                    {description || "No description provided."}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm pt-1">
                     <span className="text-dark-secondary">ID:</span>
-                    <span className="font-mono text-dark-primary">
+                    <span className="font-mono text-xs text-dark-primary bg-primary/50 px-1.5 py-0.5 rounded">
                       #{eventId}
                     </span>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase text-dark-secondary">
-                    Timeline
+                {/* Timeline */}
+                <div className="space-y-3 p-3 bg-primary/30 rounded-lg border border-gray-700/40">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold uppercase text-dark-secondary tracking-wide">
+                    <Calendar className="w-4 h-4" /> Timeline
                   </h4>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex justify-between items-center">
                       <span className="text-dark-secondary">Start:</span>
-                      <span className="text-dark-primary">
-                        {formatDate(startTime)} {formatTime(startTime)}
+                      <span className="text-dark-primary text-right">
+                        {formatDate(startTime)} @ {formatTime(startTime)}
                       </span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between items-center">
                       <span className="text-dark-secondary">End:</span>
-                      <span className="text-dark-primary">
-                        {formatDate(endTime)} {formatTime(endTime)}
+                      <span className="text-dark-primary text-right">
+                        {formatDate(endTime)} @ {formatTime(endTime)}
                       </span>
                     </div>
-                    {isOngoing && (
-                      <div className="flex justify-between text-sm">
+                    {isOngoing && timeUntilEnd > 0 && (
+                      <div className="flex justify-between items-center pt-1">
                         <span className="text-dark-secondary">Time Left:</span>
-                        <span className="text-secondary font-medium">
+                        <span className="text-admin-accent font-medium">
                           {daysUntilEnd > 0 ? `${daysUntilEnd}d ` : ""}
-                          {hoursUntilEnd}h remaining
+                          {hoursUntilEnd > 0 || daysUntilEnd === 0
+                            ? `${hoursUntilEnd}h `
+                            : ""}
+                          remaining
                         </span>
+                      </div>
+                    )}
+                    {isCompleted && (
+                      <div className="flex justify-between items-center pt-1 text-admin-success">
+                        <span className="font-medium">Event Completed</span>
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                    )}
+                    {isAwaitingResult && (
+                      <div className="flex justify-between items-center pt-1 text-admin-warning">
+                        <span className="font-medium">Awaiting Result</span>
+                        <AlertTriangle className="w-4 h-4" />
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-xs font-semibold uppercase text-dark-secondary">
-                    Options
+                {/* Options */}
+                <div className="space-y-3 p-3 bg-primary/30 rounded-lg border border-gray-700/40">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold uppercase text-dark-secondary tracking-wide">
+                    <Tag className="w-4 h-4" /> Options
                   </h4>
-                  <div className="space-y-1">
-                    {options.map((option: string, idx: number) => (
-                      <div
-                        key={idx}
-                        className={`flex items-center text-sm p-1 rounded ${
-                          winningOption === option
-                            ? "bg-admin-success/20 text-admin-success"
-                            : ""
-                        }`}
-                      >
-                        {winningOption === option && (
-                          <CheckCircle2 className="h-3 w-3 mr-1.5" />
-                        )}
-                        {option}
-                      </div>
-                    ))}
+                  <div className="space-y-1.5">
+                    {options.length > 0 ? (
+                      options.map((option: string, idx: number) => (
+                        <div
+                          key={idx}
+                          className={`flex items-center text-sm p-1.5 rounded transition-colors ${
+                            winningOption === option
+                              ? "bg-admin-success/20 text-admin-success font-medium"
+                              : "text-dark-primary"
+                          }`}
+                        >
+                          {winningOption === option && (
+                            <CheckCircle2 className="h-4 w-4 mr-2 flex-shrink-0" />
+                          )}
+                          <span className="truncate">{option}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-dark-secondary italic">
+                        No options listed.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -377,11 +438,12 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
         </TableRow>
       )}
 
-      {/* Declare Winner Row (conditional) */}
+      {/* Declare Winner Row / Section (conditional) */}
       {isDeclaringWinner && (
-        <TableRow>
-          <TableCell colSpan={8} className="p-0 border-t-0">
-            <div className="bg-primary/30 p-4 rounded-lg m-2 border border-gray-700/40">
+        <TableRow className="bg-primary/10 block md:table-row">
+          {/* On mobile, this cell spans the full width. On desktop, it spans all columns */}
+          <TableCell colSpan={8} className="p-0 block md:table-cell">
+            <div className="bg-card p-4 rounded-lg m-2 border border-secondary/50 shadow-md">
               <DeclareWinnerSection
                 event={event}
                 contract={contract}
