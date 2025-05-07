@@ -28,42 +28,103 @@ import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 import WatchList from "./pages/WatchList/WatchList";
 import SelfAssessmentPage from "./pages/SelfAssessment/SelfAssessmentPage";
+import Unauthorized from "./pages/Unauthorized/Unauthorized";
+import RoleRoute from "./components/RouteGuard/RoleRoute";
+import NotFound from "./pages/NotFound/NotFound";
 
 function Layout() {
   const location = useLocation();
-  const hideFooterRoutes = ["/login", "/reset-password", "/email-verify"];
+  const hideFooterRoutes = [
+    "/login",
+    "/reset-password",
+    "/email-verify",
+    "/unauthorized",
+    "/admin",
+  ];
 
+  // Define all valid routes
+  const validRoutes = [
+    "/",
+    "/upcoming",
+    "/results",
+    "/politics",
+    "/sports",
+    "/news",
+    "/contactus",
+    "/reward",
+    "/privacy-policy",
+    "/terms-of-use",
+    "/login",
+    "/reset-password",
+    "/email-verify",
+    "/unauthorized",
+    "/dashboard",
+    "/profile",
+    "/deposit",
+    "/self-assessment",
+    "/watchlist",
+    "/admin",
+  ];
+
+  // Check if current path matches any valid route (ignoring dynamic routes)
+  const isValidRoute =
+    validRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/bet/");
+
+  // Hide footer if path is in hideFooterRoutes OR if it's not a valid route (404)
+  const shouldHideFooter =
+    hideFooterRoutes.includes(location.pathname) || !isValidRoute;
   return (
     <>
       <Navbar />
+
       <Routes>
-        <Route path="/admin" element={<AdminPanel />} />
-        <Route
-          path="/bet/:eventId"
-          element={<BetDetails onCancel={() => console.log("Bet canceled")} />}
-        />
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/deposit" element={<DepositPage />} />
-        <Route path="/politics" element={<Politics />} />
-        <Route path="/sports" element={<Sports />} />
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/results" element={<Results />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/contactus" element={<ContactUs />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/email-verify" element={<EmailVerify />} />
+        <Route path="/politics" element={<Politics />} />
+        <Route path="/sports" element={<Sports />} />
         <Route path="/news" element={<News />} />
+        <Route path="/contactus" element={<ContactUs />} />
         <Route path="/reward" element={<Reward />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-use" element={<TermsOfUse />} />
-        <Route path="/watchlist" element={<WatchList />} />
-        <Route path="/self-assessment" element={<SelfAssessmentPage />} />
+
+        {/* Auth pages */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/email-verify" element={<EmailVerify />} />
+
+        {/* Unauthorized */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
+        {/* Authenticated: user + admin */}
+        <Route element={<RoleRoute allowedRoles={["user", "admin"]} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/bet/:eventId"
+            element={
+              <BetDetails onCancel={() => console.log("Bet canceled")} />
+            }
+          />
+          <Route path="/deposit" element={<DepositPage />} />
+          <Route path="/self-assessment" element={<SelfAssessmentPage />} />
+          <Route path="/watchlist" element={<WatchList />} />
+        </Route>
+
+        {/* Admin only */}
+        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminPanel />} />
+        </Route>
+
+        {/* 404 catch-all */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {/* Hide footer on specific routes */}
-      {!hideFooterRoutes.includes(location.pathname) && <Footer />}
+      {/* Footer */}
+      {!shouldHideFooter && <Footer />}
     </>
   );
 }
