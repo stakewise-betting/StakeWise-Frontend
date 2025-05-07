@@ -63,8 +63,7 @@ module.exports = {
             light: "#fee2e2", // red-100
           },
         },
-        
-      
+      },
       
       fontFamily: {
         "saira-stencil": ["Saira Stencil One", "sans-serif"], // Saira Stencil font for site name
@@ -176,6 +175,7 @@ module.exports = {
     },
   },
   plugins: [
+    require('tailwind-scrollbar'),
     // You can add plugins like forms, typography, aspect-ratio, etc.
     // require('@tailwindcss/forms'),
     // require('@tailwindcss/typography'),
@@ -294,4 +294,4 @@ module.exports = {
       addComponents(adminComponents);
     }
   ],
-}}
+}

@@ -1,5 +1,6 @@
 // src/components/admin/dashboard/Dashboard.tsx
 import React from "react";
+import Web3 from "web3"; // Import Web3
 import {
   Card,
   CardContent,
@@ -15,20 +16,26 @@ import {
   Wallet,
   Download,
   Info,
+  DollarSign,
 } from "lucide-react";
-import DownloadReport from "../reports/DownloadReport"; // Adjust path if needed
+import DownloadReport from "../reports/DownloadReport";
+import RecentBetsTable, { RecentBet } from "./RecentBetsTable"; // Import the new component and type
 
 interface DashboardProps {
   adminProfit: string;
   adminAddress: string;
   totalEvents: number;
   ongoingEvents: number;
-  totalBetsPlaced: number;
+  totalBetsPlaced: string; // Total value placed (ETH string)
   totalUsers: number;
-  loading: boolean;
+  loading: boolean; // Loading for top cards/details
+  // --- Add props for recent bets --- NEW ---
+  recentBets: RecentBet[];
+  loadingRecentBets: boolean;
+  web3Instance: Web3 | null; // Receive web3 instance
 }
 
-// --- Skeleton Loader Component ---
+// --- Skeleton Loaders --- (Keep existing SkeletonCard and SkeletonDetailCard)
 const SkeletonCard: React.FC = () => (
   <div className="bg-card text-dark-primary rounded-xl shadow-lg border border-gray-700/60 p-4 animate-pulse space-y-4">
     {/* Header Placeholder */}
@@ -67,34 +74,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
   ongoingEvents,
   totalBetsPlaced,
   totalUsers,
-  loading,
+  loading, // Loading for top cards
+  recentBets, // Receive recent bets
+  loadingRecentBets, // Receive loading state for bets
+  web3Instance, // Receive web3
 }) => {
+  // --- Helper functions --- (Keep existing displayValue, displayAddress)
   const displayValue = (value: string | number): string | number =>
-    // Skeleton handled by conditional rendering, so just return value or empty
     loading ? "" : value;
 
   const displayAddress = (address: string): string => {
     if (loading) return "";
-    if (!address || address === "...") return "..."; // Keep placeholder if address not loaded yet but component isn't in main loading state
+    if (!address || address === "...") return "...";
     return `${address.substring(0, 6)}...${address.substring(
       address.length - 4
     )}`;
   };
 
-  // --- Card Styling (No change needed here) ---
+  // --- Styling classes --- (Keep existing cardBaseClasses, IconWrapper, button classes)
   const cardBaseClasses = `
         bg-card text-dark-primary rounded-xl shadow-lg
         border border-gray-700/60
         transition-all duration-300 ease-in-out
         hover:shadow-xl hover:border-secondary/50
         hover:-translate-y-1
-        overflow-hidden relative // Removed fade-in animation, handled by loading state change
+        overflow-hidden relative
         bg-noise
         dark
     `;
-  // Loading classes are now handled by rendering SkeletonCard
 
-  // Helper for icon backgrounds (No change)
   const IconWrapper: React.FC<{
     children: React.ReactNode;
     className?: string;
@@ -106,38 +114,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     </div>
   );
 
-  // --- Revised Button Styling (Semi-Transparent Base, Fill on Hover) ---
-  const baseButtonClasses = `
-        inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
-        text-sm font-semibold
-        transition-all duration-300 ease-in-out relative overflow-hidden
-        border  // Apply border class
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card focus:ring-secondary/80
-     `;
-
-  const enabledButtonClasses = `
-        ${baseButtonClasses}
-        bg-secondary/20  // Semi-transparent background (adjust opacity 0-100)
-        border-secondary/60 // Visible border in base state
-        text-secondary // Text color matches border in base state
-        hover:bg-secondary // Solid background on hover
-        hover:text-white // White text on hover for contrast
-        hover:border-secondary // Keep border color consistent on hover
-        hover:-translate-y-0.5 // Slight lift effect
-        shadow-sm hover:shadow-md hover:shadow-secondary/30
-     `;
-
-  const loadingButtonClasses = `
-        ${baseButtonClasses}
-        bg-gray-600/50 text-gray-400 cursor-not-allowed
-        border-gray-500/30 shadow-none
-    `;
-
-  // --- Main Component Render ---
+  // --- Main Component Render --- MODIFIED
   return (
-    <div className="bg-primary min-h-screen p-4 sm:p-6 lg:p-8 text-dark-primary">
+    // Use min-h-screen and flex for layout if needed, or adjust container
+    <div className="bg-primary p-4 sm:p-6 lg:p-8 text-dark-primary space-y-6 sm:space-y-8">
       {/* Header */}
-      <h2 className="text-3xl font-bold mb-6 sm:mb-8 text-dark-primary flex items-center gap-3">
+      <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
         <IconWrapper className="bg-secondary/20">
           <Activity className="w-6 h-6 text-secondary" />
         </IconWrapper>
@@ -145,13 +127,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </h2>
 
       {/* --- Summary Cards Grid --- */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
           <>
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
+            <SkeletonCard /> <SkeletonCard /> <SkeletonCard /> <SkeletonCard />
           </>
         ) : (
           <>
@@ -174,7 +153,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </p>
               </CardContent>
             </Card>
-
             {/* Events Card */}
             <Card className={cardBaseClasses}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
@@ -194,27 +172,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </p>
               </CardContent>
             </Card>
-
-            {/* Bets Card */}
+            {/* Bets Value Card */}
             <Card className={cardBaseClasses}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
                 <CardTitle className="text-sm font-medium text-dark-secondary">
-                  Total Bets Placed
+                  Total Value Placed
                 </CardTitle>
                 <IconWrapper className="bg-admin-accent/15">
-                  <BarChart2 className="h-5 w-5 text-admin-accent" />
+                  <DollarSign className="h-5 w-5 text-admin-accent" />
                 </IconWrapper>
               </CardHeader>
               <CardContent className="px-4 pb-4">
                 <div className="text-2xl lg:text-3xl font-bold text-dark-primary">
-                  {displayValue(totalBetsPlaced)}
+                  {displayValue(totalBetsPlaced)} ETH
                 </div>
                 <p className="text-xs text-dark-secondary pt-1">
-                  Across all events
+                  Across all events (in ETH)
                 </p>
               </CardContent>
             </Card>
-
             {/* User Card */}
             <Card className={cardBaseClasses}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
@@ -236,12 +212,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
         )}
       </div>
 
+      {/* --- Recent Bets Table --- NEW SECTION --- */}
+      <div>
+        {" "}
+        {/* Add a div wrapper if needed for spacing */}
+        <RecentBetsTable
+          bets={recentBets}
+          loading={loadingRecentBets}
+          web3Instance={web3Instance}
+        />
+      </div>
+
       {/* --- Admin Details & Reports Grid --- */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         {loading ? (
           <>
-            <SkeletonDetailCard />
-            <SkeletonDetailCard />
+            <SkeletonDetailCard /> <SkeletonDetailCard />
           </>
         ) : (
           <>
@@ -259,7 +245,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </CardHeader>
               <CardContent className="p-4 space-y-4">
                 <CardDescription className="text-sm text-dark-secondary flex items-center gap-2">
-                  <Info size={16} className="text-admin-info flex-shrink-0" />
+                  <Info size={16} className="text-admin-info flex-shrink-0" />{" "}
                   Contract administrator wallet address.
                 </CardDescription>
                 <p className="text-sm font-medium text-dark-primary pt-2">
@@ -267,14 +253,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </p>
                 <div
                   className="text-sm text-dark-secondary font-mono break-all bg-black/20 p-3 rounded-md border border-gray-700/50 shadow-inner"
-                  title={adminAddress} // Show full address on hover if not loading
+                  title={adminAddress}
                 >
                   {displayAddress(adminAddress)}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Reports Card - Styling confirmed & Button updated */}
+            {/* Reports Card */}
             <Card className={cardBaseClasses}>
               <CardHeader className="px-4 pt-4 pb-3 border-b border-gray-700/50 flex flex-row items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -290,14 +276,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <CardDescription className="text-sm text-dark-secondary mb-4">
                   Download cumulative administrative reports.
                 </CardDescription>
-                {/* Inside the Reports Card -> CardContent */}
                 <div className="mt-auto">
-                  {/* Render DownloadReport directly, passing necessary props */}
-                  {/* DownloadReport now handles its own button rendering and styling */}
-                  <DownloadReport
-                    adminProfit={adminProfit}
-                    loading={loading} // Pass the loading state directly
-                  />
+                  <DownloadReport adminProfit={adminProfit} loading={loading} />
                 </div>
               </CardContent>
             </Card>
@@ -307,33 +287,3 @@ export const Dashboard: React.FC<DashboardProps> = ({
     </div>
   );
 };
-
-// --- Mock/Placeholder DownloadReport component for demonstration ---
-// Example using renderTrigger prop:
-/*
-const DownloadReport = ({ adminProfit, renderTrigger }) => {
-    const handleDownload = () => {
-        console.log("Downloading report for profit:", adminProfit);
-        // Add actual download logic here (e.g., generate CSV/PDF)
-        const csvData = `Admin Profit,${adminProfit}\nTotal Events,...\n...`; // Example data
-        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        if (link.download !== undefined) { // feature detection
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "admin_report.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
-
-    // Use the render prop to render the button passed from the parent
-    // The parent (Dashboard) now controls the button's appearance
-    return renderTrigger(handleDownload);
-};
-*/
-
-// --- Make sure DownloadReport is imported correctly ---
-// import DownloadReport from '../reports/DownloadReport';

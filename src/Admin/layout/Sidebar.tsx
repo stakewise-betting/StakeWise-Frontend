@@ -1,8 +1,12 @@
-// components/admin/layout/Sidebar.tsx
 import React from "react";
-// Removed Button import as we'll use a standard button/div with custom styles
-import { LayoutDashboard, CalendarDays, Settings } from "lucide-react"; // Icons
-import clsx from "clsx"; // Utility for conditional classes (install: npm i clsx or yarn add clsx)
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  Settings,
+  CircleUserRound,
+} from "lucide-react";
+import clsx from "clsx";
 
 interface SidebarProps {
   activeSection: string;
@@ -12,20 +16,36 @@ interface SidebarProps {
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "events", label: "Events", icon: CalendarDays },
-  // Add more sections here if needed
-  // { id: "users", label: "User Management", icon: Users },
-  // { id: "settings", label: "Admin Details", icon: Settings }, // Example if you add it back
+  { id: "users", label: "Users", icon: Users },
+  { id: "profile", label: "Profile", icon: CircleUserRound },
+  // { id: "settings", label: "Admin Details", icon: Settings },
 ];
 
-// Helper for Icon Backgrounds (Optional, but consistent with Dashboard)
-const IconWrapper: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = "" }) => (
-  <div
-    className={`p-2 rounded-lg flex items-center justify-center ${className}`}
-  >
-    {children}
+// Icon background accent color
+const iconBg = "bg-admin-accent/10 text-admin-accent";
+
+// Animated gradient logo text
+const Logo = () => (
+  <div className="flex items-center gap-3 px-2">
+    <span className="text-2xl">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="16" fill="#6d28d9" />
+        <text
+          x="50%"
+          y="58%"
+          textAnchor="middle"
+          fill="#fff"
+          fontSize="18"
+          fontFamily="Saira Stencil One, sans-serif"
+          dy=".3em"
+        >
+          S
+        </text>
+      </svg>
+    </span>
+    <h2 className="gradient-text font-saira-stencil text-2xl tracking-wide animate-appear">
+      Admin Panel
+    </h2>
   </div>
 );
 
@@ -33,74 +53,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSelectSection,
 }) => {
-  // Base classes for all navigation links
-  const baseLinkClasses = `
-        flex items-center w-full px-3 py-2.5 rounded-lg // Padding and rounding
-        text-sm font-medium // Text styling
-        transition-all duration-200 ease-in-out // Smooth transitions
-        cursor-pointer group // Indicate interactivity
-    `;
-
-  // Classes for INACTIVE navigation links
-  const inactiveLinkClasses = `
-        text-dark-secondary // Muted text color
-        hover:text-dark-primary // Brighter text on hover
-        hover:bg-card // Subtle background on hover
-    `;
-
-  // Classes for ACTIVE navigation links
-  const activeLinkClasses = `
-        bg-secondary/15 // Semi-transparent accent background
-        text-secondary // Accent text color
-        font-semibold // Slightly bolder text
-    `;
-
   return (
-    // Main sidebar container styling
-    <aside className="w-64 bg-primary border-r border-gray-700/60 h-full flex flex-col p-4 text-dark-primary">
-      {/* Sidebar Header/Title */}
-      <div className="mb-8 px-2 flex items-center gap-3">
-        <IconWrapper className="bg-secondary/20">
-          {/* You could use a specific logo icon here */}
-          <Settings className="w-5 h-5 text-secondary" />
-        </IconWrapper>
-        <h2 className="text-xl font-bold text-dark-primary">Admin Panel</h2>
-      </div>
+    <aside className="w-64 h-full flex flex-col p-4 bg-primary border-r border-gray-700/60 text-dark-primary relative bg-noise bg-floating-shapes animate-admin-fade-in transition-all duration-300">
+      {/* Logo/Header */}
+      <div className="mb-10">{<Logo />}</div>
 
-      {/* Navigation Links */}
-      <nav className="flex flex-col space-y-1.5">
+      {/* Nav */}
+      <nav className="flex flex-col gap-1.5">
         {navItems.map((item) => {
           const isActive = activeSection === item.id;
           return (
-            <button // Use button for accessibility and click handling
+            <button
               key={item.id}
               onClick={() => onSelectSection(item.id)}
-              // Combine base, and conditionally active/inactive classes
               className={clsx(
-                baseLinkClasses,
-                isActive ? activeLinkClasses : inactiveLinkClasses
+                "group flex items-center w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none relative",
+                // Orange hover and active states
+                isActive
+                  ? "bg-orange-500/20 text-orange-600 shadow-btn-glow scale-102"
+                  : "text-dark-secondary hover:bg-orange-500/10 hover:text-orange-600"
               )}
-              aria-current={isActive ? "page" : undefined} // Accessibility for active page
+              aria-current={isActive ? "page" : undefined}
             >
-              <item.icon
+              <span
                 className={clsx(
-                  "mr-3 h-5 w-5 flex-shrink-0" // Icon spacing and size
-                  // Icon color matches text color automatically via inheritance,
-                  // but explicitly setting ensures consistency:
-                  // isActive ? 'text-secondary' : 'text-dark-secondary group-hover:text-dark-primary'
+                  "flex items-center justify-center mr-3 rounded-lg transition-all duration-200 h-9 w-9",
+                  isActive
+                    ? "bg-orange-500 text-white shadow-btn-glow"
+                    : "bg-orange-500/10 text-orange-500 group-hover:bg-orange-600/20 group-hover:text-orange-600"
                 )}
-                aria-hidden="true"
-              />
-              <span>{item.label}</span>
+              >
+                <item.icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span
+                className={clsx(
+                  "text-base transition-colors duration-200",
+                  isActive ? "font-semibold" : "font-normal"
+                )}
+              >
+                {item.label}
+              </span>
             </button>
           );
         })}
       </nav>
 
-      {/* Optional: Footer */}
-      {/* <div className="mt-auto border-t border-gray-700/60 pt-4 px-2">
-                 <p className="text-xs text-dark-secondary">© 2024 StakeWise Admin</p>
-             </div> */}
+      {/* Optional: Sidebar Footer (e.g. settings) */}
+      <div className="mt-auto pt-6">
+        <button
+          onClick={() => onSelectSection("settings")}
+          className={clsx(
+            "flex items-center w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none",
+            "hover:bg-admin-secondary/10 hover:text-admin-secondary text-dark-secondary"
+          )}
+        >
+          <span className="flex items-center justify-center mr-3 rounded-lg h-9 w-9 bg-admin-secondary/10 text-admin-secondary group-hover:bg-admin-secondary/20 group-hover:text-admin-secondary transition-all duration-200">
+            <Settings className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="text-base">Admin Details</span>
+        </button>
+      </div>
     </aside>
   );
 };

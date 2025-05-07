@@ -1,6 +1,6 @@
 // config/contractConfig.ts
 
-export const contractAddress = "0xA5FfC27f1F6F5AC53aA94848944AfBC3CF73D552";
+export const contractAddress = "0x285D71352c9e1DDA5904316C1D0B09bd0CB9035C";
 
 export const contractABI = [
   {
@@ -532,6 +532,20 @@ export const contractABI = [
   {
     inputs: [],
     name: "getTotalAdminProfit",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+    constant: true,
+  },
+  {
+    inputs: [],
+    name: "getTotalBetsPlaced",
     outputs: [
       {
         internalType: "uint256",

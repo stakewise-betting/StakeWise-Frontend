@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Search, ChevronUp, CalendarDays, Clock, Tag, Trophy, Coins} from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  ChevronUp, CalendarDays, Clock, Tag,
+  Trophy, Coins, 
+} from "lucide-react";
+import "react-datepicker/dist/react-datepicker.css";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 
@@ -99,7 +107,7 @@ const ResultsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#1a1e2e]">
+    <div className="min-h-screen">
       {/* Hero Section with Background Image */}
       <div className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroBackgroundImage})` }}>
@@ -119,13 +127,13 @@ const ResultsPage: React.FC = () => {
             <input
               type="text"
               placeholder="Search events..."
-              className="w-full rounded-lg bg-[#2a2e3e] border border-[#3a3e4e] px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none"
+              className="w-full rounded-lg bg-[#333447] border-none px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
-            className="ml-2 rounded-lg bg-[#2a2e3e] border border-[#3a3e4e] px-4 py-2 text-white flex items-center"
+            className="ml-2 rounded-lg bg-[#333447] border-none px-4 py-2 text-white flex items-center"
             onClick={applyFilters}
           >
             <span>Filter</span>
@@ -143,14 +151,14 @@ const ResultsPage: React.FC = () => {
             currentEvents.map((event, index) => (
               <div
                 key={index}
-                className="rounded-lg bg-[#252836] overflow-hidden border border-[#353846]"
+                className="rounded-lg bg-[#333447] overflow-hidden border-none"
               >
                 <div
                   className="flex items-center justify-between p-4 cursor-pointer"
                   onClick={() => toggleEventExpansion(index)}
                 >
                   <div className="flex items-center">
-                    <div className="h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#1a1e2e] border border-[#353846] flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#1C1C27] border-none flex items-center justify-center">
                       <img
                         src={
                           event.imageURL ||

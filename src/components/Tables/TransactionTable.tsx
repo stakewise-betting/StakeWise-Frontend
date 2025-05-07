@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import transactionHistory from "@/data/transactionHistory.json";
+import { useUserTransactions } from "@/hooks/useUserTransactions";
 
 interface PaginationProps {
   currentPage: number;
@@ -99,15 +99,28 @@ function PaginationControls({
 }
 
 export default function TransactionTable() {
+  const { transactions, loading, error } = useUserTransactions();
   const [date, setDate] = React.useState<Date>();
   const [status, setStatus] = React.useState<string>("");
   const [transactionType, setTransactionType] = React.useState<string>("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize] = React.useState(5); // Number of items per page
 
+  // Map blockchain transactions to match previous UI data structure
+  const mappedTransactions = React.useMemo(() => {
+    return transactions.map((tx) => ({
+      eventId: tx.txHash, // Use txHash as a substitute for eventId
+      eventName: tx.eventName,
+      date: tx.date.toLocaleString(),
+      transactionType: tx.type, // "Bet Placed" or "Winnings Received"
+      amount: tx.amount,
+      status: "Completed", // Assume all blockchain transactions are completed
+    }));
+  }, [transactions]);
+
   // Filter transactions based on selected filters
   const filteredTransactions = React.useMemo(() => {
-    return transactionHistory.filter((transaction) => {
+    return mappedTransactions.filter((transaction) => {
       // Status filter
       if (status && transaction.status.toLowerCase() !== status.toLowerCase()) {
         return false;
@@ -138,7 +151,7 @@ export default function TransactionTable() {
 
       return true;
     });
-  }, [status, transactionType, date]);
+  }, [mappedTransactions, status, transactionType, date]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredTransactions.length / pageSize);
@@ -156,6 +169,14 @@ export default function TransactionTable() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  if (loading) {
+    return <div>Loading transactions...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="p-8 rounded-[20px] lg:mx-24 md:mx-16 mx-8 mb-[96px] bg-[#333447] min-h-[550px] space-y-6">
@@ -179,14 +200,13 @@ export default function TransactionTable() {
           <SelectTrigger className="bg-[#E27625] border-none rounded-[10px]">
             <SelectValue placeholder="Transaction Type" />
           </SelectTrigger>
-          <SelectContent className="bg-[#1C1C27] border-none text-white rounded-[10px]" >
-            <SelectItem value="deposit">Deposit</SelectItem>
-            <SelectItem value="withdrawal">Withdrawal</SelectItem>
-            <SelectItem value="refund">Refund</SelectItem>
+          <SelectContent className="bg-[#1C1C27] border-none text-white rounded-[10px]">
+            <SelectItem value="Bet Placed">Bet Placed</SelectItem>
+            <SelectItem value="Winnings Received">Winnings Received</SelectItem>
           </SelectContent>
         </Select>
 
-        <Popover >
+        <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -234,7 +254,6 @@ export default function TransactionTable() {
         <Table>
           <TableHeader className="">
             <TableRow className="border-[#56577A] text-[#A0AEC0] font-medium lg:text-lg text-sm">
-              <TableHead>EVENT ID</TableHead>
               <TableHead>EVENT NAME</TableHead>
               <TableHead>DATE</TableHead>
               <TableHead>TRANSACTION TYPE</TableHead>
@@ -249,18 +268,15 @@ export default function TransactionTable() {
                   key={index}
                   className="border-[#56577A] hover:bg-slate-800 lg:text-sm text-xs"
                 >
-                  <TableCell>{transaction.eventId}</TableCell>
                   <TableCell>{transaction.eventName}</TableCell>
                   <TableCell>{transaction.date}</TableCell>
                   <TableCell>
                     <span
                       className={cn("px-3 py-2 rounded font-medium text-sm", {
                         "bg-blue-500/10 text-blue-500":
-                          transaction.transactionType === "Deposit",
-                        "bg-orange-500/10 text-orange-500":
-                          transaction.transactionType === "Withdrawal",
-                        "bg-purple-500/10 text-purple-500":
-                          transaction.transactionType === "Refund",
+                          transaction.transactionType === "Bet Placed",
+                        "bg-green-500/10 text-green-500":
+                          transaction.transactionType === "Winnings Received",
                       })}
                     >
                       {transaction.transactionType}
@@ -269,11 +285,9 @@ export default function TransactionTable() {
                   <TableCell
                     className={cn("font-medium", {
                       "text-blue-500":
-                        transaction.transactionType === "Deposit",
-                      "text-orange-500":
-                        transaction.transactionType === "Withdrawal",
-                      "text-purple-500":
-                        transaction.transactionType === "Refund",
+                        transaction.transactionType === "Bet Placed",
+                      "text-green-500":
+                        transaction.transactionType === "Winnings Received",
                     })}
                   >
                     {transaction.amount}
