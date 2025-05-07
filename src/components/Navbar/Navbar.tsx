@@ -135,7 +135,7 @@ const Navbar: React.FC = () => {
   const navItems: NavItem[] = [
     {
       name: "POLITICS",
-      href: "/polictics",
+      href: "/politics",
       icon: <Building2 className="h-4 w-4 mr-2" />,
       breakpoint: "always",
     },
@@ -280,7 +280,7 @@ const Navbar: React.FC = () => {
 
                 <DropdownMenuSeparator className="bg-gray-700" />
                 <DropdownMenuItem asChild>
-                  <Link to="/contact" className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+                  <Link to="/contactus" className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Contact Us
                   </Link>
