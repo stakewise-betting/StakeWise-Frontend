@@ -1,331 +1,240 @@
-//news page
-import { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import { FaCalendarAlt, FaTag, FaExternalLinkAlt } from "react-icons/fa";
-import { AppContext } from "@/context/AppContext";
+// src/pages/NewsPage/news.tsx
+import React, { useState, useEffect } from "react";
+import axios from "axios"; // Make sure axios is installed
+import NewsCard, { NewsArticle } from "../../components/NewsCard/NewsCard";
+import { Skeleton } from "@/components/ui/skeleton"; // Assuming you have a Skeleton component
+import { SearchIcon, SlidersIcon } from "lucide-react";
 
-// Define interfaces for the news data
-interface NewsItem {
-  id: string;
-  title: string;
-  description: string;
-  source: string;
-  url: string;
-  imageUrl: string;
-  publishedAt: string;
-  category: string;
-}
+// --- SIMULATION: Replace this with actual API fetching ---
+// Placeholder function to simulate fetching news data like Polymarket would (from an external source/API)
+const fetchAggregatedNews = async (): Promise<NewsArticle[]> => {
+  console.log("Simulating fetching news from external sources...");
+  // In a real scenario, you'd call your backend or a news API here.
+  // Example: const response = await axios.get('/api/v1/news/aggregated');
+  // Example: const response = await axios.get('https://newsapi.org/v2/top-headlines?country=us&apiKey=YOUR_API_KEY');
 
-const News = () => {
-  const { backendUrl } = useContext(AppContext)!;
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  // Add error state to track API errors
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // Return mock data structured like a news API response (e.g., NewsAPI.org)
+  // Use data similar to the provided image for structure
+  return [
+    {
+      id: "1", // Use unique IDs
+      title: "Subversive Ballads in Elizabeth Barrett Browning's Poems (1844)",
+      author: "Montobahn Sheeply",
+      source: "Literary Journal", // Example source
+      description:
+        '"At four and a half," Elizabeth Barrett Browning reminisced, "my great delight was poring over fairy phenomenons and the a..."',
+      url: "#", // Replace with actual article URL
+      urlToImage:
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", // Example image
+      publishedAt: "2012-06-19T10:00:00Z",
+      category: "GENERAL",
+    },
+    {
+      id: "2",
+      title: "Explaining Federal Budgeting Through Privilege Economy",
+      author: "Arjun Guttja",
+      source: "Economic Times",
+      description:
+        "The American federal budget, contrary to all common-sense proclamations, is not created ex nihilo each year. In fact, less...",
+      url: "#",
+      urlToImage:
+        "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", // Example image
+      publishedAt: "2012-06-19T09:30:00Z",
+      category: "GENERAL",
+    },
+    {
+      id: "3",
+      title: "Freudian Analysis of The Manchurian Candidate",
+      author: "John Antwerp",
+      source: "Film Studies Quarterly",
+      description:
+        "The Manchurian Candidate hit the silver screen in 1962 at the the end of two important American moments: the anti-Communis...",
+      url: "#",
+      urlToImage:
+        "https://images.unsplash.com/photo-1470219556762-1771e7f9427d?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", // Example image
+      publishedAt: "2012-06-19T09:00:00Z",
+      category: "GENERAL",
+    },
+    {
+      id: "4",
+      title: "Non-linearity in the Study of Consumer History",
+      author: "Lawrence Bowdish",
+      source: "Historical Research",
+      description:
+        "There is one section of American history that really lends itself to a non-linear study, but has yet to include it. Consu...",
+      url: "#",
+      urlToImage:
+        "https://images.unsplash.com/photo-1534447677768-be436bb09401?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", // Example image
+      publishedAt: "2012-06-19T08:30:00Z",
+      category: "GENERAL",
+    },
+    // Add more mock articles as needed to fill the grid
+    {
+      id: "5",
+      title: "Exploring Renewable Energy Trends in Europe",
+      author: "Jane Doe",
+      source: "Energy Today",
+      description:
+        "European nations are accelerating their transition to renewable energy sources, driven by climate goals and technological advancements...",
+      url: "#",
+      urlToImage:
+        "https://images.unsplash.com/photo-1466611653911-95081537e5b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80",
+      publishedAt: "2024-07-20T11:00:00Z",
+      category: "Technology",
+    },
+    {
+      id: "6",
+      title: "Crypto Market Sees Volatility Amid Regulatory News",
+      author: "Crypto Analyst",
+      source: "CoinWatch",
+      description:
+        "The cryptocurrency market experienced significant price swings following announcements about potential new regulations in major economies...",
+      url: "#",
+      urlToImage:
+        "https://images.unsplash.com/photo-1621504450280- S6HSQWf5f5?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80", // Placeholder
+      publishedAt: "2024-07-19T15:45:00Z",
+      category: "Crypto",
+    },
+  ];
+};
+// --- End Simulation ---
+
+const NewsPage: React.FC = () => {
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Categories for filter
-  const categories = ["All", "Sports", "Crypto", "Esports", "Gaming"];
-
   useEffect(() => {
-    fetchNews();
-  }, [currentPage, selectedCategory]);
+    const loadNews = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch news using the (simulated) aggregation function
+        const fetchedArticles = await fetchAggregatedNews();
 
-  const fetchNews = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // API call to fetch news - replace with your actual API endpoint
-      // Add more robust error handling and logging
-      console.log(`Fetching news from: ${backendUrl}/api/news/public`);
-      
-      const { data } = await axios.get(`${backendUrl}/api/news/public`, {
-        params: {
-          page: currentPage,
-          limit: 6,
-          category: selectedCategory === "All" ? "" : selectedCategory,
-        },
-        // Add timeout to prevent long waits
-        timeout: 5000
-      });
+        // **IMPORTANT**: Adapt this mapping based on the ACTUAL structure
+        // returned by your chosen News API or backend endpoint.
+        const formattedArticles = fetchedArticles.map((article) => ({
+          id: article.id || article.url, // Ensure unique ID, fallback to URL if needed
+          title: article.title || "No Title",
+          author: article.author || undefined, // Optional
+          source:
+            typeof article.source === "object"
+              ? (article.source as any)?.name
+              : article.source, // Handle NewsAPI source object
+          description: article.description || undefined, // Optional
+          url: article.url,
+          urlToImage: article.urlToImage || undefined, // Optional
+          publishedAt: article.publishedAt,
+          category: article.category || "General", // Add category if available or default
+        }));
 
-      if (data && data.success) {
-        setNewsItems(data.news);
-        setTotalPages(data.totalPages);
-        console.log("Successfully fetched news data");
-      } else {
-        const errorMsg = "Failed to fetch news: " + (data?.message || "Unknown error");
-        console.warn(errorMsg);
-        setError(errorMsg);
-        useFallbackData();
+        setArticles(formattedArticles);
+      } catch (err) {
+        console.error("Failed to fetch news:", err);
+        setError("Failed to load news articles. Please try again later.");
+        if (axios.isAxiosError(err)) {
+          setError(
+            `Failed to load news: ${err.response?.data?.message || err.message}`
+          );
+        } else if (err instanceof Error) {
+          setError(`Failed to load news: ${err.message}`);
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      const errorMsg = `Error fetching news: ${error.message || "Unknown error"}`;
-      console.error(errorMsg);
-      setError(errorMsg);
-      useFallbackData();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Use fallback data if API fails
-  const useFallbackData = () => {
-    console.log("Using fallback news data");
-    setNewsItems([
-      {
-        id: "1",
-        title: "Manchester United Secures Dramatic Win in Premier League",
-        description: "A last-minute goal gives Manchester United a crucial victory in their title race.",
-        source: "Sports News Network",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-11T14:30:00Z",
-        category: "Sports"
-      },
-      {
-        id: "2",
-        title: "Bitcoin Price Surges Past $100,000 for First Time",
-        description: "Cryptocurrency markets rally as Bitcoin reaches new all-time high amid institutional adoption.",
-        source: "Crypto Daily",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-12T09:15:00Z",
-        category: "Crypto"
-      },
-      {
-        id: "3",
-        title: "Major eSports Tournament Announces $10 Million Prize Pool",
-        description: "The largest prize pool in eSports history attracts top teams from around the world.",
-        source: "eSports Today",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-10T11:45:00Z",
-        category: "Esports"
-      },
-      {
-        id: "4",
-        title: "NBA Finals Set to Break Viewing Records",
-        description: "This year's NBA finals matchup expected to draw unprecedented global audience.",
-        source: "Basketball Weekly",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-09T16:20:00Z",
-        category: "Sports"
-      },
-      {
-        id: "5",
-        title: "Ethereum 2.0 Upgrade Complete, Transaction Fees Plummet",
-        description: "The long-awaited upgrade brings significant improvements to the Ethereum network.",
-        source: "Blockchain Times",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-08T13:10:00Z",
-        category: "Crypto"
-      },
-      {
-        id: "6",
-        title: "New Gaming Tournament Platform Integrates Blockchain Technology",
-        description: "Revolutionary platform allows gamers to earn cryptocurrency while competing.",
-        source: "Gaming Innovation",
-        url: "#",
-        imageUrl: "/api/placeholder/400/250",
-        publishedAt: "2025-04-07T10:30:00Z",
-        category: "Gaming"
-      }
-    ]);
-    setTotalPages(5);
-  };
-
-  // Filter news based on search term
-  const filteredNews = newsItems.filter(item => 
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Format date to readable format
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
     };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+
+    loadNews();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Skeleton Loader UI
+  const renderSkeletons = () =>
+    Array.from({ length: 8 }).map(
+      (
+        _,
+        index // Show 8 placeholders
+      ) => (
+        <div
+          key={index}
+          className="bg-card dark:bg-card rounded-lg shadow-md overflow-hidden"
+        >
+          <Skeleton className="h-40 w-full" />
+          <div className="p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+            <Skeleton className="h-6 w-full" /> {/* Title */}
+            <Skeleton className="h-4 w-1/3" /> {/* Author */}
+            <Skeleton className="h-12 w-full" /> {/* Description */}
+            <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
+              <Skeleton className="h-4 w-1/3" /> {/* Source */}
+              <Skeleton className="h-4 w-1/4" /> {/* Read More */}
+            </div>
+          </div>
+        </div>
+      )
+    );
 
   return (
-    <div className="min-h-screen bg-primary text-main">
-      {/* Header Banner */}
-      <div className="w-full h-72 bg-cover bg-center relative" style={{ backgroundImage: "url('/api/placeholder/1200/400')" }}>
-        <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Betting News</h1>
-          <p className="text-xl text-white text-center max-w-3xl">
-            Stay updated with the latest news from the world of sports, crypto, and gaming.
+    <div>
+      <div className="relative w-full">
+        <div className="bg-gradient-to-b from-black to-transparent absolute top-0 left-0 right-0 h-64 z-0"></div>
+        <div className="relative z-10 px-6 py-16 md:px-12 lg:px-24 max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-4xl font-bold mb-3 text-white">
+            Latest News
+          </h1>
+          <p className="text-gray-300 text-lg mb-12">
+            Stay updated with the most recent news and developments.
           </p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Filters & Search */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-          <div className="flex flex-wrap gap-2">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => {
-                  setSelectedCategory(category === "All" ? "" : category);
-                  setCurrentPage(1);
-                }}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  (category === "All" && selectedCategory === "") || selectedCategory === category
-                    ? "bg-secondary text-white"
-                    : "bg-secondary/10 text-sub hover:bg-secondary/20"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-          <div className="w-full md:w-auto">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-grow">
               <input
                 type="text"
                 placeholder="Search news..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-80 px-4 py-2 rounded-lg bg-primary border border-secondary focus:outline-none focus:ring-2 focus:ring-secondary"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-purple-600"
               />
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sub">
-                <i className="fas fa-search"></i>
-              </button>
+              <SearchIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
+            <button className="flex items-center justify-center gap-2 bg-gray-800/60 hover:bg-gray-700/70 text-white py-2.5 px-5 rounded-lg sm:w-auto">
+              <SlidersIcon size={18} />
+              <span>Filter</span>
+            </button>
           </div>
         </div>
+      </div>
+      <div className="container mx-auto px-4 py-8 bg-primary text-light-primary dark:text-dark-primary">
 
-        {/* Show error message if API failed */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <p className="text-sm">
-              {error} (Using fallback data instead)
-            </p>
+          <div className="text-center text-red-500 dark:text-red-400 bg-red-100 dark:bg-red-900 p-4 rounded-md">
+            {error}
           </div>
         )}
 
-        {/* News Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-secondary"></div>
-          </div>
-        ) : filteredNews.length === 0 ? (
-          <div className="text-center py-10">
-            <h3 className="text-2xl font-semibold mb-2">No news found</h3>
-            <p className="text-sub">Try adjusting your search or filters</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredNews.map((news) => (
-              <div key={news.id} className="bg-primary border border-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={news.imageUrl} 
-                    alt={news.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      news.category === "Sports" ? "bg-blue-500/10 text-blue-500" : 
-                      news.category === "Crypto" ? "bg-purple-500/10 text-purple-500" : 
-                      news.category === "Esports" ? "bg-red-500/10 text-red-500" : 
-                      news.category === "Gaming" ? "bg-green-500/10 text-green-500" : 
-                      "bg-secondary/10 text-secondary"
-                    }`}>
-                      <FaTag className="inline mr-1 text-xs" />
-                      {news.category}
-                    </span>
-                    <span className="text-sub text-sm">
-                      <FaCalendarAlt className="inline mr-1" />
-                      {formatDate(news.publishedAt)}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-3 hover:text-secondary transition-colors">
-                    <Link to={`/news/${news.id}`}>{news.title}</Link>
-                  </h3>
-                  
-                  <p className="text-sub mb-4 line-clamp-3">{news.description}</p>
-                  
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-sm font-medium">{news.source}</span>
-                    <a 
-                      href={news.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center text-secondary hover:text-accent transition-colors"
-                    >
-                      Read more
-                      <FaExternalLinkAlt className="ml-1" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {!searchTerm && totalPages > 1 && (
-          <div className="flex justify-center mt-12">
-            <div className="flex space-x-1">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  currentPage === 1 
-                    ? "bg-secondary/10 text-sub cursor-not-allowed" 
-                    : "bg-secondary/10 text-sub hover:bg-secondary hover:text-white"
-                }`}
-              >
-                <i className="fas fa-chevron-left"></i>
-              </button>
-              
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    currentPage === i + 1
-                      ? "bg-secondary text-white"
-                      : "bg-secondary/10 text-sub hover:bg-secondary/20"
-                  }`}
-                >
-                  {i + 1}
-                </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {loading
+            ? renderSkeletons()
+            : articles.map((article) => (
+                <NewsCard key={article.id} article={article} />
               ))}
-              
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  currentPage === totalPages
-                    ? "bg-secondary/10 text-sub cursor-not-allowed"
-                    : "bg-secondary/10 text-sub hover:bg-secondary hover:text-white"
-                }`}
-              >
-                <i className="fas fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-        )}
+          {!loading && articles.length === 0 && !error && (
+            <p className="text-center col-span-full text-sub dark:text-dark-secondary">
+              No news articles found.
+            </p>
+          )}
+        </div>
+
+        {/* Optional: Add Pagination component here if needed */}
+        {/* <div className="mt-8 flex justify-center"> */}
+        {/*   <Pagination currentPage={...} totalPages={...} onPageChange={...} /> */}
+        {/* </div> */}
       </div>
     </div>
   );
 };
 
-export default News;
+export default NewsPage;

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Search, ChevronUp } from "lucide-react";
-import "react-datepicker/dist/react-datepicker.css";
+import { ChevronDown, ChevronLeft, ChevronRight, Search, ChevronUp, CalendarDays, Clock, Tag, Trophy, Coins} from "lucide-react";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 
@@ -42,7 +41,7 @@ const ResultsPage: React.FC = () => {
     try {
       const eventCount = await betContract.methods.nextEventId().call();
       const eventList: any[] = [];
-      
+
       for (let eventId = 1; eventId < eventCount; eventId++) {
         try {
           const eventData = await betContract.methods.getEvent(eventId).call();
@@ -71,15 +70,16 @@ const ResultsPage: React.FC = () => {
   // Apply filters function
   const applyFilters = () => {
     let filtered = [...events];
-    
+
     // Apply search term filter
     if (searchTerm) {
-      filtered = filtered.filter(event => 
-        event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (event) =>
+          event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          event.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     setFilteredEvents(filtered);
     setCurrentPage(1);
   };
@@ -93,23 +93,21 @@ const ResultsPage: React.FC = () => {
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const currentEvents = filteredEvents.slice(
+    indexOfFirstEvent,
+    indexOfLastEvent
+  );
 
   return (
     <div className="min-h-screen bg-[#1a1e2e]">
       {/* Hero Section with Background Image */}
-      <div 
-        className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBackgroundImage})` }}
-      >
+      <div className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroBackgroundImage})` }}>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-        
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <h1 className="text-4xl font-bold text-white mb-2">Betting Results</h1>
-          <p className="text-lg text-gray-300 max-w-2xl">
-            Explore all completed events and their outcomes. Check final prize pools, and all event details.
-          </p>
+          <p className="text-lg text-gray-300 max-w-2xl">Explore all completed events and their outcomes. Check final prize pools, and all event details.</p>
         </div>
       </div>
 
@@ -126,7 +124,7 @@ const ResultsPage: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button 
+          <button
             className="ml-2 rounded-lg bg-[#2a2e3e] border border-[#3a3e4e] px-4 py-2 text-white flex items-center"
             onClick={applyFilters}
           >
@@ -147,35 +145,56 @@ const ResultsPage: React.FC = () => {
                 key={index}
                 className="rounded-lg bg-[#252836] overflow-hidden border border-[#353846]"
               >
-                <div 
+                <div
                   className="flex items-center justify-between p-4 cursor-pointer"
                   onClick={() => toggleEventExpansion(index)}
                 >
                   <div className="flex items-center">
                     <div className="h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#1a1e2e] border border-[#353846] flex items-center justify-center">
-                      <img 
-                        src={event.imageURL || "/src/assets/images/resultsLabel-icon.png"} 
-                        alt="Event Logo" 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={
+                          event.imageURL ||
+                          "/src/assets/images/resultsLabel-icon.png"
+                        }
+                        alt="Event Logo"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="ml-4">
-                      <h3 className="font-semibold text-white text-lg">{event.name}</h3>
+                      <h3 className="font-semibold text-white text-lg">
+                        {event.name}
+                      </h3>
                       <div className="flex items-center text-sm text-gray-400">
                         <span className="mr-2">
-                          {new Date(parseInt(event.startTime) * 1000).toLocaleDateString()} - {new Date(parseInt(event.endTime) * 1000).toLocaleDateString()}
+                          {new Date(
+                            parseInt(event.startTime) * 1000
+                          ).toLocaleDateString()}{" "}
+                          -{" "}
+                          {new Date(
+                            parseInt(event.endTime) * 1000
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium 
-                      ${event.name.toLowerCase().includes('crypto') ? 'bg-purple-600 text-white' : 
-                       event.name.toLowerCase().includes('sports') ? 'bg-blue-600 text-white' : 
-                       'bg-green-600 text-white'}`}>
-                      {event.name.toLowerCase().includes('crypto') ? 'Crypto' : 
-                       event.name.toLowerCase().includes('esports') ? 'Esports' : 
-                       event.name.toLowerCase().includes('politics') ? 'Politics' : 'Sports'}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium 
+                      ${
+                        event.name.toLowerCase().includes("crypto")
+                          ? "bg-purple-600 text-white"
+                          : event.name.toLowerCase().includes("sports")
+                          ? "bg-blue-600 text-white"
+                          : "bg-green-600 text-white"
+                      }`}
+                    >
+                      {event.name.toLowerCase().includes("crypto")
+                        ? "Crypto"
+                        : event.name.toLowerCase().includes("esports")
+                        ? "Esports"
+                        : event.name.toLowerCase().includes("politics")
+                        ? "Politics"
+                        : "Sports"}
                     </span>
                     <button className="ml-4 text-gray-400">
                       {expandedEvent === index ? (
@@ -186,57 +205,90 @@ const ResultsPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Expanded Content */}
                 {expandedEvent === index && (
-                  <div className="p-4 border-t border-[#353846] bg-[#1e2233]">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 border-t border-[#353846] bg-[#1e2233] text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <h4 className="text-gray-400 mb-2">Description</h4>
-                        <p className="text-white">{event.description}</p>
-                        
-                        <h4 className="text-gray-400 mt-4 mb-2">Event Details</h4>
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Start Date:</span>
-                            <span className="text-white">{new Date(parseInt(event.startTime) * 1000).toLocaleDateString()}</span>
+                        <div className="flex items-center mb-3 text-gray-300">
+                          {/* <Info className="w-5 h-5 mr-2 text-purple-400" /> */}
+                          <h4 className="font-semibold text-base text-white">Event Details</h4>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-start">
+                            <CalendarDays className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-400 w-24 flex-shrink-0">Start Date</span>
+                            <span className="text-white ml-2 break-words">
+                              {new Date(parseInt(event.startTime) * 1000).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                              ,{" "}
+                              {new Date(parseInt(event.startTime) * 1000).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">End Date:</span>
-                            <span className="text-white">{new Date(parseInt(event.endTime) * 1000).toLocaleDateString()}</span>
+
+                          <div className="flex items-start">
+                            <Clock className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-gray-400 w-24 flex-shrink-0">End Date</span>
+                            <span className="text-white ml-2 break-words">
+                              {new Date(parseInt(event.endTime) * 1000).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                              ,{" "}
+                              {new Date(parseInt(event.endTime) * 1000).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Event Type:</span>
-                            <span className="text-white">
-                              {event.name.toLowerCase().includes('crypto') ? 'Crypto' : 
-                               event.name.toLowerCase().includes('esports') ? 'Esports' : 
-                               event.name.toLowerCase().includes('politics') ? 'Politics' : 'Sports'}
+                          <div className="flex items-center">
+                            <Tag className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-400 w-24 flex-shrink-0">Event Type</span>
+                            <span className="text-white ml-2">
+                              {event.name.toLowerCase().includes("crypto")
+                                ? "Crypto"
+                                : event.name.toLowerCase().includes("esports")
+                                ? "Esports"
+                                : event.name.toLowerCase().includes("politics")
+                                ? "Politics"
+                                : "Sports"}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div>
-                        <h4 className="text-gray-400 mb-2">Results</h4>
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Prize Pool:</span>
-                            <span className="text-green-400">{Web3.utils.fromWei(event.prizePool, 'ether')} ETH</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Winner:</span>
-                            <span className="text-green-400 font-semibold">{event.winningOption}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-400">Participants:</span>
-                            <span className="text-white">1,289</span>
-                          </div>
+                        <div className="flex items-center mb-3 text-gray-300">
+                          <h4 className="font-semibold text-base text-white">Description</h4>
                         </div>
-                        
-                        <div className="mt-4 p-3 bg-[#2e3446] rounded-lg">
-                          <p className="text-white">
-                            {event.notificationMessage || "Event completed. Winner has been declared."}
-                          </p>
+                        <p className="text-gray-300 mb-4 text-sm">{event.description || "No description provided."}</p>
+                        <div className="flex items-center mb-3 text-gray-300">
+                          <h4 className="font-semibold text-base text-white">Results</h4>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <Trophy className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-400 w-24 flex-shrink-0">Winner</span>
+                            <span className="text-green-400 font-semibold ml-2">{event.winningOption || "N/A"}</span>
+                          </div>
+
+                          <div className="flex items-center">
+                            <Coins className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-400 w-24 flex-shrink-0">Prize Pool</span>
+                            <span className="text-green-400 ml-2">
+                              {event.prizePool? `${Web3.utils.fromWei(event.prizePool,"ether")} ETH`:"0 ETH"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -257,7 +309,7 @@ const ResultsPage: React.FC = () => {
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               // Logic to show a window of page numbers around current page
               let pageNum;
@@ -270,7 +322,7 @@ const ResultsPage: React.FC = () => {
               } else {
                 pageNum = currentPage - 2 + i;
               }
-              
+
               return (
                 <button
                   key={pageNum}
@@ -285,10 +337,12 @@ const ResultsPage: React.FC = () => {
                 </button>
               );
             })}
-            
+
             <button
               className="rounded px-3 py-1 text-white bg-[#2a2e3e] hover:bg-[#3a3e4e]"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="h-4 w-4" />
