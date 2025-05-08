@@ -175,6 +175,7 @@ module.exports = {
     },
   },
   plugins: [
+    require('tailwind-scrollbar'),
     // You can add plugins like forms, typography, aspect-ratio, etc.
     // require('@tailwindcss/forms'),
     // require('@tailwindcss/typography'),
