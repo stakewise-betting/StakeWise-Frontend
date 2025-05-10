@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  ChevronUp, CalendarDays, Clock, Tag,
-  Trophy, Coins, 
-} from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Search, ChevronUp, CalendarDays, Clock, Tag, Trophy, Coins } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
@@ -18,6 +11,7 @@ const ResultsPage: React.FC = () => {
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [savedEvents, setSavedEvents] = useState<{[key: number]: boolean}>({});
   const eventsPerPage = 5;
 
   // Hero section background image
@@ -55,7 +49,10 @@ const ResultsPage: React.FC = () => {
           const eventData = await betContract.methods.getEvent(eventId).call();
           // Only include completed events with a winner declared
           if (eventData.isCompleted && eventData.winningOption) {
-            eventList.push(eventData);
+            eventList.push({
+              ...eventData,
+              id: eventId, // Add the eventId to the data
+            });
           }
         } catch (error) {
           console.error(`Error fetching event ${eventId}:`, error);
@@ -63,6 +60,11 @@ const ResultsPage: React.FC = () => {
       }
       setEvents(eventList);
       setFilteredEvents(eventList);
+      
+      // Save all events to database automatically
+      eventList.forEach(event => {
+        saveResultToDatabase(event);
+      });
     } catch (error) {
       console.error("Error loading events:", error);
     }
@@ -97,6 +99,63 @@ const ResultsPage: React.FC = () => {
     setExpandedEvent(expandedEvent === index ? null : index);
   };
 
+  // Function to determine category based on event name
+  const determineCategory = (eventName: string): string => {
+    const name = eventName.toLowerCase();
+    if (name.includes("crypto")) return "Crypto";
+    if (name.includes("esports")) return "Esports";
+    if (name.includes("politics")) return "Politics";
+    return "Sports";
+  };
+
+  // Save result to database
+  const saveResultToDatabase = async (event: any) => {
+    const eventId = parseInt(event.id);
+    
+    // Skip if already saved
+    if (savedEvents[eventId]) {
+      return;
+    }
+    
+    try {
+      // Prepare the data according to your schema
+      const resultData = {
+        eventId: eventId,
+        name: event.name,
+        category: determineCategory(event.name),
+        winner: event.winningOption,
+        prizepool: parseFloat(Web3.utils.fromWei(event.prizePool || "0", "ether"))
+      };
+
+      // Make API call to save result
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/results/save-result`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(resultData),
+      });
+
+      if (response.ok) {
+        // Mark this event as saved
+        setSavedEvents(prev => ({ ...prev, [eventId]: true }));
+        console.log(`Result saved for event ID ${eventId}`);
+      } else {
+        const data = await response.json();
+        // If it's not a duplicate entry error, log it
+        if (!data.error?.includes('already exists')) {
+          console.error(`Failed to save result for event ID ${eventId}:`, data.error);
+        } else {
+          // Still mark duplicates as saved to avoid retrying
+          setSavedEvents(prev => ({ ...prev, [eventId]: true }));
+          console.log(`Result for event ID ${eventId} already exists in database`);
+        }
+      }
+    } catch (error: any) {
+      console.error(`Error saving result for event ID ${eventId}:`, error);
+    }
+  };
+
   // Calculate pagination
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
   const indexOfLastEvent = currentPage * eventsPerPage;
@@ -107,7 +166,7 @@ const ResultsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#1a1e2e]">
       {/* Hero Section with Background Image */}
       <div className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroBackgroundImage})` }}>
@@ -196,13 +255,7 @@ const ResultsPage: React.FC = () => {
                           : "bg-green-600 text-white"
                       }`}
                     >
-                      {event.name.toLowerCase().includes("crypto")
-                        ? "Crypto"
-                        : event.name.toLowerCase().includes("esports")
-                        ? "Esports"
-                        : event.name.toLowerCase().includes("politics")
-                        ? "Politics"
-                        : "Sports"}
+                      {determineCategory(event.name)}
                     </span>
                     <button className="ml-4 text-gray-400">
                       {expandedEvent === index ? (
@@ -220,7 +273,6 @@ const ResultsPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <div className="flex items-center mb-3 text-gray-300">
-                          {/* <Info className="w-5 h-5 mr-2 text-purple-400" /> */}
                           <h4 className="font-semibold text-base text-white">Event Details</h4>
                         </div>
                         <div className="space-y-3">
@@ -263,13 +315,7 @@ const ResultsPage: React.FC = () => {
                             <Tag className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
                             <span className="text-gray-400 w-24 flex-shrink-0">Event Type</span>
                             <span className="text-white ml-2">
-                              {event.name.toLowerCase().includes("crypto")
-                                ? "Crypto"
-                                : event.name.toLowerCase().includes("esports")
-                                ? "Esports"
-                                : event.name.toLowerCase().includes("politics")
-                                ? "Politics"
-                                : "Sports"}
+                              {determineCategory(event.name)}
                             </span>
                           </div>
                         </div>
