@@ -1,28 +1,26 @@
-import React from "react";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Users,
-  Settings,
-  CircleUserRound,
-} from "lucide-react";
-import clsx from "clsx";
+"use client"
+
+import type React from "react"
+import { LayoutDashboard, CalendarDays, Users, Settings, CircleUserRound, ImageIcon } from "lucide-react"
+import clsx from "clsx"
 
 interface SidebarProps {
-  activeSection: string;
-  onSelectSection: (section: string) => void;
+  activeSection: string
+  onSelectSection: (section: string) => void
 }
 
+// Check the navItems array to ensure the slider item is correctly defined
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "events", label: "Events", icon: CalendarDays },
+  { id: "slider", label: "Slider", icon: ImageIcon },
   { id: "users", label: "Users", icon: Users },
   { id: "profile", label: "Profile", icon: CircleUserRound },
-  // { id: "settings", label: "Admin Details", icon: Settings },
-];
+  //{ id: "settings", label: "Admin Details", icon: Settings },
+]
 
 // Icon background accent color
-const iconBg = "bg-admin-accent/10 text-admin-accent";
+const iconBg = "bg-admin-accent/10 text-admin-accent"
 
 // Animated gradient logo text
 const Logo = () => (
@@ -43,16 +41,12 @@ const Logo = () => (
         </text>
       </svg>
     </span>
-    <h2 className="gradient-text font-saira-stencil text-2xl tracking-wide animate-appear">
-      Admin Panel
-    </h2>
+    <h2 className="gradient-text font-saira-stencil text-2xl tracking-wide animate-appear">Admin Panel</h2>
   </div>
-);
+)
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  activeSection,
-  onSelectSection,
-}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection }) => {
+  // Make sure the label is being rendered in the button
   return (
     <aside className="w-64 h-full flex flex-col p-4 bg-primary border-r border-gray-700/60 text-dark-primary relative bg-noise bg-floating-shapes animate-admin-fade-in transition-all duration-300">
       {/* Logo/Header */}
@@ -61,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Nav */}
       <nav className="flex flex-col gap-1.5">
         {navItems.map((item) => {
-          const isActive = activeSection === item.id;
+          const isActive = activeSection === item.id
           return (
             <button
               key={item.id}
@@ -71,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 // Orange hover and active states
                 isActive
                   ? "bg-orange-500/20 text-orange-600 shadow-btn-glow scale-102"
-                  : "text-dark-secondary hover:bg-orange-500/10 hover:text-orange-600"
+                  : "text-dark-secondary hover:bg-orange-500/10 hover:text-orange-600",
               )}
               aria-current={isActive ? "page" : undefined}
             >
@@ -80,21 +74,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   "flex items-center justify-center mr-3 rounded-lg transition-all duration-200 h-9 w-9",
                   isActive
                     ? "bg-orange-500 text-white shadow-btn-glow"
-                    : "bg-orange-500/10 text-orange-500 group-hover:bg-orange-600/20 group-hover:text-orange-600"
+                    : "bg-orange-500/10 text-orange-500 group-hover:bg-orange-600/20 group-hover:text-orange-600",
                 )}
               >
                 <item.icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <span
-                className={clsx(
-                  "text-base transition-colors duration-200",
-                  isActive ? "font-semibold" : "font-normal"
-                )}
+                className={clsx("text-base transition-colors duration-200", isActive ? "font-semibold" : "font-normal")}
               >
                 {item.label}
               </span>
             </button>
-          );
+          )
         })}
       </nav>
 
@@ -104,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onSelectSection("settings")}
           className={clsx(
             "flex items-center w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none",
-            "hover:bg-admin-secondary/10 hover:text-admin-secondary text-dark-secondary"
+            "hover:bg-admin-secondary/10 hover:text-admin-secondary text-dark-secondary",
           )}
         >
           <span className="flex items-center justify-center mr-3 rounded-lg h-9 w-9 bg-admin-secondary/10 text-admin-secondary group-hover:bg-admin-secondary/20 group-hover:text-admin-secondary transition-all duration-200">
@@ -114,5 +105,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
     </aside>
-  );
-};
+  )
+}

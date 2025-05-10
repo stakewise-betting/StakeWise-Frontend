@@ -6,6 +6,7 @@ import { AdminLayout } from "@/Admin/layout/AdminLayout"; // Updated path to mat
 import { Dashboard } from "@/Admin/dashboard/Dashboard"; // Updated to use the correct alias path
 import { EventsPage } from "@/Admin/events/EventsPage"; // Updated path to match project structure
 import UserManagementPage from "@/Admin/users/UserManagementPage"; // Updated to use the correct alias path
+import SliderPage from "./slider/Slider"
 import setupWeb3AndContract from "@/services/blockchainService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -292,8 +293,7 @@ const AdminPanel: React.FC = () => {
         validBets.sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
         setRecentBets(validBets.slice(0, limit)); // Limit to 'limit'
         console.log(
-          `Processed and limited to ${
-            validBets.slice(0, limit).length
+          `Processed and limited to ${validBets.slice(0, limit).length
           } recent bets.`
         );
       } catch (err) {
@@ -514,6 +514,8 @@ const AdminPanel: React.FC = () => {
           <div className="p-6">Loading Events Data...</div>
         );
 
+      case "slider":
+        return <SliderPage />
       case "users":
         // UserManagementPage fetches its own data, needs no props from here
         return <UserManagementPage />;
