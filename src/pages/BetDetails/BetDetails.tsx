@@ -6,7 +6,7 @@ import BetSlip from "@/components/BetSlip/BetSlip";
 import CountdownTimer from "@/components/CountdownTimer";
 import DepositLimitTracker from "@/components/DepositLimitTracker"; // Import our new component
 import { contractABI, contractAddress } from "@/config/contractConfig";
-import CommentSection from "@/components/CommentSection";
+import CommentSection from "@/components/CommentSection/CommentSection";
 import { AppContext } from "@/context/AppContext";
 import responsibleGamblingService from "@/services/responsibleGamblingApiService";
 
