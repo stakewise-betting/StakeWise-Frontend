@@ -157,7 +157,7 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
           <div className="space-y-0">
             {event.options.map((option, index) => (
               <div key={index} className="flex items-center justify-between h-[22px]">
-                <span className="text-sm text-gray-200">{option}</span>
+                <span className="text-[13px] text-gray-200">{option}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400 w-8 text-right">
                     {getOddsForOption(option)}
