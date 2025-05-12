@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// Removed: Search, Button, Input imports as they are now in SearchAndFilterSection
 import { UpcomingCard } from "@/components/UpcomingCard/UpcomingCard";
 import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
 import Pagination from "@/components/Pagination/Pagination";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
-
+import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection"; // Added import
 
 // Define TypeScript interface for event data
 interface BlockchainEvent {
@@ -30,10 +28,10 @@ export default function Page() {
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [events, setEvents] = useState<BlockchainEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // This state is now passed to SearchAndFilterSection
   const eventsPerPage = 4;
 
   // Filter items
@@ -90,16 +88,12 @@ export default function Page() {
       const eventCount = await betContract.methods.nextEventId().call();
       const eventList: BlockchainEvent[] = [];
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-      
-      // Loop through valid eventIds, starting from 1
+
       for (let eventId = 1; eventId < eventCount; eventId++) {
         try {
           const eventData = await betContract.methods.getEvent(eventId).call();
-          
-          // Only include events where startTime is in the future (upcoming events)
           const startTimeSeconds = Number(eventData.startTime);
           if (startTimeSeconds > currentTime) {
-            // Format event data to include fields needed by UpcomingCard
             const formattedEvent: BlockchainEvent = {
               ...eventData,
               eventId: eventId.toString(),
@@ -113,19 +107,15 @@ export default function Page() {
               endTime: eventData.endTime || "0",
               createdAt: eventData.createdAt || (Date.now() / 1000).toString(),
               options: eventData.options || [],
-              category: eventData.category || "Event",  // "Uncategorized" || here we can't pass category from blockchain, because there is no category field in the contract
+              category: eventData.category || "Event",
              };
-            
             eventList.push(formattedEvent);
           }
         } catch (error) {
           console.error(`Error fetching event ${eventId}:`, error);
         }
       }
-      
-      // Sort by startTime (soonest first)
       eventList.sort((a, b) => Number(a.startTime) - Number(b.startTime));
-      
       setEvents(eventList);
     } catch (error) {
       console.error("Error loading events:", error);
@@ -133,76 +123,57 @@ export default function Page() {
     }
   };
 
-  // Filter events based on search query
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Calculate total pages
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-  // Get current events
   const getCurrentEvents = () => {
     const indexOfLastEvent = currentPage * eventsPerPage;
     const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
     return filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   };
 
-  // Toggle interested state for an event
   const handleInterestedClick = async (eventId: string) => {
     if (!web3) {
       console.error("Web3 not initialized");
       return;
     }
-    
     try {
-      // Get current account
-      const accounts = await (window as any).ethereum.request({ 
-        method: 'eth_requestAccounts' 
+      const accounts = await (window as any).ethereum.request({
+        method: 'eth_requestAccounts'
       });
       const account = accounts[0];
-      
-      // Update UI optimistically
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.eventId === eventId
             ? {
                 ...event,
                 isUserInterested: !event.isUserInterested,
-                interestedCount: event.isUserInterested 
-                  ? Math.max(0, event.interestedCount - 1) 
+                interestedCount: event.isUserInterested
+                  ? Math.max(0, event.interestedCount - 1)
                   : event.interestedCount + 1,
               }
             : event
         )
       );
-      
-      // Update blockchain (you would implement this based on your contract)
-      const contract = new web3.eth.Contract(contractABI, contractAddress);
-      // This is a placeholder - replace with your actual contract method
+      // const contract = new web3.eth.Contract(contractABI, contractAddress);
       // await contract.methods.toggleInterest(eventId).send({from: account});
-      
       console.log(`Toggled interest for event ${eventId} by account ${account}`);
     } catch (error) {
       console.error("Error toggling interest:", error);
-      
-      // Revert UI change if blockchain update fails
       setEvents((prevEvents) =>
         prevEvents.map((event) => (event.eventId === eventId ? { ...event } : event))
       );
     }
   };
 
-  
-
-  // Handle page change
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    // Scroll to top when page changes
     window.scrollTo(0, 0);
   };
 
-  // Reset to first page when search query changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
@@ -217,20 +188,12 @@ export default function Page() {
           ))}
         </div>
         <div className="space-y-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1 border-2 border-[#333447] rounded-lg">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8488AC]" />
-              <Input 
-                className="pl-10 bg-[#1C1C27] placeholder-[#8488AC] text-white border-none focus:border-transparent outline-none focus:outline-none focus:ring-0" 
-                placeholder="Search by name"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">New</Button>
-            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">Trending</Button>
-          </div>
-          
+          {/* Use the new SearchAndFilterSection component */}
+          <SearchAndFilterSection
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery} // Pass the setSearchQuery function directly
+          />
+
           {isLoading ? (
             <div className="text-center py-10">
               <p className="text-white">Loading upcoming events from blockchain...</p>
@@ -239,12 +202,10 @@ export default function Page() {
             <div className="space-y-6">
               {getCurrentEvents().length > 0 ? (
                 getCurrentEvents().map((event) => {
-                  // Create a new event object with the click handler included
                   const eventWithHandler = {
                     ...event,
                     onInterestedClick: () => handleInterestedClick(event.eventId)
                   };
-                  
                   return <UpcomingCard key={event.eventId} event={eventWithHandler} />;
                 })
               ) : (
@@ -254,8 +215,7 @@ export default function Page() {
               )}
             </div>
           )}
-          
-          {/* Only show pagination if there are events */}
+
           {!isLoading && filteredEvents.length > 0 && (
             <Pagination
               currentPage={currentPage}
@@ -268,4 +228,3 @@ export default function Page() {
     </div>
   );
 }
-
