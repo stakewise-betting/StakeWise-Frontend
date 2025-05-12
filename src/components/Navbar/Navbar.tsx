@@ -5,7 +5,6 @@ import {
   Building2,
   Trophy,
   Calendar,
-  BarChart3,
   Gift,
   Moon,
   MessageSquare,
@@ -150,12 +149,6 @@ const Navbar: React.FC = () => {
       href: "/upcoming",
       icon: <Calendar className="h-4 w-4 mr-2" />,
       breakpoint: "lg",
-    },
-    {
-      name: "RESULTS",
-      href: "/results",
-      icon: <BarChart3 className="h-4 w-4 mr-2" />,
-      breakpoint: "xl",
     },
     {
       name: "NEWS",
