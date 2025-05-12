@@ -1,7 +1,7 @@
 // src/components/navbar/UserProfileDropdown.tsx
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ChevronDown, Moon, LogOut, Eye, BarChart3 , Mail ,MessageSquare } from "lucide-react"; // Using lucide-react icons
+import { User, ChevronDown, Moon, LogOut, Eye, BarChart3, MessageSquare } from "lucide-react"; // Using lucide-react icons
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -180,7 +180,18 @@ const UserProfileDropdown: React.FC = () => {
                 </DropdownMenuItem>
 
 
-                {/* contact us link was added by bhashitha */}
+                {/* Contact Us and Results page links were added by Bhashitha */}
+                <DropdownMenuItem 
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                        navigate("/results");
+                        setProfileOpen(false);
+                    }}
+                >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Results                                      
+                </DropdownMenuItem>
+
                 <DropdownMenuItem 
                     className="flex items-center cursor-pointer"
                     onClick={() => {

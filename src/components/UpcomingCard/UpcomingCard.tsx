@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Star, Share2, Calendar, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 
 interface BlockchainEvent {
   eventId: string;

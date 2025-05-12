@@ -11,7 +11,7 @@ import { AppContext } from "@/context/AppContext";
 import { useContext } from "react";
 import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 
-import OnlineUsersWS from "@/components/OnlineUsersWS";
+import OnlineUsersWS from "@/components/OnlineUsersWS/OnlineUsersWS";
 
 const Dashboard = () => {
   const { userData } = useContext(AppContext)!;

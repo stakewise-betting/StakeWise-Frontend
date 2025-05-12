@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Web3 from "web3";
-import FilterSidebar from "@/components/dropdownMenu/DropdownMenu";
+import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
 import BettingCard from "@/components/BettingCard/BettingCard"; 
 import { contractABI, contractAddress } from "@/config/contractConfig"; 
 import { AppContext } from "@/context/AppContext"; 
