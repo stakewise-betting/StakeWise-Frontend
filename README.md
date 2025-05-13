@@ -283,7 +283,10 @@ StakeWise-Frontend/
 │ │ ├── Buttons/
 │ │ │ └── Buttons.tsx
 │ │ ├── ContactUsCom/
-│ │ │ └── ContactUsTabs.tsx
+│ │ │ ├── ContactUsTabs.tsx
+│ │ │ ├── NewsLetter.tsx
+│ │ │ ├── ResponsibleGamblingTab.types.ts
+│ │ │ └── SupportTab.tsx
 │ │ ├── Footer/
 │ │ │ └── Footer.tsx
 │ │ ├── GoogleAuth/
@@ -374,11 +377,16 @@ StakeWise-Frontend/
 │ │ │ └── tooltip.tsx
 │ │ ├── UpcomingCard/
 │ │ │ ├── UpcomingCard.tsx
+│ │ ├── DepositLimitTracker/
+│ │ │ ├── DepositLimitTracker.tsx
+│ │ ├── OnlineUsersWS/
+│ │ │ ├── OnlineUsersWS.tsx
+│ │ ├── CommentSection/
 │ │ │ ├── CommentSection.tsx
+│ │ ├── CountdownTimer/
 │ │ │ ├── CountdownTimer.tsx
 │ │ │ └── sample.jpg
 │ │ ├── circular-progress.tsx
-│ │ ├── NewsLetter.tsx
 │ ├── config/
 │ │ └── contractConfig.ts
 │ ├── constants/
