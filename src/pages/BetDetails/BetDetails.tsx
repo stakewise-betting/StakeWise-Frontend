@@ -4,7 +4,7 @@ import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
 import CountdownTimer from "@/components/CountdownTimer";
-import DepositLimitTracker from "@/components/DepositLimitTracker"; // Import our new component
+import DepositLimitTracker from "@/components/DepositLimitTracker";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import CommentSection from "@/components/CommentSection/CommentSection";
 import { AppContext } from "@/context/AppContext";
@@ -173,43 +173,51 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   return (
     <div className="min-h-screen bg-[#1C1C27] text-white p-4 lg:p-6">
-      <button
-        onClick={onCancel}
-        className="mb-4 text-sm text-gray-400 hover:text-gray-300"
-      >
-        {`< Back to Events`}
-      </button>
-
       <div className="max-w-7xl mx-auto mb-6">
         <CountdownTimer endTime={Number(eventData.endTime)} />
       </div>
 
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
-        <BetInterface
-          eventData={eventData}
-          eventOdds={eventOdds}
-          selectedOption={selectedOption}
-          setSelectedOption={setSelectedOption}
-          web3={web3}
-        />
-        <div className="space-y-6">
-          <BetSlip
+      <div className="max-w-7xl mx-auto">
+        {/* First row: BetInterface and BetSlip/DepositLimitTracker */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          <BetInterface
             eventData={eventData}
+            eventOdds={eventOdds}
             selectedOption={selectedOption}
             setSelectedOption={setSelectedOption}
-            amount={amount}
-            setAmount={setAmount}
-            onBet={handleBet}
-            onCancel={onCancel}
-            disableBet={limitExceeded}
-            limitExceededMessage={limitExceededMessage}
+            web3={web3}
           />
-          <DepositLimitTracker
-            amount={amount}
-            onLimitExceeded={handleLimitExceeded}
-          />
+          <div className="space-y-6">
+            <BetSlip
+              eventData={eventData}
+              selectedOption={selectedOption}
+              setSelectedOption={setSelectedOption}
+              amount={amount}
+              setAmount={setAmount}
+              onBet={handleBet}
+              onCancel={onCancel}
+              disableBet={limitExceeded}
+              limitExceededMessage={limitExceededMessage}
+            />
+            <DepositLimitTracker
+              amount={amount}
+              onLimitExceeded={handleLimitExceeded}
+            />
+          </div>
         </div>
-        <CommentSection betId={eventId || ""} currentUserId={currentUserId} />
+
+        {/* Second row: Comments Section (full width) */}
+        <div className="bg-card rounded-xl border border-gray-700/60 shadow-lg transition-all duration-300 hover:shadow-xl hover:border-secondary/30 bg-noise dark">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-6 text-dark-primary">
+              Community Discussion
+            </h2>
+            <CommentSection
+              betId={eventId || ""}
+              currentUserId={currentUserId}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

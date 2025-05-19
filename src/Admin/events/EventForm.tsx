@@ -1,5 +1,5 @@
 // components/admin/events/EventForm.tsx
-import React, { useState, useEffect } from "react"; // Added useEffect for potential future use
+import React, { useState } from "react"; // Added useEffect for potential future use
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

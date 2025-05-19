@@ -21,9 +21,6 @@ const navItems = [
   // { id: "settings", label: "Admin Details", icon: Settings },
 ];
 
-// Icon background accent color
-const iconBg = "bg-admin-accent/10 text-admin-accent";
-
 // Animated gradient logo text
 const Logo = () => (
   <div className="flex items-center gap-3 px-2">
