@@ -5,14 +5,10 @@ import {
   Building2,
   Trophy,
   Calendar,
-<<<<<<< HEAD
-  BarChart3,
-  Newspaper,
-=======
->>>>>>> dev
   Gift,
   Moon,
   MessageSquare,
+  Newspaper
 } from "lucide-react";
 
 import { AppContext } from "@/context/AppContext";
