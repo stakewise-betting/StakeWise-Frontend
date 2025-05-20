@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
-import CountdownTimer from "@/components/CountdownTimer";
-import DepositLimitTracker from "@/components/DepositLimitTracker";
+import CountdownTimer from "@/components/CountdownTimer/CountdownTimer";
+import DepositLimitTracker from "@/components/DepositLimitTracker/DepositLimitTracker"; // Import our new component
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import CommentSection from "@/components/CommentSection/CommentSection";
 import { AppContext } from "@/context/AppContext";

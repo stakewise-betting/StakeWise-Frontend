@@ -124,7 +124,7 @@ const PersonalInfoForm = () => {
               id="firstname"
               value={fname}
               onChange={(e) => setFname(e.target.value)}
-              className="w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Set first name"
             />
           </div>
@@ -134,7 +134,7 @@ const PersonalInfoForm = () => {
               id="lastname"
               value={lname}
               onChange={(e) => setLname(e.target.value)}
-              className="w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="Set last name"
             />
           </div>
@@ -146,7 +146,7 @@ const PersonalInfoForm = () => {
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder="Set username"
           />
           <p className="text-sm text-zinc-400">
@@ -165,10 +165,10 @@ const PersonalInfoForm = () => {
                 handleDateChange(value, selectedMonth, selectedYear);
               }}
             >
-              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <SelectValue placeholder="Day" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1C1C27] border-none rounded-lg">
+              <SelectContent className="bg-[#333447] border-none rounded-lg">
                 {Array.from({ length: 31 }, (_, i) => (
                   <SelectItem key={i + 1} value={(i + 1).toString()}>
                     {i + 1}
@@ -185,10 +185,10 @@ const PersonalInfoForm = () => {
                 handleDateChange(selectedDay, value, selectedYear);
               }}
             >
-              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1C1C27] border-none rounded-lg">
+              <SelectContent className="bg-[#333447] border-none rounded-lg">
                 {[
                   "January",
                   "February",
@@ -218,10 +218,10 @@ const PersonalInfoForm = () => {
                 handleDateChange(selectedDay, selectedMonth, value);
               }}
             >
-              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
-              <SelectContent className="bg-[#1C1C27] border-none rounded-lg max-h-[200px]">
+              <SelectContent className="bg-[#333447] border-none rounded-lg max-h-[200px]">
                 {Array.from({ length: 100 }, (_, i) => (
                   <SelectItem key={2025 - i} value={(2025 - i).toString()}>
                     {2025 - i}
@@ -242,10 +242,10 @@ const PersonalInfoForm = () => {
             value={gender}
             onValueChange={(value) => setGender(value)}
           >
-            <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#1C1C27] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
-            <SelectContent className="bg-[#1C1C27] border-none rounded-lg">
+            <SelectContent className="bg-[#333447] border-none rounded-lg">
               <SelectItem value="male">Male</SelectItem>
               <SelectItem value="female">Female</SelectItem>
             </SelectContent>

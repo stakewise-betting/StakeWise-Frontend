@@ -1,13 +1,277 @@
+// import { useState, useEffect, useMemo, useContext } from "react";
+// import { Search } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import Web3 from "web3";
+// import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
+// import BettingCard from "@/components/BettingCard/BettingCard"; 
+// import { contractABI, contractAddress } from "@/config/contractConfig"; 
+// import { AppContext } from "@/context/AppContext"; 
+// import { useWatchlist } from '@/context/WatchlistContext'; 
+
+// // Interfaces
+// interface OptionOdds {
+//   optionName: string;
+//   oddsPercentage: number;
+// }
+
+// type EventOddsMap = {
+//   [eventId: string]: OptionOdds[] | null;
+// };
+
+// // --- Odds Calculation Logic (Helper function) ---
+// type CalculateOddsFunction = (
+//     betContract: any,
+//     eventId: string,
+//     options: string[]
+// ) => Promise<OptionOdds[] | null>;
+
+// const calculateEventOdds: CalculateOddsFunction = async (betContract, eventId, options) => {
+//   if (!options || options.length === 0) return null;
+//   try {
+//     const totalVolumeWei = await betContract.methods.getTotalBetsForEvent(eventId).call();
+//     const totalVolume = BigInt(totalVolumeWei);
+    
+//     if (totalVolume === 0n) {
+//       const equalPercentage = 100 / options.length;
+//       return options.map((option) => ({ optionName: option, oddsPercentage: equalPercentage }));
+//     }
+    
+//     const oddsPromises = options.map(async (option) => {
+//       try {
+//         const optionBetsWei = await betContract.methods.getBetsForOption(eventId, option).call();
+//         const optionVolume = BigInt(optionBetsWei);
+//         const percentage = totalVolume === 0n ? 0 : Number((optionVolume * 10000n) / totalVolume) / 100;
+//         return { optionName: option, oddsPercentage: percentage };
+//       } catch (error) {
+//         console.error(`Error fetching odds for option ${option} in event ${eventId}:`, error);
+//         return { optionName: option, oddsPercentage: 0 };
+//       }
+//     });
+    
+//     return await Promise.all(oddsPromises);
+//   } catch (error) {
+//     console.error(`Error calculating odds for event ${eventId}:`, error);
+//     return null;
+//   }
+// };
+
+// // --- Watchlist Page Component ---
+// export default function WatchListPage() {
+//   // Filter items
+//   const filterItems = [
+//     { title: "Categories", items: [
+//       { name: "Politics", count: 21 },
+//       { name: "Sports", count: 32 },
+//       { name: "Games", count: 12 },
+//     ] },
+//     { title: "Locations", items: [
+//       { name: "USA", count: 12 },
+//       { name: "Sri Lanka", count: 34 },
+//       { name: "India", count: 8 },
+//       { name: "Australia", count: 15 },
+//     ] },
+//     { title: "Date Range", items: [
+//       { name: "Today", count: 9 },
+//       { name: "This Weekend", count: 14 },
+//       { name: "Next Week", count: 8 },
+//       { name: "Next 3 Months", count: 45 },
+//     ] },
+//   ];
+  
+//   const [searchQuery, setSearchQuery] = useState("");
+
+//   // Get AppContext
+//   const appContext = useContext(AppContext);
+//   if (!appContext) throw new Error("WatchListPage must be used within AppContextProvider");
+//   const { isLoggedin } = appContext;
+
+//   // Get Watchlist Data from WatchlistContext
+//   const {
+//     watchlistEvents,
+//     isLoading: isWatchlistLoading,
+//     error: watchlistError,
+//     refreshWatchlist
+//   } = useWatchlist();
+
+//   // State for Web3 and dynamic odds
+//   const [web3, setWeb3] = useState<Web3 | null>(null);
+//   const [betContract, setBetContract] = useState<any>(null);
+//   const [eventOdds, setEventOdds] = useState<EventOddsMap>({});
+//   const [isOddsLoading, setIsOddsLoading] = useState<boolean>(false);
+
+//   // Initialize Web3
+//   useEffect(() => {
+//     const initWeb3 = async () => {
+//       try {
+//         // Check if Web3 is injected by MetaMask
+//         if (window.ethereum) {
+//           const web3Instance = new Web3(window.ethereum);
+//           setWeb3(web3Instance);
+          
+//           // Create contract instance
+//           try {
+//             const contract = new web3Instance.eth.Contract(contractABI, contractAddress);
+//             setBetContract(contract);
+//           } catch (contractError) {
+//             console.error("Error creating contract instance:", contractError);
+//           }
+//         } else {
+//           console.log("No Ethereum browser extension detected");
+//         }
+//       } catch (error) {
+//         console.error("Web3 initialization error:", error);
+//       }
+//     };
+    
+//     initWeb3();
+//   }, []);
+
+//   // Refresh watchlist when login state changes
+//   useEffect(() => {
+//     if (isLoggedin) {
+//       refreshWatchlist();
+//     }
+//   }, [isLoggedin]);
+
+//   // Fetch Odds for watchlist events
+//   useEffect(() => {
+//     const fetchAllOdds = async () => {
+//       if (!betContract || watchlistEvents.length === 0) {
+//         setEventOdds({});
+//         return;
+//       }
+      
+//       setIsOddsLoading(true);
+//       console.log(`Fetching odds for ${watchlistEvents.length} events...`);
+      
+//       const oddsPromises = watchlistEvents.map(event =>
+//         calculateEventOdds(betContract, String(event.eventId), event.options)
+//           .then(odds => ({ eventId: String(event.eventId), odds }))
+//           .catch(err => ({ eventId: String(event.eventId), odds: null }))
+//       );
+      
+//       try {
+//         const oddsResults = await Promise.all(oddsPromises);
+//         const newOddsMap = oddsResults.reduce<EventOddsMap>((acc, result) => {
+//           if (result) acc[result.eventId] = result.odds;
+//           return acc;
+//         }, {});
+        
+//         setEventOdds(newOddsMap);
+//       } catch (error) {
+//         console.error("Error fetching all odds:", error);
+//       } finally {
+//         setIsOddsLoading(false);
+//       }
+//     };
+    
+//     fetchAllOdds();
+//   }, [watchlistEvents, betContract]);
+
+//   // Filter events based on search query
+//   const filteredEvents = useMemo(() => {
+//     return watchlistEvents.filter(event =>
+//       event.name.toLowerCase().includes(searchQuery.toLowerCase())
+//     );
+//   }, [watchlistEvents, searchQuery]);
+
+//   // Render content based on loading and error states
+//   const renderContent = () => {
+//     // Check if user is not logged in
+//     if (!isLoggedin) {
+//       return <p className="text-gray-400 text-center mt-10">Please log in to view your watchlist</p>;
+//     }
+
+//     // Check if loading watchlist data
+//     if (isWatchlistLoading && !watchlistError) {
+//       return <p className="text-gray-400 text-center mt-10">Loading watchlist...</p>;
+//     }
+
+//     // Check for errors from WatchlistContext
+//     if (watchlistError) {
+//       return <p className="text-red-500 text-center mt-10">Error: {watchlistError}</p>;
+//     }
+
+//     // Check if watchlist is empty
+//     if (filteredEvents.length === 0) {
+//       if (searchQuery) {
+//         return <p className="text-gray-400 text-center mt-10">No watchlist events match your search.</p>;
+//       }
+//       return <p className="text-gray-400 text-center mt-10">Your watchlist is empty. Add events using the star icon!</p>;
+//     }
+
+//     // Render the betting cards
+//     return (
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
+//         {filteredEvents.map((event) => (
+//           <BettingCard
+//             key={event.eventId}
+//             event={{
+//               eventId: String(event.eventId),
+//               name: event.name,
+//               imageURL: event.imageURL,
+//               options: event.options,
+//               endTime: event.endTime,
+//               startTime: event.startTime,
+//               description: event.description,
+//               prizePool: "0" // Placeholder, will be fetched from contract
+//             }}
+//             eventOdds={eventOdds[String(event.eventId)] || null}
+//             web3={web3}
+//           />
+//         ))}
+//       </div>
+//     );
+//   };
+//   return (
+//     <div className="min-h-screen bg-[#1C1C27] px-[100px] py-8">
+//       <h1 className="text-4xl font-bold text-white mb-8">Watch List</h1>
+//       <div className="grid gap-6 md:grid-cols-[240px,1fr]">
+//         <div className="space-y-6 text-[#ffffff]">
+//           {filterItems.map((filter, index) => (
+//             <FilterSidebar key={index} title={filter.title} items={filter.items} />
+//           ))}
+//         </div>
+//         <div className="space-y-6">
+//            {/* Search and Filter Section */}
+//           <div className="flex gap-4">
+//             <div className="relative flex-1 border-2 border-[#333447] rounded-lg">
+//               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8488AC]" />
+//               <Input 
+//                 className="pl-10 bg-[#1C1C27] placeholder-[#8488AC] text-white border-none focus:border-transparent outline-none focus:outline-none focus:ring-0" 
+//                 placeholder="Search by name"
+//                 value={searchQuery}
+//                 onChange={(e) => setSearchQuery(e.target.value)}
+//               />
+//             </div>
+//             <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">Trending</Button>
+//             <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">New</Button>
+//           </div>
+          
+//           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1 px-0 sm:px-0 md:px-0 lg:px-0 w-full">
+//             {/* Display loading indicator for odds */}
+//             {isOddsLoading && <p className="text-gray-400 text-center mt-4">Loading odds...</p>}
+            
+//             {/* Render watchlist content based on state */}
+//             {renderContent()}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
 import { useState, useEffect, useMemo, useContext } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+// Removed: Search, Button, Input imports as they are now in SearchAndFilterSection
 import Web3 from "web3";
-import FilterSidebar from "@/components/dropdownMenu/DropdownMenu";
-import BettingCard from "@/components/BettingCard/BettingCard"; 
-import { contractABI, contractAddress } from "@/config/contractConfig"; 
-import { AppContext } from "@/context/AppContext"; 
-import { useWatchlist } from '@/context/WatchlistContext'; 
+import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
+import BettingCard from "@/components/BettingCard/BettingCard";
+import { contractABI, contractAddress } from "@/config/contractConfig";
+import { AppContext } from "@/context/AppContext";
+import { useWatchlist } from '@/context/WatchlistContext';
+import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection"; // Added import
 
 // Interfaces
 interface OptionOdds {
@@ -31,12 +295,12 @@ const calculateEventOdds: CalculateOddsFunction = async (betContract, eventId, o
   try {
     const totalVolumeWei = await betContract.methods.getTotalBetsForEvent(eventId).call();
     const totalVolume = BigInt(totalVolumeWei);
-    
+
     if (totalVolume === 0n) {
       const equalPercentage = 100 / options.length;
       return options.map((option) => ({ optionName: option, oddsPercentage: equalPercentage }));
     }
-    
+
     const oddsPromises = options.map(async (option) => {
       try {
         const optionBetsWei = await betContract.methods.getBetsForOption(eventId, option).call();
@@ -48,7 +312,7 @@ const calculateEventOdds: CalculateOddsFunction = async (betContract, eventId, o
         return { optionName: option, oddsPercentage: 0 };
       }
     });
-    
+
     return await Promise.all(oddsPromises);
   } catch (error) {
     console.error(`Error calculating odds for event ${eventId}:`, error);
@@ -78,7 +342,7 @@ export default function WatchListPage() {
       { name: "Next 3 Months", count: 45 },
     ] },
   ];
-  
+
   const [searchQuery, setSearchQuery] = useState("");
 
   // Get AppContext
@@ -104,12 +368,9 @@ export default function WatchListPage() {
   useEffect(() => {
     const initWeb3 = async () => {
       try {
-        // Check if Web3 is injected by MetaMask
         if (window.ethereum) {
           const web3Instance = new Web3(window.ethereum);
           setWeb3(web3Instance);
-          
-          // Create contract instance
           try {
             const contract = new web3Instance.eth.Contract(contractABI, contractAddress);
             setBetContract(contract);
@@ -123,7 +384,6 @@ export default function WatchListPage() {
         console.error("Web3 initialization error:", error);
       }
     };
-    
     initWeb3();
   }, []);
 
@@ -132,7 +392,7 @@ export default function WatchListPage() {
     if (isLoggedin) {
       refreshWatchlist();
     }
-  }, [isLoggedin]);
+  }, [isLoggedin]); // <--- Reverted to original dependency array
 
   // Fetch Odds for watchlist events
   useEffect(() => {
@@ -141,23 +401,22 @@ export default function WatchListPage() {
         setEventOdds({});
         return;
       }
-      
+
       setIsOddsLoading(true);
       console.log(`Fetching odds for ${watchlistEvents.length} events...`);
-      
+
       const oddsPromises = watchlistEvents.map(event =>
         calculateEventOdds(betContract, String(event.eventId), event.options)
           .then(odds => ({ eventId: String(event.eventId), odds }))
           .catch(err => ({ eventId: String(event.eventId), odds: null }))
       );
-      
+
       try {
         const oddsResults = await Promise.all(oddsPromises);
         const newOddsMap = oddsResults.reduce<EventOddsMap>((acc, result) => {
           if (result) acc[result.eventId] = result.odds;
           return acc;
         }, {});
-        
         setEventOdds(newOddsMap);
       } catch (error) {
         console.error("Error fetching all odds:", error);
@@ -165,7 +424,6 @@ export default function WatchListPage() {
         setIsOddsLoading(false);
       }
     };
-    
     fetchAllOdds();
   }, [watchlistEvents, betContract]);
 
@@ -178,30 +436,21 @@ export default function WatchListPage() {
 
   // Render content based on loading and error states
   const renderContent = () => {
-    // Check if user is not logged in
     if (!isLoggedin) {
       return <p className="text-gray-400 text-center mt-10">Please log in to view your watchlist</p>;
     }
-
-    // Check if loading watchlist data
     if (isWatchlistLoading && !watchlistError) {
       return <p className="text-gray-400 text-center mt-10">Loading watchlist...</p>;
     }
-
-    // Check for errors from WatchlistContext
     if (watchlistError) {
       return <p className="text-red-500 text-center mt-10">Error: {watchlistError}</p>;
     }
-
-    // Check if watchlist is empty
     if (filteredEvents.length === 0) {
       if (searchQuery) {
         return <p className="text-gray-400 text-center mt-10">No watchlist events match your search.</p>;
       }
       return <p className="text-gray-400 text-center mt-10">Your watchlist is empty. Add events using the star icon!</p>;
     }
-
-    // Render the betting cards
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
         {filteredEvents.map((event) => (
@@ -215,7 +464,7 @@ export default function WatchListPage() {
               endTime: event.endTime,
               startTime: event.startTime,
               description: event.description,
-              prizePool: "0" // Placeholder, will be fetched from contract
+              prizePool: "0"
             }}
             eventOdds={eventOdds[String(event.eventId)] || null}
             web3={web3}
@@ -224,6 +473,7 @@ export default function WatchListPage() {
       </div>
     );
   };
+
   return (
     <div className="min-h-screen bg-[#1C1C27] px-[100px] py-8">
       <h1 className="text-4xl font-bold text-white mb-8">Watch List</h1>
@@ -234,25 +484,14 @@ export default function WatchListPage() {
           ))}
         </div>
         <div className="space-y-6">
-          <div className="flex gap-4">
-            <div className="relative flex-1 border-2 border-[#333447] rounded-lg">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8488AC]" />
-              <Input 
-                className="pl-10 bg-[#1C1C27] placeholder-[#8488AC] text-white border-none focus:border-transparent outline-none focus:outline-none focus:ring-0" 
-                placeholder="Search by name"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">Trending</Button>
-            <Button variant="secondary" className="bg-[#333447] hover:bg-[#4A4E68]">New</Button>
-          </div>
-          
+          {/* Use the new SearchAndFilterSection component */}
+          <SearchAndFilterSection
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1 px-0 sm:px-0 md:px-0 lg:px-0 w-full">
-            {/* Display loading indicator for odds */}
             {isOddsLoading && <p className="text-gray-400 text-center mt-4">Loading odds...</p>}
-            
-            {/* Render watchlist content based on state */}
             {renderContent()}
           </div>
         </div>

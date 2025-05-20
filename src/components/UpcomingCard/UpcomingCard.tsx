@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Star, Share2, Calendar, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 
 interface BlockchainEvent {
   eventId: string;
@@ -123,7 +123,7 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
                     <Clock className="h-3 w-3" />
                     <span>Event Time</span>
                     </div>
-                    <div className="text-white">{eventStartTime} - {eventEndTime}</div>
+                    <div className="text-white">{eventStartTime}</div>
                 </div>
                 <div className="grid grid-cols-[100px,1fr] text-sm">
                     <div className="text-gray-400 flex items-center gap-1">
