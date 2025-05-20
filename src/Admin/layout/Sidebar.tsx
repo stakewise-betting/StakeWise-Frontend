@@ -5,6 +5,7 @@ import {
   Users,
   Settings,
   CircleUserRound,
+  Newspaper
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -18,6 +19,7 @@ const navItems = [
   { id: "events", label: "Events", icon: CalendarDays },
   { id: "users", label: "Users", icon: Users },
   { id: "profile", label: "Profile", icon: CircleUserRound },
+  { id: "news", label: "News", icon: Newspaper },
   // { id: "settings", label: "Admin Details", icon: Settings },
 ];
 

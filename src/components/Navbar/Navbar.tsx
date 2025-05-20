@@ -8,7 +8,7 @@ import {
   Gift,
   Moon,
   MessageSquare,
-  Newspaper,
+  Newspaper
 } from "lucide-react";
 
 import { AppContext } from "@/context/AppContext";

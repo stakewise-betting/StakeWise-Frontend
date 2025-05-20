@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { RecentBet } from "@/Admin/dashboard/RecentBetsTable"; // Corrected path, Import the RecentBet type
 import { toast } from "sonner"; // Assuming you use sonner for notifications
 import AdminProfilePage from "@/Admin/profile/AdminProfilePage";
+import { NewsPage } from "@/Admin/news/NewsPage";
 
 // Define the expected structure for user count API response
 // Using the one from adminService for consistency if possible, otherwise define here
@@ -521,6 +522,9 @@ const AdminPanel: React.FC = () => {
       case "profile": // <-- Add this case
         // AdminProfilePage fetches its own data
         return <AdminProfilePage />;
+
+      case "news":
+        return <NewsPage />;
 
       default:
         // Default to dashboard, same logic as 'dashboard' case
