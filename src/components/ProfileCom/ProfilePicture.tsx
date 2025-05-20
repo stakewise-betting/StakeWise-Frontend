@@ -160,7 +160,7 @@ export default function ProfilePicture() {
               </li>
             </ul>
           </div>
-          <div className="flex flex-wrap gap-2">
+          {/* <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               className="py-3 bg-red-500 border-none rounded-lg hover:bg-red-600"
@@ -169,7 +169,7 @@ export default function ProfilePicture() {
             >
               Reset to Default
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </SettingsCard>

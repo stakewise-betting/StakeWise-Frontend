@@ -299,11 +299,11 @@ const ResponsibleGamblingTab = ({
                     value={limitAmount}
                     onChange={(e) => setLimitAmount(e.target.value)}
                     placeholder="Enter amount"
-                    className="bg-[#333447] border border-[#444560] focus:border-[#1C1C27] focus:ring-1 focus:ring-[#1C1C27] pl-8 rounded-lg"
+                    className="bg-[#333447] border border-[#444560] focus:border-[#1C1C27] focus:ring-1 focus:ring-[#1C1C27] pl-16 rounded-lg"
                     min="0"
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    $
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    ETH
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 ml-4">

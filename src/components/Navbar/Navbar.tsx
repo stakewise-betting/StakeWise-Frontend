@@ -44,12 +44,7 @@ const Navbar: React.FC = () => {
     return null; // Safeguard if context is unavailable
   }
 
-  const {
-    backendUrl,
-    isLoggedin,
-    setUserData,
-    setIsLoggedin,
-  } = appContext;
+  const { backendUrl, isLoggedin, setUserData, setIsLoggedin } = appContext;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -175,9 +170,17 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-[#1C1C27] text-white h-16 px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
       <div className="flex items-center px-2">
-        <Link to="/" onClick={() => window.scrollTo(0, 0)} className="flex items-center">
+        <Link
+          to="/"
+          onClick={() => window.scrollTo(0, 0)}
+          className="flex items-center"
+        >
           <span className="text-3xl mr-3 font-saira-stencil">STAKEWISE</span>
-          <img src={TeamLogo} alt="Team Logo" className="logo-icon w-[42px] h-[34px]" />
+          <img
+            src={TeamLogo}
+            alt="Team Logo"
+            className="logo-icon w-[42px] h-[34px]"
+          />
         </Link>
       </div>
 
@@ -188,7 +191,9 @@ const Navbar: React.FC = () => {
             to={item.href}
             onClick={() => window.scrollTo(0, 0)}
             className={({ isActive }) =>
-              `flex items-center ${isActive ? "text-[#E27625]" : "text-[#8488AC]"} hover:text-[#E27625] hover:border-b-[3px] hover:border-[#E27625] transition-color pb-2 ${
+              `flex items-center ${
+                isActive ? "text-[#E27625]" : "text-[#8488AC]"
+              } hover:text-[#E27625] hover:border-b-[3px] hover:border-[#E27625] transition-color pb-2 ${
                 item.breakpoint === "xl"
                   ? "hidden xl:flex"
                   : item.breakpoint === "lg"
@@ -236,10 +241,21 @@ const Navbar: React.FC = () => {
                   <Menu className="!w-6 !h-6" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-[#252538] text-white border-gray-700">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-[#252538] text-white border-gray-700"
+              >
                 {navItems.map((item) => (
-                  <DropdownMenuItem key={`mobile-${item.name}`} asChild className="md:hidden">
-                    <Link to={item.href} className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+                  <DropdownMenuItem
+                    key={`mobile-${item.name}`}
+                    asChild
+                    className="md:hidden"
+                  >
+                    <Link
+                      to={item.href}
+                      className="flex items-center cursor-pointer"
+                      onClick={() => window.scrollTo(0, 0)}
+                    >
                       {item.icon}
                       {item.name}
                     </Link>
@@ -273,12 +289,19 @@ const Navbar: React.FC = () => {
 
                 <DropdownMenuSeparator className="bg-gray-700" />
                 <DropdownMenuItem asChild>
-                  <Link to="/contactus" className="flex items-center cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+                  <Link
+                    to="/contactus"
+                    className="flex items-center cursor-pointer"
+                    onClick={() => window.scrollTo(0, 0)}
+                  >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Contact Us
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={toggleDarkMode} className="flex items-center cursor-pointer">
+                <DropdownMenuItem
+                  onClick={toggleDarkMode}
+                  className="flex items-center cursor-pointer"
+                >
                   <Moon className="h-4 w-4 mr-2" />
                   Dark Mode
                   <div
@@ -313,6 +336,5 @@ const Navbar: React.FC = () => {
     </nav>
   );
 };
-
 
 export default Navbar;

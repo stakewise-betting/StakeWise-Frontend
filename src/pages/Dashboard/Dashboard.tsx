@@ -25,7 +25,7 @@ const Dashboard = () => {
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <div>
-        <OnlineUsersWS wsUrl={wsUrl} />
+        
         <div className="min-h-[200px] py-10 lg:mx-24 md:mx-16 mx-8">
           {/* Profile Section */}
 
@@ -57,11 +57,15 @@ const Dashboard = () => {
               </AvatarFallback>
             </Avatar>
 
-            <div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-4">
               <h2 className="text-lg font-semibold text-white">
                 {userData?.fname ||
                   (userData?.walletAddress ? "MetaMask User" : "User")}
               </h2>
+              <OnlineUsersWS wsUrl={wsUrl} />
+              </div>
+            
               <p className="text-sm text-slate-400">
                 {userData?.email ||
                   (userData?.walletAddress
