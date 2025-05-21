@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// --- Reusable Icon Wrapper (Copied from Dashboard) ---
+// --- Reusable Icon Wrapper ---
 const IconWrapper: React.FC<{
   children: React.ReactNode;
   className?: string;
@@ -73,7 +73,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Styling Classes (Adapted from Dashboard) ---
+  // --- Styling Classes ---
   const cardBaseClasses = `
         bg-card text-dark-primary rounded-xl shadow-lg
         border border-gray-700/60
