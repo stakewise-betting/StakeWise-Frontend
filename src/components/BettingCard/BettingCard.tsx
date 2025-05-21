@@ -210,7 +210,7 @@ const BettingCard: FC<BettingCardProps> = ({ event, web3 }) => {
                 key={index}
                 className="flex items-center justify-between h-[22px]"
               >
-                <span className="text-sm text-gray-200">{option}</span>
+                <span className="text-xs text-gray-200">{option}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400 w-8 text-right">
                     {loading ? "..." : getOddsForOption(option)}

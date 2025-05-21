@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-// Removed: Search, Button, Input imports as they are now in SearchAndFilterSection
 import { UpcomingCard } from "@/components/UpcomingCard/UpcomingCard";
 import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
 import Pagination from "@/components/Pagination/Pagination";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
-import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection"; // Added import
+import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection";
 
 // Define TypeScript interface for event data
 interface BlockchainEvent {
@@ -25,9 +24,9 @@ interface BlockchainEvent {
 }
 
 export default function Page() {
-  const [web3, setWeb3] = useState<Web3 | null>(null);
-  const [events, setEvents] = useState<BlockchainEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [web3, setWeb3] = useState<Web3 | null>(null); // State to store the web3 instance
+  const [events, setEvents] = useState<BlockchainEvent[]>([]); // State to store all upcoming blockchain events
+  const [isLoading, setIsLoading] = useState(true); 
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,16 +82,20 @@ export default function Page() {
     init();
   }, []);
 
+   // Fetch and format events from the blockchain
   const loadEvents = async (betContract: any) => {
     try {
-      const eventCount = await betContract.methods.nextEventId().call();
+      const eventCount = await betContract.methods.nextEventId().call(); // Get total event count
       const eventList: BlockchainEvent[] = [];
-      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      const currentTime = Math.floor(Date.now() / 1000); // Current timestamp
 
+      // Loop through each event ID
       for (let eventId = 1; eventId < eventCount; eventId++) {
         try {
           const eventData = await betContract.methods.getEvent(eventId).call();
           const startTimeSeconds = Number(eventData.startTime);
+
+          // Filter: Only add events that are in the future
           if (startTimeSeconds > currentTime) {
             const formattedEvent: BlockchainEvent = {
               ...eventData,
@@ -115,6 +118,8 @@ export default function Page() {
           console.error(`Error fetching event ${eventId}:`, error);
         }
       }
+
+      // Sort upcoming events by start time
       eventList.sort((a, b) => Number(a.startTime) - Number(b.startTime));
       setEvents(eventList);
     } catch (error) {
@@ -123,24 +128,28 @@ export default function Page() {
     }
   };
 
+  // Filter events based on the search input
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
+  // Get events for the current page
   const getCurrentEvents = () => {
     const indexOfLastEvent = currentPage * eventsPerPage;
     const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
     return filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   };
 
+   // Handler to toggle user interest in an event
   const handleInterestedClick = async (eventId: string) => {
     if (!web3) {
       console.error("Web3 not initialized");
       return;
     }
     try {
+      // Request user's Ethereum address
       const accounts = await (window as any).ethereum.request({
         method: 'eth_requestAccounts'
       });
@@ -158,8 +167,7 @@ export default function Page() {
             : event
         )
       );
-      // const contract = new web3.eth.Contract(contractABI, contractAddress);
-      // await contract.methods.toggleInterest(eventId).send({from: account});
+      
       console.log(`Toggled interest for event ${eventId} by account ${account}`);
     } catch (error) {
       console.error("Error toggling interest:", error);
@@ -169,11 +177,13 @@ export default function Page() {
     }
   };
 
+  // Handler to change pagination
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
     window.scrollTo(0, 0);
   };
 
+  // Reset to page 1 when the search query changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);
@@ -188,7 +198,7 @@ export default function Page() {
           ))}
         </div>
         <div className="space-y-6">
-          {/* Use the new SearchAndFilterSection component */}
+          
           <SearchAndFilterSection
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery} // Pass the setSearchQuery function directly
@@ -200,6 +210,7 @@ export default function Page() {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Events list */}
               {getCurrentEvents().length > 0 ? (
                 getCurrentEvents().map((event) => {
                   const eventWithHandler = {
@@ -216,6 +227,8 @@ export default function Page() {
             </div>
           )}
 
+
+          {/* Pagination control */}
           {!isLoading && filteredEvents.length > 0 && (
             <Pagination
               currentPage={currentPage}

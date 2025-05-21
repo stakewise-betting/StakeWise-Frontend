@@ -3,6 +3,7 @@ import { Star, Share2, Calendar, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 
+// Define the event structure
 interface BlockchainEvent {
   eventId: string;
   name: string;
@@ -16,15 +17,15 @@ interface BlockchainEvent {
   tags: string[];
   category: string;
   onInterestedClick?: () => void;
-  // Other potential blockchain properties
 }
 
 interface EventCardProps {
   event: BlockchainEvent;
 }
 
+// Functional component that receives a blockchain event
 export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
-  // ... (keep all the existing code for data extraction, formatting, handlers etc.)
+  // Extract and format data
   const title = event.name;
   const image = event.imageURL || "/placeholder.svg";
   const listedDate = new Date(Number(event.createdAt) * 1000).toLocaleDateString();
@@ -37,6 +38,7 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
   const startTimeMs = Number(event.startTime) * 1000;
   const timeRemaining = startTimeMs - currentTime;
 
+  // Helper to format time remaining to event
   const formatTimeRemaining = () => {
     const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -61,14 +63,15 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
   const interested = event.interestedCount || 0;
   const isInterested = event.isUserInterested || false;
 
+  // Handle interest button click
   const handleInterestedClick = () => {
     if (event.onInterestedClick) {
       event.onInterestedClick();
     }
   };
 
+  // Share handler with Web Share API fallback
   const handleShare = () => {
-    // ... (share handler code remains the same)
     if (navigator.share) {
         navigator.share({
           title: title,
@@ -85,7 +88,6 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
 
 
   return (
-    // Using border-t instead of style for consistency if possible
     <div className="bg-[#1C1C27] rounded-none border-t border-[#8488AC]">
       <CardContent className="p-6">
         <div className="grid gap-6 md:grid-cols-[240px,1fr]">
@@ -96,7 +98,7 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
               alt={title}
               width={240}
               height={240}
-              className="rounded-lg object-cover w-full h-[240px]" // Ensure height is fixed
+              className="rounded-lg object-cover w-full h-[240px]"
             />
             <div className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded-md text-xs font-medium">
               {formatTimeRemaining()}
@@ -104,9 +106,9 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
           </div>
 
           {/* Details Column */}
-          <div className="space-y-4 flex flex-col justify-between"> {/* Added flex flex-col justify-between */}
+          <div className="space-y-4 flex flex-col justify-between">
             {/* Top Section: Title, Dates, Venue */}
-            <div className="space-y-2"> {/* Grouped top info */}
+            <div className="space-y-2">
                 <div>
                     <h3 className="text-xl font-semibold text-white mb-1">{title}</h3>
                     <div className="text-sm text-gray-400">Listed on: {listedDate}</div>
@@ -132,24 +134,12 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
                     </div>
                     <div className="text-white">{venue}</div>
                 </div>
-
-                {/* --- Description Section --- */}
                 <div className="grid grid-cols-[100px,1fr] text-sm">
                     <div className="text-gray-400">Description</div>
-                    {/*
-                      - h-16: Fixed height (adjust if needed)
-                      - overflow-y-auto: Enable vertical scroll on overflow
-                      - pr-2: Padding for scrollbar space
-                      - scrollbar-thin: Makes scrollbar thinner
-                      - scrollbar-track-transparent: Makes the track bg invisible
-                      - scrollbar-thumb-[#333447]: Sets thumb color
-                      - hover:scrollbar-thumb-[#4A4E68]: Sets thumb hover color (optional)
-                    */}
                     <div className="text-white h-16 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#333447] hover:scrollbar-thumb-[#4A4E68]">
                         {description}
                     </div>
                 </div>
-                 {/* --- End of Description Section --- */}
             </div>
 
 
