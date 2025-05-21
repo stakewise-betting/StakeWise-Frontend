@@ -1,4 +1,5 @@
-import type React from "react";
+//StakeWise-Frontend/src/Admin/layout/Sidebar.tsx
+import React from "react";
 import {
   LayoutDashboard,
   CalendarDays,

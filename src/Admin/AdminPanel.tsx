@@ -1,4 +1,4 @@
-// StakeWise-Frontend/src/Admin/shared/AdminPanel.tsx
+// StakeWise-Frontend/src/Admin/AdminPanel.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Web3 from "web3";
 import axios from "axios";
