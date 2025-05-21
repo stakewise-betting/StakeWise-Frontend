@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
-// Define the News interface based on our schema
+// Defining the News interface based on our schema
 interface NewsItem {
   _id: string;
   newsId: number;
@@ -26,7 +26,7 @@ interface NewsItem {
   category: string;
   author: string;
   publishDate: string;
-  imageUrl?: string; // Added image URL field
+  imageUrl?: string;
 }
 
 interface NewsDisplayPageProps {
@@ -41,9 +41,6 @@ export const NewsDisplayPage: React.FC<NewsDisplayPageProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Hero section background image
-  const heroBackgroundImage = "/src/assets/images/NewsBanner.png"; // Update this path to your image
 
   // Fetch news from the backend
   useEffect(() => {
@@ -99,22 +96,15 @@ export const NewsDisplayPage: React.FC<NewsDisplayPageProps> = ({
   };
 
   return (
-    <div className="bg-primary min-h-screen p-4 sm:p-6 lg:p-8 text-dark-primary">
+    <div className="bg-primary min-h-screen py-10 lg:mx-24 md:mx-16 mx-8 text-dark-primary">
       {/* Header */}
-
-      {/* Hero Section with Background Image */}
-      <div
-        className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBackgroundImage})` }}
-      >
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-4xl font-bold text-white mb-2">News & Updates</h1>
-          <p className="text-lg text-gray-300 max-w-2xl">
-            Latest news, announcements, and updates from our team.
-          </p>
-        </div>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-2 text-dark-primary flex items-center gap-3">
+          News & Updates
+        </h2>
+        <p className="text-dark-secondary max-w-2xl">
+          Latest news, announcements, and updates from our team.
+        </p>
       </div>
 
       {/* Category Filter */}
@@ -179,7 +169,7 @@ export const NewsDisplayPage: React.FC<NewsDisplayPageProps> = ({
 
       {/* News Grid */}
       {!loading && !error && filteredNews.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredNews.map((item) => (
             <Card
               key={item._id}

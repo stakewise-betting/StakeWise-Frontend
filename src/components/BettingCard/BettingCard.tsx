@@ -8,6 +8,7 @@ import Web3 from "web3";
 import { useWatchlist } from "@/context/WatchlistContext";
 import { AppContext } from "@/context/AppContext";
 import { toast } from "react-toastify";
+import { contractABI, contractAddress } from "@/config/contractConfig";
 
 interface OptionOdds {
   optionName: string;
@@ -28,24 +29,57 @@ interface EventData {
 
 interface BettingCardProps {
   event: EventData;
-  eventOdds: OptionOdds[] | null;
   web3: Web3 | null;
 }
 
-const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
+const BettingCard: FC<BettingCardProps> = ({ event, web3 }) => {
   const navigate = useNavigate();
   const { isLoggedin } = useContext(AppContext) || { isLoggedin: false };
-  const { addToWatchlist, removeFromWatchlist, checkInWatchlist } = useWatchlist();
-  
+  const { addToWatchlist, removeFromWatchlist, checkInWatchlist } =
+    useWatchlist();
+
   const [isInWatchlist, setIsInWatchlist] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [eventOdds, setEventOdds] = useState<OptionOdds[] | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const startTime = new Date(Number(event.startTime) * 1000);
   const endTime = new Date(Number(event.endTime) * 1000);
   const currentTime = Math.floor(Date.now() / 1000);
 
-  const isEventActive = Number(event.startTime) <= currentTime && Number(event.endTime) > currentTime;
+  const isEventActive =
+    Number(event.startTime) <= currentTime &&
+    Number(event.endTime) > currentTime;
   const isEventExpired = Number(event.endTime) <= currentTime;
+
+  // Fetch odds when component mounts or when web3/event changes
+  useEffect(() => {
+    const fetchEventOdds = async () => {
+      if (web3 && event.eventId) {
+        try {
+          setLoading(true);
+          const contract = new web3.eth.Contract(contractABI, contractAddress);
+          const oddsRaw = await contract.methods
+            .getEventOdds(event.eventId)
+            .call();
+          // Transform oddsRaw to OptionOdds[]
+          const odds: OptionOdds[] = Array.isArray(oddsRaw)
+            ? oddsRaw.map((item: any) => ({
+                optionName: item.optionName ?? "",
+                oddsPercentage: Number(item.oddsPercentage ?? 0),
+              }))
+            : [];
+          setEventOdds(odds);
+        } catch (error) {
+          console.error("Error fetching event odds:", error);
+          setEventOdds(null);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchEventOdds();
+  }, [web3, event.eventId]);
 
   // Check if event is in watchlist when component mounts
   useEffect(() => {
@@ -59,22 +93,22 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
         }
       }
     };
-    
+
     checkWatchlistStatus();
-  }, [event.eventId, isLoggedin]);
+  }, [event.eventId, isLoggedin, checkInWatchlist]);
 
   const handleWatchlistToggle = async () => {
     if (!isLoggedin) {
       toast.warn("Please log in to use the watchlist feature");
       return;
     }
-    
+
     if (isProcessing) return;
-    
+
     setIsProcessing(true);
     try {
       const eventId = Number(event.eventId);
-      
+
       if (isInWatchlist) {
         const success = await removeFromWatchlist(eventId);
         if (success) {
@@ -122,7 +156,13 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
   const statusInfo = getStatusInfo();
 
   return (
-    <Card className="w-full max-w-md bg-[#333447] text-white shadow-lg border-0">
+    <Card
+      className="w-full max-w-md bg-[#333447] text-white shadow-lg border-0 
+                   transition-all duration-300 ease-in-out
+                   hover:shadow-xl hover:border hover:border-secondary/50
+                   hover:outline hover:outline-1 hover:outline-secondary/30
+                   hover:-translate-y-1"
+    >
       <CardHeader className="p-2 space-y-0">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
@@ -132,21 +172,31 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
               className="w-12 h-12 rounded-md object-cover"
             />
             <div>
-              <h3 className="font-semibold text-sm leading-tight">{event.name}</h3>
-              <div className={`text-[10px] ${statusInfo.color}`}>{statusInfo.label}</div>
+              <h3 className="font-semibold text-sm leading-tight">
+                {event.name}
+              </h3>
+              <div className={`text-[10px] ${statusInfo.color}`}>
+                {statusInfo.label}
+              </div>
             </div>
           </div>
           <div className="flex gap-2 text-[#8488AC]">
             <button className="hover:text-white transition-colors">
               <Pin className="h-4 w-4" />
             </button>
-            <button 
-              className={`hover:text-yellow-400 transition-colors ${isInWatchlist ? 'text-yellow-400 fill-yellow-400' : ''} ${isProcessing ? 'opacity-50' : ''}`} 
+            <button
+              className={`hover:text-yellow-400 transition-colors ${
+                isInWatchlist ? "text-yellow-400 fill-yellow-400" : ""
+              } ${isProcessing ? "opacity-50" : ""}`}
               onClick={handleWatchlistToggle}
               disabled={isProcessing}
             >
-              <Star className={`h-4 w-4 ${isInWatchlist ? 'fill-yellow-400' : 'fill-none'}`} 
-              fill={isInWatchlist ? 'currentColor' : 'none'}  />
+              <Star
+                className={`h-4 w-4 ${
+                  isInWatchlist ? "fill-yellow-400" : "fill-none"
+                }`}
+                fill={isInWatchlist ? "currentColor" : "none"}
+              />
             </button>
           </div>
         </div>
@@ -156,18 +206,23 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
         <ScrollArea className="h-[70px] pr-2 overflow-hidden">
           <div className="space-y-0">
             {event.options.map((option, index) => (
-              <div key={index} className="flex items-center justify-between h-[22px]">
-                <span className="text-[13px] text-gray-200">{option}</span>
+              <div
+                key={index}
+                className="flex items-center justify-between h-[22px]"
+              >
+                <span className="text-sm text-gray-200">{option}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-400 w-8 text-right">
-                    {getOddsForOption(option)}
+                    {loading ? "..." : getOddsForOption(option)}
                   </span>
                   <Button
                     variant="secondary"
                     className={`text-[#00BD58] hover:text-white text-[9px] px-1 py-0 h-[14px] rounded
-                      ${isEventExpired
-                        ? "bg-gray-500 hover:bg-gray-600 cursor-not-allowed"
-                        : "bg-[#3b7846] hover:bg-[#00BD58]"}`}
+                      ${
+                        isEventExpired
+                          ? "bg-gray-500 hover:bg-gray-600 cursor-not-allowed"
+                          : "bg-[#3b7846] hover:bg-[#00BD58]"
+                      }`}
                     onClick={() => {
                       if (!isEventExpired) {
                         navigate(`/bet/${event.eventId}`);
@@ -189,7 +244,9 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
               <Clock className="h-3 w-3" />
               <span>{endTime.toLocaleString()}</span>
             </div>
-            <span className="text-xs text-right">{formattedPrizePool()} Vol.</span>
+            <span className="text-xs text-right">
+              {formattedPrizePool()} Vol.
+            </span>
           </div>
         </div>
       </CardContent>
@@ -198,5 +255,3 @@ const BettingCard: FC<BettingCardProps> = ({ event, eventOdds, web3 }) => {
 };
 
 export default BettingCard;
-
-

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, Trophy, Star, Link2, FileText } from "lucide-react";
 import Web3 from "web3";
@@ -11,6 +11,9 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { toast } from "react-toastify";
+import { useWatchlist } from "@/context/WatchlistContext";
+import { AppContext } from "@/context/AppContext";
 
 // Define an array of different colors for the chart bars
 const CHART_COLORS = [
@@ -63,6 +66,12 @@ export default function BetInterface({
   const [activeTab, setActiveTab] = useState<"description" | "rules">(
     "description"
   );
+  const [isInWatchlist, setIsInWatchlist] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  const { isLoggedin } = useContext(AppContext) || { isLoggedin: false };
+  const { addToWatchlist, removeFromWatchlist, checkInWatchlist } =
+    useWatchlist();
 
   // Ensure all options are strings
   const displayedOptions = showMore
@@ -107,6 +116,76 @@ export default function BetInterface({
           odds: 0,
         }));
 
+  // Check if event is in watchlist when component mounts
+  useEffect(() => {
+    const checkWatchlistStatus = async () => {
+      if (isLoggedin && eventData.eventId) {
+        try {
+          const inWatchlist = await checkInWatchlist(Number(eventData.eventId));
+          setIsInWatchlist(inWatchlist);
+        } catch (error) {
+          console.error("Error checking watchlist status:", error);
+        }
+      }
+    };
+
+    checkWatchlistStatus();
+  }, [eventData.eventId, isLoggedin, checkInWatchlist]);
+
+  // Handle watchlist toggle
+  const handleWatchlistToggle = async () => {
+    if (!isLoggedin) {
+      toast.warn("Please log in to use the watchlist feature");
+      return;
+    }
+
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      const eventId = Number(eventData.eventId);
+
+      if (isInWatchlist) {
+        const success = await removeFromWatchlist(eventId);
+        if (success) {
+          setIsInWatchlist(false);
+          toast.success("Removed from watchlist");
+        }
+      } else {
+        const success = await addToWatchlist(eventId);
+        if (success) {
+          setIsInWatchlist(true);
+          toast.success("Added to watchlist");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling watchlist:", error);
+      toast.error("Failed to update watchlist");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle copy link to clipboard
+  const handleCopyLink = () => {
+    try {
+      // Create URL for the current event
+      const eventUrl = `${window.location.origin}/bet/${eventData.eventId}`;
+      navigator.clipboard.writeText(eventUrl);
+      toast.success("Event URL copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy URL:", error);
+      toast.error("Failed to copy URL to clipboard");
+    }
+  };
+
+  // Handle report event
+  const handleReportEvent = () => {
+    // Here you could implement a modal for reporting the event
+    // For now, just show a toast message
+    toast.info("Report feature will be available soon");
+  };
+
   return (
     <div className="lg:col-span-2">
       {/* Main Event Card */}
@@ -148,13 +227,32 @@ export default function BetInterface({
               </div>
             </div>
             <div className="flex gap-1">
-              <button className="rounded-md p-2 text-dark-secondary hover:bg-primary/50 hover:text-dark-primary transition-colors">
-                <Star className="h-5 w-5" />
+              <button
+                className={`rounded-md p-2 ${
+                  isInWatchlist
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-dark-secondary hover:bg-primary/50 hover:text-dark-primary"
+                } transition-colors ${isProcessing ? "opacity-50" : ""}`}
+                onClick={handleWatchlistToggle}
+                disabled={isProcessing}
+              >
+                <Star
+                  className={`h-5 w-5 ${
+                    isInWatchlist ? "fill-yellow-400" : "fill-none"
+                  }`}
+                  fill={isInWatchlist ? "currentColor" : "none"}
+                />
               </button>
-              <button className="rounded-md p-2 text-dark-secondary hover:bg-primary/50 hover:text-dark-primary transition-colors">
+              <button
+                className="rounded-md p-2 text-dark-secondary hover:bg-primary/50 hover:text-dark-primary transition-colors"
+                onClick={handleCopyLink}
+              >
                 <Link2 className="h-5 w-5" />
               </button>
-              <button className="rounded-md p-2 text-dark-secondary hover:bg-primary/50 hover:text-dark-primary transition-colors">
+              <button
+                className="rounded-md p-2 text-dark-secondary hover:bg-primary/50 hover:text-dark-primary transition-colors"
+                onClick={handleReportEvent}
+              >
                 <FileText className="h-5 w-5" />
               </button>
             </div>

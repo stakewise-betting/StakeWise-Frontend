@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/pages/Reward/Reward.tsx
 import RaffleSection from '@/components/RewardCom/RaffleSection'
 import TokenClaimSection from '@/components/RewardCom/TokenClaimsSection'
 import RedeemSection from '@/components/RewardCom/RedeemSection'

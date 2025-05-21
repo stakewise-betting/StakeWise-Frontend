@@ -52,11 +52,7 @@ const formatTimestamp = (timestamp: number): string => {
   return new Date(timestamp * 1000).toLocaleString(); // Convert seconds to ms
 };
 
-const RecentBetsTable: React.FC<RecentBetsTableProps> = ({
-  bets,
-  loading,
-  web3Instance, // Might not be strictly needed if amount is pre-formatted
-}) => {
+const RecentBetsTable: React.FC<RecentBetsTableProps> = ({ bets, loading }) => {
   const cardBaseClasses = `
     bg-card text-dark-primary rounded-xl shadow-lg
     border border-gray-700/60
