@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trash2, User as UserIcon } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { format } from "date-fns"; // For date formatting
 import { IUser } from "@/types/user.types"; // Adjust path if needed
 import { toast } from "sonner"; // Or react-toastify
