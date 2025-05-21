@@ -1,7 +1,7 @@
 // src/components/navbar/UserProfileDropdown.tsx
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, ChevronDown, Moon, LogOut, Eye, BarChart3, MessageSquare } from "lucide-react"; // Using lucide-react icons
+import { User, ChevronDown, Moon, LogOut, Eye, BarChart3, MessageSquare, LayoutDashboard } from "lucide-react"; // Using lucide-react icons
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -175,7 +175,7 @@ const UserProfileDropdown: React.FC = () => {
                         setProfileOpen(false);
                     }}
                 >
-                    <BarChart3 className="h-4 w-4 mr-2" />
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
                     Dashboard
                 </DropdownMenuItem>
 

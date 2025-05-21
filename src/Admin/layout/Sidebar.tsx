@@ -5,7 +5,7 @@ import {
   Users,
   Settings,
   CircleUserRound,
-  Newspaper
+  Ticket,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -17,9 +17,9 @@ interface SidebarProps {
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "events", label: "Events", icon: CalendarDays },
+  { id: "raffles", label: "Raffles", icon: Ticket }, // New Raffles section
   { id: "users", label: "Users", icon: Users },
   { id: "profile", label: "Profile", icon: CircleUserRound },
-  { id: "news", label: "News", icon: Newspaper },
   // { id: "settings", label: "Admin Details", icon: Settings },
 ];
 
