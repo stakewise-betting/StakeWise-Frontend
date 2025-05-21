@@ -6,12 +6,14 @@ import { AdminLayout } from "@/Admin/layout/AdminLayout"; // Updated path to mat
 import { Dashboard } from "@/Admin/dashboard/Dashboard"; // Updated to use the correct alias path
 import { EventsPage } from "@/Admin/events/EventsPage"; // Updated path to match project structure
 import UserManagementPage from "@/Admin/users/UserManagementPage"; // Updated to use the correct alias path
+import SliderPage from "./slider/slider";
 import setupWeb3AndContract from "@/services/blockchainService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { RecentBet } from "@/Admin/dashboard/RecentBetsTable"; // Corrected path, Import the RecentBet type
 import { toast } from "sonner"; // Assuming you use sonner for notifications
 import AdminProfilePage from "@/Admin/profile/AdminProfilePage";
+import { NewsPage } from "@/Admin/news/NewsPage";
 
 // Define the expected structure for user count API response
 // Using the one from adminService for consistency if possible, otherwise define here
@@ -514,6 +516,8 @@ const AdminPanel: React.FC = () => {
           <div className="p-6">Loading Events Data...</div>
         );
 
+      case "slider":
+        return <SliderPage />;
       case "users":
         // UserManagementPage fetches its own data, needs no props from here
         return <UserManagementPage />;
@@ -521,6 +525,9 @@ const AdminPanel: React.FC = () => {
       case "profile": // <-- Add this case
         // AdminProfilePage fetches its own data
         return <AdminProfilePage />;
+
+      case "news":
+        return <NewsPage />;
 
       default:
         // Default to dashboard, same logic as 'dashboard' case

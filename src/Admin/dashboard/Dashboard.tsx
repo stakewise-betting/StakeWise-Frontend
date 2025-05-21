@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import {
   Users,
-  BarChart2,
   TrendingUp,
   Activity,
   Wallet,

@@ -145,7 +145,7 @@ const WalletSection = ({ userData }: { userData: any }) => (
     <div className="flex items-center justify-between">
       <Label>Wallet Address</Label>
     </div>
-    <div className="flex items-center bg-[#1C1C27] rounded-lg px-3 py-2">
+    <div className="flex items-center bg-[#333447] rounded-lg px-3 py-2">
       <Wallet className="h-4 w-4 text-zinc-400" />
       <div className="w-full text-sm px-2 py-1">{userData?.walletAddress}</div>
     </div>
@@ -173,7 +173,7 @@ const EmailSection = ({
         <LoadingBadge />
       )}
     </div>
-    <div className="flex items-center bg-[#1C1C27]  rounded-lg px-3 py-2">
+    <div className="flex items-center bg-[#333447]  rounded-lg px-3 py-2">
       <Mail className="h-4 w-4 text-zinc-400" />
       <div className="w-full text-sm px-2 py-1">{userData?.email}</div>
     </div>
@@ -203,7 +203,7 @@ const PhoneSection = ({
 }) => (
   <div className="space-y-2">
     <Label htmlFor="phone">Phone Number</Label>
-    <div className="flex items-center bg-[#1C1C27]  rounded-lg px-3 py-2">
+    <div className="flex items-center bg-[#333447]  rounded-lg px-3 py-2">
       <Phone className="h-4 w-4 text-zinc-400" />
       <input
         id="phone"
@@ -227,10 +227,10 @@ const LanguageSection = ({
   <div className="space-y-2">
     <Label htmlFor="language">Preferred Language</Label>
     <Select value={language} onValueChange={setLanguage}>
-      <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#1C1C27]  rounded-lg">
+      <SelectTrigger className="border-none w-full py-3 px-4 text-sm bg-[#333447]  rounded-lg">
         <SelectValue placeholder="Select language" />
       </SelectTrigger>
-      <SelectContent className="bg-[#1C1C27] border-none rounded-lg">
+      <SelectContent className="bg-[#333447] border-none rounded-lg">
         {["en", "es", "fr", "de", "it", "pt"].map((lang) => (
           <SelectItem key={lang} value={lang}>
             {languageNames[lang]}

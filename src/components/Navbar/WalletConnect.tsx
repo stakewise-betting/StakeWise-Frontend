@@ -118,12 +118,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
           ${usdValue}
         </span>
       </div>
-      <div className="text-xs text-gray-400 flex flex-col items-end">
-        <span>{walletBalance} ETH</span>
-        <span className="truncate max-w-[80px]">
-          {walletAddress ? `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : ''}
-        </span>
-      </div>
       <ButtonOutline
         onClick={() => navigate("/deposit")}
         small
