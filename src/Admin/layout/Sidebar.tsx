@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/Admin/layout/Sidebar.tsx
 import React from "react";
 import {
   LayoutDashboard,
@@ -6,6 +7,8 @@ import {
   Settings,
   CircleUserRound,
   Ticket,
+  ImageIcon,
+  Newspaper,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -14,6 +17,7 @@ interface SidebarProps {
   onSelectSection: (section: string) => void;
 }
 
+// Check the navItems array to ensure the slider item is correctly defined
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "events", label: "Events", icon: CalendarDays },
@@ -21,6 +25,10 @@ const navItems = [
   { id: "users", label: "Users", icon: Users },
   { id: "profile", label: "Profile", icon: CircleUserRound },
   // { id: "settings", label: "Admin Details", icon: Settings },
+  { id: "slider", label: "Slider", icon: ImageIcon },
+  { id: "news", label: "News", icon: Newspaper },
+
+  //{ id: "settings", label: "Admin Details", icon: Settings },
 ];
 
 // Icon background accent color
@@ -55,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSelectSection,
 }) => {
+  // Make sure the label is being rendered in the button
   return (
     <aside className="w-64 h-full flex flex-col p-4 bg-primary border-r border-gray-700/60 text-dark-primary relative bg-noise bg-floating-shapes animate-admin-fade-in transition-all duration-300">
       {/* Logo/Header */}
