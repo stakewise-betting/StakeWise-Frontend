@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/components/RewardCom/Confirmation-model.tsx
 import { CheckCircleIcon } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"

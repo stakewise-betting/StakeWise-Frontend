@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/components/RewardCom/RaffleSection.tsx
 import { useState } from "react"
 import { TicketIcon, ClockIcon, UsersIcon, CoinsIcon, CheckCircleIcon } from "lucide-react"
 import {
