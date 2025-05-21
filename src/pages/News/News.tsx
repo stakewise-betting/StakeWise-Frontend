@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 
-// Define the News interface based on our schema
+// Defining the News interface based on our schema
 interface NewsItem {
   _id: string;
   newsId: number;
@@ -26,7 +26,7 @@ interface NewsItem {
   category: string;
   author: string;
   publishDate: string;
-  imageUrl?: string; // Added image URL field
+  imageUrl?: string;
 }
 
 interface NewsDisplayPageProps {
