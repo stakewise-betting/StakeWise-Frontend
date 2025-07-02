@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: react-vite-app
+    env: node
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm run preview
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_API_URL
+        value: https://your-backend-api-url.com
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
