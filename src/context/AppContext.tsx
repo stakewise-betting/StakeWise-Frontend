@@ -1,4 +1,4 @@
-// src/context/AppContext.tsx
+// StakeWise-Frontend/src/context/AppContext.tsx
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";

@@ -1,4 +1,4 @@
-// StakeWise-Frontend/src/Admin/shared/AdminPanel.tsx
+// StakeWise-Frontend/src/Admin/AdminPanel.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import Web3 from "web3";
 import axios from "axios";
@@ -6,6 +6,7 @@ import { AdminLayout } from "@/Admin/layout/AdminLayout"; // Updated path to mat
 import { Dashboard } from "@/Admin/dashboard/Dashboard"; // Updated to use the correct alias path
 import { EventsPage } from "@/Admin/events/EventsPage"; // Updated path to match project structure
 import UserManagementPage from "@/Admin/users/UserManagementPage"; // Updated to use the correct alias path
+import RafflesPage from "@/Admin/raffles/RafflesPage"; // Import the new RafflesPage component
 import SliderPage from "./slider/slider";
 import setupWeb3AndContract from "@/services/blockchainService";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,6 +46,7 @@ const AdminPanel: React.FC = () => {
   // --- Web3 & Contract State ---
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any>(null); // Consider defining a Contract type if using TypeChain or similar
+  const [raffleContract, setRaffleContract] = useState<any>(null); // State for raffle contract
   const [adminProfit, setAdminProfit] = useState<string>("0");
   const [adminAddress, setAdminAddress] = useState<string>("");
 
@@ -326,6 +328,14 @@ const AdminPanel: React.FC = () => {
       const { web3Instance, betContract } = await setupWeb3AndContract();
       setWeb3(web3Instance);
       setContract(betContract);
+
+      // Initialize Raffle Contract - This would need to be adapted based on how you setup your raffle contract
+      // For now, we'll just set it to null but in a real implementation you'd initialize it here
+      // const raffleContractInstance = new web3Instance.eth.Contract(raffleContractABI, raffleContractAddress);
+      // setRaffleContract(raffleContractInstance);
+
+      setRaffleContract(null); // For now, until you have the actual contract
+
       console.log("Web3 and Contract setup complete.");
 
       if (betContract && web3Instance) {
@@ -405,6 +415,19 @@ const AdminPanel: React.FC = () => {
   const handleWinnerDeclared = useCallback(() => {
     console.log("Winner declared handler triggered. Refreshing data.");
     toast.info("Event winner declared, refreshing data...");
+    refreshAllData();
+  }, [refreshAllData]);
+
+  // --- Raffle Event Handlers ---
+  const handleRaffleCreated = useCallback(() => {
+    console.log("Raffle created handler triggered. Refreshing data.");
+    toast.info("New raffle created, refreshing data...");
+    refreshAllData();
+  }, [refreshAllData]);
+
+  const handleRaffleWinnerSelected = useCallback(() => {
+    console.log("Raffle winner selected handler triggered. Refreshing data.");
+    toast.info("Raffle winner selected, refreshing data...");
     refreshAllData();
   }, [refreshAllData]);
 
@@ -514,6 +537,20 @@ const AdminPanel: React.FC = () => {
           />
         ) : (
           <div className="p-6">Loading Events Data...</div>
+        );
+
+      case "raffles":
+        // RafflesPage needs web3 for contract interaction
+        return web3 ? (
+          <RafflesPage
+            contract={raffleContract || null} // Pass the raffle contract when available
+            web3={web3}
+            onRaffleCreated={handleRaffleCreated}
+            onWinnerSelected={handleRaffleWinnerSelected}
+            isLoading={loadingBlockchain} // Example loading prop
+          />
+        ) : (
+          <div className="p-6">Loading Raffles Data...</div>
         );
 
       case "slider":

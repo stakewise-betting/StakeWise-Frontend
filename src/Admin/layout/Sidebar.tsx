@@ -1,11 +1,14 @@
-import type React from "react";
+//StakeWise-Frontend/src/Admin/layout/Sidebar.tsx
+import React from "react";
 import {
   LayoutDashboard,
   CalendarDays,
   Users,
   Settings,
   CircleUserRound,
+  Ticket,
   ImageIcon,
+  Newspaper,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -18,9 +21,13 @@ interface SidebarProps {
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "events", label: "Events", icon: CalendarDays },
-  { id: "slider", label: "Slider", icon: ImageIcon },
+  { id: "raffles", label: "Raffles", icon: Ticket }, // New Raffles section
   { id: "users", label: "Users", icon: Users },
   { id: "profile", label: "Profile", icon: CircleUserRound },
+  // { id: "settings", label: "Admin Details", icon: Settings },
+  { id: "slider", label: "Slider", icon: ImageIcon },
+  { id: "news", label: "News", icon: Newspaper },
+
   //{ id: "settings", label: "Admin Details", icon: Settings },
 ];
 
