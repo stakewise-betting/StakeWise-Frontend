@@ -45,9 +45,10 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const backendBaseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-  
+
+  const backendBaseUrl =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
   // Load raffles from backend and blockchain
   const loadRaffles = async () => {
     setLoading(true);
@@ -55,45 +56,50 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
     try {
       // Fetch raffles from backend
       const response = await axios.get(`${backendBaseUrl}/api/raffles`);
-      
+
       if (response.data.success) {
         const backendRaffles = response.data.data;
-        
+
         // Enhance with blockchain data when possible
         if (contract) {
-          const rafflePromises = backendRaffles.map(async (raffle: RaffleData) => {
-            try {
-              // Try to get additional blockchain data
-              const blockchainRaffle = await contract.methods
-                .getRaffle(raffle.raffleId)
-                .call();
-              
-              // Convert Wei values to ETH
-              const ticketPrice = web3.utils.fromWei(
-                blockchainRaffle.ticketPrice.toString(),
-                "ether"
-              );
-              const prizeAmount = web3.utils.fromWei(
-                blockchainRaffle.prizeAmount.toString(),
-                "ether"
-              );
-              
-              // Merge data, prioritizing blockchain for accurate state
-              return {
-                ...raffle,
-                isCompleted: blockchainRaffle.isCompleted,
-                winner: blockchainRaffle.winner,
-                totalTicketsSold: Number(blockchainRaffle.totalTicketsSold),
-                ticketPrice: parseFloat(ticketPrice),
-                prizeAmount: parseFloat(prizeAmount)
-              };
-            } catch (err) {
-              console.warn(`Failed to fetch blockchain data for raffle ${raffle.raffleId}:`, err);
-              // Return backend data if blockchain fetch fails
-              return raffle;
+          const rafflePromises = backendRaffles.map(
+            async (raffle: RaffleData) => {
+              try {
+                // Try to get additional blockchain data
+                const blockchainRaffle = await contract.methods
+                  .getRaffle(raffle.raffleId)
+                  .call();
+
+                // Convert Wei values to ETH
+                const ticketPrice = web3.utils.fromWei(
+                  blockchainRaffle.ticketPrice.toString(),
+                  "ether"
+                );
+                const prizeAmount = web3.utils.fromWei(
+                  blockchainRaffle.prizeAmount.toString(),
+                  "ether"
+                );
+
+                // Merge data, prioritizing blockchain for accurate state
+                return {
+                  ...raffle,
+                  isCompleted: blockchainRaffle.isCompleted,
+                  winner: blockchainRaffle.winner,
+                  totalTicketsSold: Number(blockchainRaffle.totalTicketsSold),
+                  ticketPrice: parseFloat(ticketPrice),
+                  prizeAmount: parseFloat(prizeAmount),
+                };
+              } catch (err) {
+                console.warn(
+                  `Failed to fetch blockchain data for raffle ${raffle.raffleId}:`,
+                  err
+                );
+                // Return backend data if blockchain fetch fails
+                return raffle;
+              }
             }
-          });
-          
+          );
+
           const enhancedRaffles = await Promise.all(rafflePromises);
           setRaffles(enhancedRaffles);
         } else {
@@ -112,36 +118,38 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
       setLoading(false);
     }
   };
-  
+
   // Initial load
   useEffect(() => {
     loadRaffles();
   }, [contract, web3]);
-  
+
   // Handle refresh
   const handleRefresh = async () => {
     setRefreshing(true);
     await loadRaffles();
     setRefreshing(false);
   };
-  
+
   // Handle raffle created
   const handleRaffleCreated = async () => {
     await loadRaffles();
     if (onRaffleCreated) onRaffleCreated();
   };
-  
+
   // Handle winner selected
   const handleWinnerSelected = async () => {
     await loadRaffles();
     if (onWinnerSelected) onWinnerSelected();
   };
-  
+
   // Delete raffle
   const handleDeleteRaffle = async (raffleId: number) => {
     try {
-      const response = await axios.delete(`${backendBaseUrl}/api/raffles/${raffleId}`);
-      
+      const response = await axios.delete(
+        `${backendBaseUrl}/api/raffles/${raffleId}`
+      );
+
       if (response.data.success) {
         toast.success("Raffle deleted successfully");
         await loadRaffles();
@@ -153,12 +161,14 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
       toast.error(`Failed to delete raffle: ${err.message}`);
     }
   };
-  
+
   // Select winner
   const handleSelectWinner = async (raffleId: number) => {
     try {
-      const response = await axios.post(`${backendBaseUrl}/api/raffles/${raffleId}/select-winner`);
-      
+      const response = await axios.post(
+        `${backendBaseUrl}/api/raffles/${raffleId}/select-winner`
+      );
+
       if (response.data.success) {
         toast.success(`Winner selected: ${response.data.data.winner}`);
         await loadRaffles();

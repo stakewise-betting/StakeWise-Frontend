@@ -2,13 +2,11 @@ import React, { useState, useContext, useCallback } from "react";
 import { useNavigate, NavLink, Link } from "react-router-dom";
 import {
   Menu,
-  Building2,
-  Trophy,
   Calendar,
   Gift,
-  Moon,
   MessageSquare,
-  Newspaper
+  Newspaper,
+  Home,
 } from "lucide-react";
 
 import { AppContext } from "@/context/AppContext";
@@ -47,10 +45,10 @@ const Navbar: React.FC = () => {
   const { backendUrl, isLoggedin, setUserData, setIsLoggedin } = appContext;
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [localWalletConnected, setLocalWalletConnected] = useState(false);
   const [localUsdValue, setLocalUsdValue] = useState("0.00");
   const [mobileUnreadCount, setMobileUnreadCount] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const connectWalletForMobile = async () => {
     if (window.ethereum) {
@@ -128,15 +126,9 @@ const Navbar: React.FC = () => {
 
   const navItems: NavItem[] = [
     {
-      name: "POLITICS",
-      href: "/politics",
-      icon: <Building2 className="h-4 w-4 mr-2" />,
-      breakpoint: "always",
-    },
-    {
-      name: "SPORTS",
-      href: "/sports",
-      icon: <Trophy className="h-4 w-4 mr-2" />,
+      name: "HOME",
+      href: "/",
+      icon: <Home className="h-4 w-4 mr-2" />,
       breakpoint: "always",
     },
     {
@@ -163,28 +155,26 @@ const Navbar: React.FC = () => {
       : []),
   ];
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   return (
-    <nav className="bg-[#1C1C27] text-white h-16 px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
-      <div className="flex items-center px-2">
+    <nav className="bg-[#1C1C27] text-white h-16 px-2 sm:px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+      <div className="flex items-center px-1 sm:px-2">
         <Link
           to="/"
           onClick={() => window.scrollTo(0, 0)}
           className="flex items-center"
         >
-          <span className="text-3xl mr-3 font-saira-stencil">STAKEWISE</span>
+          <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl mr-2 sm:mr-3 font-saira-stencil">
+            STAKEWISE
+          </span>
           <img
             src={TeamLogo}
             alt="Team Logo"
-            className="logo-icon w-[42px] h-[34px]"
+            className="logo-icon w-[28px] h-[22px] sm:w-[35px] sm:h-[28px] md:w-[42px] md:h-[34px]"
           />
         </Link>
       </div>
 
-      <div className="hidden md:flex items-center space-x-8 mt-2 ml-10 text-[13px] font-bold">
+      <div className="hidden lg:flex items-center space-x-4 xl:space-x-8 mt-2 ml-4 xl:ml-10 text-[12px] xl:text-[13px] font-bold">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
@@ -203,29 +193,62 @@ const Navbar: React.FC = () => {
             }
           >
             {item.icon}
-            {item.name}
+            <span className="ml-1 xl:ml-2">{item.name}</span>
           </NavLink>
         ))}
       </div>
 
-      <div className="flex items-center space-x-6">
+      <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
         {isLoggedin ? (
           <>
             <WalletConnect isLoggedin={isLoggedin} />
             <NotificationsBell />
             <UserProfileDropdown />
+
+            {/* Mobile Menu Button for logged in users */}
+            <DropdownMenu onOpenChange={setMenuOpen} open={menuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden text-[#ffffff] !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 transition"
+                >
+                  <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 sm:w-56 bg-[#252538] text-white border-gray-700 mr-2"
+              >
+                {navItems.map((item) => (
+                  <DropdownMenuItem key={`mobile-${item.name}`} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center cursor-pointer text-sm"
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                        setMenuOpen(false);
+                      }}
+                    >
+                      {item.icon}
+                      <span className="ml-2">{item.name}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         ) : (
           <>
             <Button
               variant="ghost"
-              className="hidden md:flex text-orange-500 hover:text-orange-400"
+              className="hidden sm:flex text-orange-500 hover:text-orange-400 text-sm px-2 py-1"
               onClick={() => navigate("/login")}
             >
               Login
             </Button>
             <Button
-              className="hidden md:flex bg-orange-500 hover:bg-orange-600 text-white rounded-full"
+              className="hidden sm:flex bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm px-3 py-1"
               onClick={() => navigate("/signup")}
             >
               Sign Up
@@ -236,36 +259,39 @@ const Navbar: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-[#ffffff] !w-8 !h-8 !p-2 hover:bg-gray-700 transition"
+                  className="text-[#ffffff] !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 transition"
                 >
-                  <Menu className="!w-6 !h-6" />
+                  <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56 bg-[#252538] text-white border-gray-700"
+                className="w-48 sm:w-56 bg-[#252538] text-white border-gray-700 mr-2"
               >
                 {navItems.map((item) => (
                   <DropdownMenuItem
                     key={`mobile-${item.name}`}
                     asChild
-                    className="md:hidden"
+                    className="lg:hidden"
                   >
                     <Link
                       to={item.href}
-                      className="flex items-center cursor-pointer"
-                      onClick={() => window.scrollTo(0, 0)}
+                      className="flex items-center cursor-pointer text-sm"
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                        setMenuOpen(false);
+                      }}
                     >
                       {item.icon}
-                      {item.name}
+                      <span className="ml-2">{item.name}</span>
                     </Link>
                   </DropdownMenuItem>
                 ))}
 
-                <DropdownMenuSeparator className="md:hidden bg-gray-700" />
-                <DropdownMenuItem asChild className="md:hidden">
+                <DropdownMenuSeparator className="lg:hidden bg-gray-700" />
+                <DropdownMenuItem asChild className="sm:hidden">
                   <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full mt-2 justify-center"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full mt-2 justify-center text-sm"
                     onClick={() => {
                       navigate("/signup");
                       setMenuOpen(false);
@@ -274,10 +300,10 @@ const Navbar: React.FC = () => {
                     Sign Up
                   </Button>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="md:hidden">
+                <DropdownMenuItem asChild className="sm:hidden">
                   <Button
                     variant="outline"
-                    className="w-full rounded-full mt-2 justify-center text-orange-500 border border-orange-500 hover:bg-gray-700"
+                    className="w-full rounded-full mt-2 justify-center text-orange-500 border border-orange-500 hover:bg-gray-700 text-sm"
                     onClick={() => {
                       navigate("/login");
                       setMenuOpen(false);
@@ -291,30 +317,15 @@ const Navbar: React.FC = () => {
                 <DropdownMenuItem asChild>
                   <Link
                     to="/contactus"
-                    className="flex items-center cursor-pointer"
-                    onClick={() => window.scrollTo(0, 0)}
+                    className="flex items-center cursor-pointer text-sm"
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      setMenuOpen(false);
+                    }}
                   >
                     <MessageSquare className="h-4 w-4 mr-2" />
                     Contact Us
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={toggleDarkMode}
-                  className="flex items-center cursor-pointer"
-                >
-                  <Moon className="h-4 w-4 mr-2" />
-                  Dark Mode
-                  <div
-                    className={`ml-auto w-8 h-4 rounded-full ${
-                      isDarkMode ? "bg-orange-500" : "bg-gray-600"
-                    } relative`}
-                  >
-                    <div
-                      className={`absolute top-0.5 ${
-                        isDarkMode ? "right-0.5" : "left-0.5"
-                      } w-3 h-3 bg-white rounded-full transition-all`}
-                    ></div>
-                  </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
