@@ -179,7 +179,7 @@ export default function TransactionTable() {
   }
 
   return (
-    <div className="p-8 rounded-[20px] lg:mx-24 md:mx-16 mx-8 mb-[96px] bg-[#333447] min-h-[550px] space-y-6">
+    <div className="p-8 rounded-[20px] lg:mx-24 md:mx-16 mx-8 mb-[96px] bg-[#333447] min-h-[500px] space-y-6">
       <div className="">
         <h2 className="text-[20px] font-bold ">Transaction Details</h2>
       </div>
