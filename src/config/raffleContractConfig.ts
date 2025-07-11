@@ -1,4 +1,4 @@
-export const raffleContractAddress = "0x7b4510809268370Fa0cEc70FD2f8769A32fEf8e3"; // Use your actual address
+export const raffleContractAddress = "0x8F901d4225cFe6800748260945FC88e3F82D2B73"; // Use your actual address
 export const raffleContractABI = [
   // Same ABI as in the backend service, but shortened here for readability
   {
