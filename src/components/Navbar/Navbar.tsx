@@ -7,6 +7,7 @@ import {
   MessageSquare,
   Newspaper,
   Home,
+  Trophy,
 } from "lucide-react";
 
 import { AppContext } from "@/context/AppContext";
@@ -135,6 +136,12 @@ const Navbar: React.FC = () => {
       name: "UPCOMING EVENTS",
       href: "/upcoming",
       icon: <Calendar className="h-4 w-4 mr-2" />,
+      breakpoint: "lg",
+    },
+    {
+      name: "LEADERBOARD",
+      href: "/leaderboard",
+      icon: <Trophy className="h-4 w-4 mr-2" />,
       breakpoint: "lg",
     },
     {
