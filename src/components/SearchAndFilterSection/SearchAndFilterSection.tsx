@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 interface SearchAndFilterSectionProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  // You can add more props here if the "New" or "Trending" buttons
-  // need to trigger actions in the parent component, e.g.:
+  // Add more props here if the "New" or "Trending" buttons
   // onNewClick?: () => void;
   // onTrendingClick?: () => void;
 }

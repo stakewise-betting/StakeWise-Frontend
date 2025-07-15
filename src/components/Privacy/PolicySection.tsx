@@ -1,5 +1,6 @@
 import * as React from "react";
 
+//Reusable component to display a titled section of content, like a paragraph or list.
 interface PolicySectionProps {
   title: string;
   content: React.ReactNode;

@@ -16,6 +16,7 @@ interface WatchlistEvent {
   createdAt?: string;
 }
 
+// Structure of the context (functions and states exposed)
 interface WatchlistContextType {
   watchlistEvents: WatchlistEvent[];
   isLoading: boolean;
@@ -35,6 +36,7 @@ interface WatchlistProviderProps {
 }
 
 export const WatchlistProvider: React.FC<WatchlistProviderProps> = ({ children }) => {
+  // State for storing watchlist events
   const [watchlistEvents, setWatchlistEvents] = useState<WatchlistEvent[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +50,34 @@ export const WatchlistProvider: React.FC<WatchlistProviderProps> = ({ children }
   const { backendUrl, isLoggedin } = appContext;
   
   // Fetch user's watchlist
+  /**
+ * Fetches the user's watchlist events from the backend API.
+ * 
+ * This function retrieves watchlist events for the currently logged-in user.
+ * It handles authentication checks, loading states, and error handling.
+ * 
+ * @async
+ * @function fetchWatchlist
+ * @returns {Promise<void>} Does not return a value, but updates state variables.
+ * 
+ * @throws {Error} If the API request fails or returns an error response.
+ * 
+ * @example
+ * // Call the function to fetch watchlist
+ * await fetchWatchlist();
+ * 
+ * @remarks
+ * - Sets {@link isLoading} state to true during the API call and false afterward.
+ * - Updates {@link watchlistEvents} state with fetched data on success.
+ * - Sets {@link error} state with an error message if the operation fails.
+ * - Requires user to be logged in (checks {@link isLoggedin} state).
+ * - Uses credentials for authorization with the backend.
+ */
   const fetchWatchlist = async () => {
     // Clear previous errors
     setError(null);
     
-    // Don't try to fetch if not logged in
+    // If not logged in, reset and exit
     if (!isLoggedin) {
       setIsLoading(false);
       setWatchlistEvents([]);

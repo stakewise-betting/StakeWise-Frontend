@@ -1,3 +1,4 @@
+//Reusable component to display a bullet-point list.
 interface PolicyListProps {
   items: string[];
 }
