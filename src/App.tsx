@@ -52,7 +52,7 @@ function Layout() {
         <Route path="/email-verify" element={<EmailVerify />} />
       </Routes>
 
-      {/* Hide footer on specific routes */}
+      {/* Hide footer on specific routes s*/}
       {!hideFooterRoutes.includes(location.pathname) && <Footer />}
     </>
   );
