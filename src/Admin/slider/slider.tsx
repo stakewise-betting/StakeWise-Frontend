@@ -1,32 +1,32 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
-import { Activity, AlertCircle, Pencil, Trash2, Upload } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { useState, useRef, type ChangeEvent, type DragEvent } from "react"
+import { Activity, AlertCircle, Pencil, Trash2, Upload } from "lucide-react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
 // Define the Slider type
 interface Slider {
-  id: string;
-  heading: string;
-  description: string;
-  buttonName: string;
-  buttonPath: string;
-  image: string;
-  addedDate: string;
+  id: string
+  heading: string
+  description: string
+  buttonName: string
+  buttonPath: string
+  image: string
+  addedDate: string
 }
 
 // Define form errors type
 interface FormErrors {
-  heading?: string;
-  description?: string;
-  buttonName?: string;
-  buttonPath?: string;
-  image?: string;
+  heading?: string
+  description?: string
+  buttonName?: string
+  buttonPath?: string
+  image?: string
 }
 
 export default function SliderPage() {
@@ -54,8 +54,7 @@ export default function SliderPage() {
     {
       id: "3",
       heading: "LAS VEGAS",
-      description:
-        "Get up to speed with everything you need to know about the F1 Las Vegas Grand Prix.",
+      description: "Get up to speed with everything you need to know about the F1 Las Vegas Grand Prix.",
       buttonName: "Buy Now",
       buttonPath: "home/category/f1/lasvegas",
       image: "f1Car.png",
@@ -70,24 +69,24 @@ export default function SliderPage() {
       image: "evms.png",
       addedDate: "16 Feb",
     },
-  ]);
+  ])
 
   // State for form management
-  const [editingSlider, setEditingSlider] = useState<Slider | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingSlider, setEditingSlider] = useState<Slider | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
   const [formData, setFormData] = useState<Omit<Slider, "id" | "addedDate">>({
     heading: "",
     description: "",
     buttonName: "",
     buttonPath: "",
     image: "",
-  });
-  const [file, setFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  })
+  const [file, setFile] = useState<File | null>(null)
+  const [fileError, setFileError] = useState<string | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Form handlers
   const handleAddNew = () => {
@@ -97,13 +96,13 @@ export default function SliderPage() {
       buttonName: "",
       buttonPath: "",
       image: "",
-    });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    setEditingSlider(null);
-    setIsFormOpen(true);
-  };
+    })
+    setFile(null)
+    setErrors({})
+    setTouched({})
+    setEditingSlider(null)
+    setIsFormOpen(true)
+  }
 
   const handleEdit = (slider: Slider) => {
     setFormData({
@@ -112,145 +111,141 @@ export default function SliderPage() {
       buttonName: slider.buttonName,
       buttonPath: slider.buttonPath,
       image: slider.image,
-    });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    setEditingSlider(slider);
-    setIsFormOpen(true);
-  };
+    })
+    setFile(null)
+    setErrors({})
+    setTouched({})
+    setEditingSlider(slider)
+    setIsFormOpen(true)
+  }
 
   const handleDelete = (id: string) => {
-    setSliders(sliders.filter((slider) => slider.id !== id));
-  };
+    setSliders(sliders.filter((slider) => slider.id !== id))
+  }
 
   const handleCancel = () => {
-    setIsFormOpen(false);
-    setEditingSlider(null);
-  };
+    setIsFormOpen(false)
+    setEditingSlider(null)
+  }
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setTouched((prev) => ({ ...prev, [name]: true }));
-  };
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setTouched((prev) => ({ ...prev, [name]: true }))
+  }
 
-  const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    validate();
-  };
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name } = e.target
+    setTouched((prev) => ({ ...prev, [name]: true }))
+    validate()
+  }
 
   // Form validation
   const validate = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: FormErrors = {}
 
     if (!formData.heading.trim()) {
-      newErrors.heading = "Heading is required";
+      newErrors.heading = "Heading is required"
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = "Description is required"
     } else if (formData.description.length > 500) {
-      newErrors.description = "Description must be less than 500 characters";
+      newErrors.description = "Description must be less than 500 characters"
     }
 
     if (!formData.buttonName.trim()) {
-      newErrors.buttonName = "Button name is required";
+      newErrors.buttonName = "Button name is required"
     }
 
     if (!formData.buttonPath.trim()) {
-      newErrors.buttonPath = "Button path is required";
+      newErrors.buttonPath = "Button path is required"
     }
 
     if (!editingSlider?.image && !file && !formData.image) {
-      newErrors.image = "Image is required";
+      newErrors.image = "Image is required"
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   // File handling
   const validateFile = (file: File): boolean => {
     // Check file type
-    const validTypes = ["image/jpeg", "image/png"];
+    const validTypes = ["image/jpeg", "image/png"]
     if (!validTypes.includes(file.type)) {
-      setFileError("Only JPEG and PNG files are allowed");
-      return false;
+      setFileError("Only JPEG and PNG files are allowed")
+      return false
     }
 
     // Check file size (25MB = 25 * 1024 * 1024 bytes)
-    const maxSize = 25 * 1024 * 1024;
+    const maxSize = 25 * 1024 * 1024
     if (file.size > maxSize) {
-      setFileError("File size must be less than 25MB");
-      return false;
+      setFileError("File size must be less than 25MB")
+      return false
     }
 
-    setFileError(null);
-    return true;
-  };
+    setFileError(null)
+    return true
+  }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
+      const selectedFile = e.target.files[0]
       if (validateFile(selectedFile)) {
-        setFile(selectedFile);
-        setFormData((prev) => ({ ...prev, image: selectedFile.name }));
-        setTouched((prev) => ({ ...prev, image: true }));
-        setErrors((prev) => ({ ...prev, image: undefined }));
+        setFile(selectedFile)
+        setFormData((prev) => ({ ...prev, image: selectedFile.name }))
+        setTouched((prev) => ({ ...prev, image: true }))
+        setErrors((prev) => ({ ...prev, image: undefined }))
       } else {
-        e.target.value = "";
+        e.target.value = ""
       }
     }
-  };
+  }
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+    e.preventDefault()
+    setIsDragging(true)
+  }
 
   const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
+    e.preventDefault()
+    setIsDragging(false)
+  }
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+    e.preventDefault()
+    setIsDragging(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
+      const droppedFile = e.dataTransfer.files[0]
       if (validateFile(droppedFile)) {
-        setFile(droppedFile);
-        setFormData((prev) => ({ ...prev, image: droppedFile.name }));
-        setTouched((prev) => ({ ...prev, image: true }));
-        setErrors((prev) => ({ ...prev, image: undefined }));
+        setFile(droppedFile)
+        setFormData((prev) => ({ ...prev, image: droppedFile.name }))
+        setTouched((prev) => ({ ...prev, image: true }))
+        setErrors((prev) => ({ ...prev, image: undefined }))
       }
     }
-  };
+  }
 
   const handleBrowseClick = () => {
-    fileInputRef.current?.click();
-  };
+    fileInputRef.current?.click()
+  }
 
   const handleCancelUpload = () => {
-    setFile(null);
-    setFormData((prev) => ({ ...prev, image: editingSlider?.image || "" }));
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setFile(null)
+    setFormData((prev) => ({ ...prev, image: editingSlider?.image || "" }))
+    if (fileInputRef.current) fileInputRef.current.value = ""
     if (!editingSlider?.image) {
-      setErrors((prev) => ({ ...prev, image: "Image is required" }));
+      setErrors((prev) => ({ ...prev, image: "Image is required" }))
     }
-  };
+  }
 
   const handleDoneUpload = () => {
     // In a real app, you would upload the file to a server here
-    console.log("File ready for upload:", file);
-  };
+    console.log("File ready for upload:", file)
+  }
 
   const handleClearForm = () => {
     setFormData({
@@ -259,15 +254,15 @@ export default function SliderPage() {
       buttonName: "",
       buttonPath: "",
       image: "",
-    });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+    })
+    setFile(null)
+    setErrors({})
+    setTouched({})
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
 
   const handleSave = () => {
-    const isValid = validate();
+    const isValid = validate()
 
     if (isValid) {
       if (editingSlider) {
@@ -279,39 +274,34 @@ export default function SliderPage() {
                   ...editingSlider,
                   ...formData,
                 }
-              : s
-          )
-        );
+              : s,
+          ),
+        )
       } else {
         // Add new slider
         const newSlider = {
           ...formData,
           id: Date.now().toString(),
-          addedDate: new Date().toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "short",
-          }),
-        };
-        setSliders([...sliders, newSlider]);
+          addedDate: new Date().toLocaleDateString("en-US", { day: "2-digit", month: "short" }),
+        }
+        setSliders([...sliders, newSlider])
       }
-      setIsFormOpen(false);
-      setEditingSlider(null);
+      setIsFormOpen(false)
+      setEditingSlider(null)
     } else {
       // Mark all fields as touched to show errors
-      const allTouched: Record<string, boolean> = {};
+      const allTouched: Record<string, boolean> = {}
       Object.keys(formData).forEach((key) => {
-        allTouched[key] = true;
-      });
-      setTouched(allTouched);
+        allTouched[key] = true
+      })
+      setTouched(allTouched)
     }
-  };
+  }
 
   // Icon wrapper component
   const IconWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="p-2 rounded-full flex items-center justify-center bg-secondary/20">
-      {children}
-    </div>
-  );
+    <div className="p-2 rounded-full flex items-center justify-center bg-secondary/20">{children}</div>
+  )
 
   // Render the slider form
   const renderSliderForm = () => {
@@ -320,9 +310,7 @@ export default function SliderPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Heading
-              </Label>
+              <Label className="block text-sm font-medium mb-1 text-dark-primary">Heading</Label>
               <Input
                 type="text"
                 name="heading"
@@ -330,9 +318,7 @@ export default function SliderPage() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.heading && errors.heading
-                    ? "border-red-500"
-                    : "border-gray-700/60"
+                  touched.heading && errors.heading ? "border-red-500" : "border-gray-700/60"
                 }`}
                 placeholder="Enter heading"
               />
@@ -345,9 +331,7 @@ export default function SliderPage() {
             </div>
 
             <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Description
-              </Label>
+              <Label className="block text-sm font-medium mb-1 text-dark-primary">Description</Label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -355,9 +339,7 @@ export default function SliderPage() {
                 onBlur={handleBlur}
                 rows={5}
                 className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.description && errors.description
-                    ? "border-red-500"
-                    : "border-gray-700/60"
+                  touched.description && errors.description ? "border-red-500" : "border-gray-700/60"
                 }`}
                 placeholder="Enter description"
               />
@@ -367,15 +349,11 @@ export default function SliderPage() {
                   {errors.description}
                 </div>
               )}
-              <div className="text-xs text-dark-secondary mt-1">
-                {formData.description.length}/500 characters
-              </div>
+              <div className="text-xs text-dark-secondary mt-1">{formData.description.length}/500 characters</div>
             </div>
 
             <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Button Name
-              </Label>
+              <Label className="block text-sm font-medium mb-1 text-dark-primary">Button Name</Label>
               <Input
                 type="text"
                 name="buttonName"
@@ -383,9 +361,7 @@ export default function SliderPage() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.buttonName && errors.buttonName
-                    ? "border-red-500"
-                    : "border-gray-700/60"
+                  touched.buttonName && errors.buttonName ? "border-red-500" : "border-gray-700/60"
                 }`}
                 placeholder="Enter button name"
               />
@@ -398,9 +374,7 @@ export default function SliderPage() {
             </div>
 
             <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Button Path
-              </Label>
+              <Label className="block text-sm font-medium mb-1 text-dark-primary">Button Path</Label>
               <Input
                 type="text"
                 name="buttonPath"
@@ -408,9 +382,7 @@ export default function SliderPage() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.buttonPath && errors.buttonPath
-                    ? "border-red-500"
-                    : "border-gray-700/60"
+                  touched.buttonPath && errors.buttonPath ? "border-red-500" : "border-gray-700/60"
                 }`}
                 placeholder="Enter button path"
               />
@@ -425,12 +397,9 @@ export default function SliderPage() {
 
           <div>
             <div className="bg-gray-800/30 p-6 rounded-lg border border-gray-700/60">
-              <h3 className="font-medium mb-2 text-dark-primary">
-                Upload Image
-              </h3>
+              <h3 className="font-medium mb-2 text-dark-primary">Upload Image</h3>
               <p className="text-sm text-dark-secondary mb-4">
-                Please upload file in jpeg or png format and make sure the file
-                size is under 25 MB.
+                Please upload file in jpeg or png format and make sure the file size is under 25 MB.
               </p>
 
               <div
@@ -438,8 +407,8 @@ export default function SliderPage() {
                   isDragging
                     ? "border-secondary bg-secondary/10"
                     : touched.image && errors.image
-                    ? "border-red-500"
-                    : "border-gray-700/60"
+                      ? "border-red-500"
+                      : "border-gray-700/60"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -448,9 +417,7 @@ export default function SliderPage() {
                 <div className="flex flex-col items-center">
                   <Upload className="w-10 h-10 text-secondary mb-2" />
                   <p className="mb-2 text-dark-primary">Drop file or browse</p>
-                  <p className="text-sm text-dark-secondary mb-4">
-                    Format: jpeg, png & Max file size: 25 MB
-                  </p>
+                  <p className="text-sm text-dark-secondary mb-4">Format: jpeg, png & Max file size: 25 MB</p>
                   <button
                     type="button"
                     onClick={handleBrowseClick}
@@ -535,50 +502,31 @@ export default function SliderPage() {
           </Button>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   // Render the slider table
   const renderSliderTable = () => {
     return (
       <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-dark-primary">
-          On Going Banners:
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-dark-primary">On Going Banners:</h2>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-800/40 border-b border-gray-700/60">
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Added Date
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Heading
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Image
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Actions
-                </th>
+                <th className="text-left p-3 text-sm font-medium text-dark-secondary">Added Date</th>
+                <th className="text-left p-3 text-sm font-medium text-dark-secondary">Heading</th>
+                <th className="text-left p-3 text-sm font-medium text-dark-secondary">Image</th>
+                <th className="text-left p-3 text-sm font-medium text-dark-secondary">Actions</th>
               </tr>
             </thead>
             <tbody>
               {sliders.map((slider) => (
-                <tr
-                  key={slider.id}
-                  className="border-b border-gray-700/40 hover:bg-gray-800/20"
-                >
-                  <td className="p-3 text-sm text-dark-primary">
-                    {slider.addedDate}
-                  </td>
-                  <td className="p-3 text-sm text-dark-primary">
-                    {slider.heading}
-                  </td>
-                  <td className="p-3 text-sm text-dark-secondary">
-                    {slider.image}
-                  </td>
+                <tr key={slider.id} className="border-b border-gray-700/40 hover:bg-gray-800/20">
+                  <td className="p-3 text-sm text-dark-primary">{slider.addedDate}</td>
+                  <td className="p-3 text-sm text-dark-primary">{slider.heading}</td>
+                  <td className="p-3 text-sm text-dark-secondary">{slider.image}</td>
                   <td className="p-3 text-sm">
                     <div className="flex gap-2">
                       <button
@@ -603,8 +551,8 @@ export default function SliderPage() {
           </table>
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   // Main render
   return (
@@ -619,9 +567,7 @@ export default function SliderPage() {
       <Card className="bg-card rounded-xl shadow-lg border border-gray-700/60 transition-all duration-300 ease-in-out overflow-hidden relative bg-noise">
         <CardHeader className="p-6 border-b border-gray-700/60">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-dark-primary">
-              {isFormOpen ? "Edit Slider" : "Manage Sliders"}
-            </h1>
+            <h1 className="text-2xl font-bold text-dark-primary">{isFormOpen ? "Edit Slider" : "Manage Sliders"}</h1>
             {!isFormOpen && (
               <Button
                 onClick={handleAddNew}
@@ -633,10 +579,8 @@ export default function SliderPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
-          {isFormOpen ? renderSliderForm() : renderSliderTable()}
-        </CardContent>
+        <CardContent className="p-0">{isFormOpen ? renderSliderForm() : renderSliderTable()}</CardContent>
       </Card>
     </div>
-  );
+  )
 }
