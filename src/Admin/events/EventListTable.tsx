@@ -3,7 +3,6 @@ import React from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableHead,
   TableHeader,
   TableRow,
@@ -47,7 +46,7 @@ export const EventListTable: React.FC<EventListTableProps> = ({
 
   // Placeholder state for search/filter
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [activeFilters, setActiveFilters] = React.useState({});
+  const [activeFilters] = React.useState({});
 
   // Example filtering logic (implement actual filtering as needed)
   const filteredEvents = sortedEvents.filter((event) => {

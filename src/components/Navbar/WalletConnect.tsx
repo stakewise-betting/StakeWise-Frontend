@@ -11,7 +11,8 @@ interface WalletConnectProps {
 
 const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
   const navigate = useNavigate();
-  const { isConnected, walletAddress, connectWallet, web3, isConnecting } = useWallet();
+  const { isConnected, walletAddress, connectWallet, web3, isConnecting } =
+    useWallet();
   const [walletBalance, setWalletBalance] = useState<string>("0.00");
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,7 +36,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
 
     if (isLoggedin) {
       fetchBalance();
-      
+
       // Set up interval to update balance periodically
       const balanceInterval = setInterval(fetchBalance, 30000); // Every 30 seconds
       return () => clearInterval(balanceInterval);
@@ -80,12 +81,14 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
   // Handle wallet connection with toast notifications
   const handleConnectWallet = async () => {
     if (isConnecting || isLoading) {
-      toast.info("Connection already in progress. Please check MetaMask popup.");
+      toast.info(
+        "Connection already in progress. Please check MetaMask popup."
+      );
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       await connectWallet();
       toast.success("Wallet connected successfully!");
@@ -94,9 +97,13 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
       if (error.code === 4001) {
         toast.info("Wallet connection request rejected.");
       } else if (error.code === -32002) {
-        toast.info("Connection request already pending. Please check MetaMask.");
+        toast.info(
+          "Connection request already pending. Please check MetaMask."
+        );
       } else {
-        toast.error(error.message || "Failed to connect wallet. See console for details.");
+        toast.error(
+          error.message || "Failed to connect wallet. See console for details."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -110,35 +117,36 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
 
   // Render connect button or wallet info
   return isConnected ? (
-    <div className="flex items-center space-x-3 bg-black/20 px-3 py-1.5 rounded-lg">
-      <FaWallet className="text-green-400 text-lg" />
+    <div className="flex items-center space-x-2 sm:space-x-3 bg-black/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+      <FaWallet className="text-green-400 text-sm sm:text-lg" />
       <div className="flex flex-col items-start leading-tight">
-        <span className="text-xs text-gray-400">Cash</span>
-        <span className="font-semibold text-green-400 text-sm">
+        <span className="text-xs text-gray-400 hidden sm:block">Cash</span>
+        <span className="font-semibold text-green-400 text-xs sm:text-sm">
           ${usdValue}
-        </span>
-      </div>
-      <div className="text-xs text-gray-400 flex flex-col items-end">
-        <span>{walletBalance} ETH</span>
-        <span className="truncate max-w-[80px]">
-          {walletAddress ? `${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}` : ''}
         </span>
       </div>
       <ButtonOutline
         onClick={() => navigate("/deposit")}
         small
-        className="ml-2"
+        className="ml-1 sm:ml-2 text-xs sm:text-sm px-2 sm:px-3 py-1"
       >
-        Deposit
+        <span className="hidden sm:inline">Deposit</span>
+        <span className="sm:hidden">+</span>
       </ButtonOutline>
     </div>
   ) : (
-    <ButtonOutline 
-      onClick={handleConnectWallet} 
+    <ButtonOutline
+      onClick={handleConnectWallet}
       small
       disabled={isConnecting || isLoading}
+      className="text-xs sm:text-sm px-2 sm:px-3 py-1"
     >
-      {isConnecting || isLoading ? "Connecting..." : "Connect Wallet"}
+      <span className="hidden sm:inline">
+        {isConnecting || isLoading ? "Connecting..." : "Connect Wallet"}
+      </span>
+      <span className="sm:hidden">
+        {isConnecting || isLoading ? "..." : "Connect"}
+      </span>
     </ButtonOutline>
   );
 };
