@@ -11,7 +11,6 @@ import {
   Trophy,
   Coins,
 } from "lucide-react";
-import "react-datepicker/dist/react-datepicker.css";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 
@@ -28,7 +27,7 @@ const ResultsPage: React.FC = () => {
   const eventsPerPage = 5;
 
   // Hero section background image
-  const heroBackgroundImage = "/src/assets/images/ResultsBanner.jpg"; // Update this path to your image
+  const heroBackgroundImage = "/src/assets/images/ResultsBanner.jpg";
 
   // Fetch events from blockchain
   useEffect(() => {
@@ -132,7 +131,7 @@ const ResultsPage: React.FC = () => {
     }
 
     try {
-      // Prepare the data according to your schema
+      // Prepare the data according to our schema
       const resultData = {
         eventId: eventId,
         name: event.name,

@@ -37,7 +37,7 @@ const DepositPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch ETH price from CoinGecko API
+  // Fetch ETH price from CoinGecko API -- etherium price in dollars --
   const fetchEthPrice = async () => {
     try {
       const response = await fetch(
@@ -137,7 +137,7 @@ const DepositPage = () => {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-  }, []);
+  }, []);//runs once
 
   const refreshWalletData = async () => {
     setIsRefreshing(true);
@@ -179,8 +179,9 @@ const DepositPage = () => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts: string) => {
         if (accounts.length > 0) {
-          checkIfWalletIsConnected();
+          checkIfWalletIsConnected(); //refetches data if account changed
         } else {
+          //user disconnected all accounts
           setIsConnected(false);
           setUserWalletAddress("");
           setWalletBalance("0.00");
@@ -199,7 +200,7 @@ const DepositPage = () => {
     };
   }, []);
 
-  // Card styling based on the admin dashboard examples
+  // Card styling
   const cardClasses = `
     bg-card text-dark-primary rounded-xl shadow-lg
     border border-gray-700/60
