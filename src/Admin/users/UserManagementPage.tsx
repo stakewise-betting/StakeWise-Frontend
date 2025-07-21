@@ -1,19 +1,30 @@
-// StakeWise-Frontend/src/Admin/users/UserManagementPage.tsx (Create this new file)
+// StakeWise-Frontend/src/Admin/users/UserManagementPage.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Assuming you have Alert
-import { Skeleton } from "@/components/ui/skeleton"; // Assuming you have Skeleton
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Users as UsersIcon, AlertCircle } from "lucide-react";
-import UserTable from "./UserTable"; // Import the table component
-import { fetchAllUsers, deleteUserById } from "@/services/adminService"; // Import API functions
-import { IUser } from "@/types/user.types"; // Adjust path if needed
-import { toast } from "sonner"; // Or your preferred toast library
+import UserTable from "./UserTable";
+import RoleChangeDialog from "./RoleChangeDialog";
+import { fetchAllUsers, deleteUserById, changeUserRole } from "@/services/adminService"; 
+import { IUser } from "@/types/user.types";
+import { toast } from "sonner";
 
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingUserId, setDeletingUserId] = useState<string | null>(null); // Track deletion state
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  
+  const [roleChangeDialog, setRoleChangeDialog] = useState<{
+    isOpen: boolean;
+    user: IUser | null;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    user: null,
+    isLoading: false,
+  });
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -40,7 +51,7 @@ const UserManagementPage: React.FC = () => {
   }, [loadUsers]);
 
   const handleDeleteUser = async (userId: string): Promise<void> => {
-    setDeletingUserId(userId); // Set loading state for this specific user
+    setDeletingUserId(userId);
     try {
       const result = await deleteUserById(userId);
       setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
@@ -52,24 +63,67 @@ const UserManagementPage: React.FC = () => {
           err.response?.data?.message || err.message || "Server error"
         }`
       );
-      // Re-throw the error so the Table component knows it failed
       throw err;
     } finally {
-      setDeletingUserId(null); // Clear loading state regardless of success/failure
+      setDeletingUserId(null);
     }
+  };
+
+  const handleRoleChange = (user: IUser) => {
+    setRoleChangeDialog({
+      isOpen: true,
+      user,
+      isLoading: false,
+    });
+  };
+
+  const handleConfirmRoleChange = async (userId: string, newRole: string) => {
+    setRoleChangeDialog(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      const result = await changeUserRole(userId, newRole);
+      
+      // Update the user in the local state
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === userId ? { ...user, role: newRole as "admin" | "moderator" | "user" } : user
+        )
+      );
+      
+      toast.success(result.message || "User role updated successfully!");
+      
+      setRoleChangeDialog({
+        isOpen: false,
+        user: null,
+        isLoading: false,
+      });
+    } catch (err: any) {
+      console.error("Role change error:", err);
+      toast.error(
+        `Failed to change user role: ${
+          err.response?.data?.message || err.message || "Server error"
+        }`
+      );
+      setRoleChangeDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  const handleCloseRoleDialog = () => {
+    setRoleChangeDialog({
+      isOpen: false,
+      user: null,
+      isLoading: false,
+    });
   };
 
   const renderContent = () => {
     if (loading) {
       return (
         <div className="space-y-4">
-          <Skeleton className="h-8 w-1/4" /> {/* Header Skeleton */}
-          <Skeleton className="h-[40px] w-full" /> {/* Table Header Skeleton */}
+          <Skeleton className="h-8 w-1/4" />
+          <Skeleton className="h-[40px] w-full" />
           {[...Array(5)].map((_, i) => (
-            <Skeleton
-              key={i}
-              className="h-[50px] w-full"
-            /> /* Table Row Skeletons */
+            <Skeleton key={i} className="h-[50px] w-full" />
           ))}
         </div>
       );
@@ -81,8 +135,7 @@ const UserManagementPage: React.FC = () => {
           variant="destructive"
           className="dark border-red-500/50 bg-red-900/20 text-red-300"
         >
-          <AlertCircle className="h-4 w-4 !text-red-400" />{" "}
-          {/* Ensure icon color */}
+          <AlertCircle className="h-4 w-4 !text-red-400" />
           <AlertTitle className="text-red-300">Error</AlertTitle>
           <AlertDescription className="text-red-400">
             {error} - Please try refreshing the page.
@@ -100,6 +153,7 @@ const UserManagementPage: React.FC = () => {
         <UserTable
           users={users}
           onDeleteUser={handleDeleteUser}
+          onChangeRole={handleRoleChange} 
           deletingUserId={deletingUserId}
         />
       </div>
@@ -118,10 +172,17 @@ const UserManagementPage: React.FC = () => {
           <CardTitle className="text-xl text-dark-primary">
             All Registered Users ({users.length})
           </CardTitle>
-          {/* Optional: Add search/filter input here later */}
         </CardHeader>
         <CardContent>{renderContent()}</CardContent>
       </Card>
+
+      <RoleChangeDialog
+        user={roleChangeDialog.user}
+        isOpen={roleChangeDialog.isOpen}
+        onClose={handleCloseRoleDialog}
+        onConfirm={handleConfirmRoleChange}
+        isLoading={roleChangeDialog.isLoading}
+      />
     </div>
   );
 };
