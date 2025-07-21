@@ -109,14 +109,13 @@ export const DeclareWinnerSection: React.FC<DeclareWinnerSectionProps> = ({
   const options = Array.isArray(event?.options) ? event.options : [];
 
   return (
-    // Changed background, added padding, consistent border
-    <div className="space-y-4 p-4 md:p-5 bg-primary/30 border border-gray-700/40 rounded-lg">
-      <div>
+    <div className="space-y-6">
+      <div className="space-y-4">
         <Label
-          htmlFor={`select-winner-${event?.eventId}`} // Add unique ID for accessibility
-          className="text-sm font-semibold text-dark-primary block mb-2"
+          htmlFor={`select-winner-${event?.eventId}`}
+          className="text-lg font-semibold text-white block"
         >
-          Select Winning Option for Event #{event?.eventId || "N/A"}
+          Select Winning Option
         </Label>
         <Select
           value={winningOption}
@@ -125,25 +124,27 @@ export const DeclareWinnerSection: React.FC<DeclareWinnerSectionProps> = ({
         >
           <SelectTrigger
             id={`select-winner-${event?.eventId}`}
-            className="w-full bg-primary/50 border-gray-600/80 text-dark-primary focus:border-secondary/60 focus:ring-secondary/30"
+            className="w-full h-12 bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-600/30 text-white focus:border-emerald-500/50 focus:ring-emerald-500/30 rounded-lg font-medium"
             aria-label="Select winning option"
           >
-            <SelectValue placeholder="Choose the outcome..." />
+            <SelectValue placeholder="Choose the winning outcome..." />
           </SelectTrigger>
-          {/* Style the dropdown content */}
-          <SelectContent className="bg-card border-gray-600 text-dark-primary">
+          <SelectContent className="bg-[#282836] border-gray-600/50 rounded-lg shadow-2xl max-h-60">
             {options.length > 0 ? (
               options.map((option: string, index: number) => (
                 <SelectItem
                   key={index}
                   value={option}
-                  className="hover:bg-primary/50 focus:bg-primary/50 cursor-pointer"
+                  className="hover:bg-emerald-500/10 focus:bg-emerald-500/10 cursor-pointer transition-all duration-200 rounded-md my-1 py-3"
                 >
-                  {option}
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span className="font-medium text-white">{option}</span>
+                  </div>
                 </SelectItem>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-dark-secondary italic">
+              <div className="px-4 py-3 text-sm text-slate-400 italic text-center">
                 No options available for this event.
               </div>
             )}
@@ -153,38 +154,48 @@ export const DeclareWinnerSection: React.FC<DeclareWinnerSectionProps> = ({
 
       {/* Display Error Message */}
       {errorMsg && (
-        <div className="p-3 text-sm text-admin-danger bg-admin-danger/10 border border-admin-danger/30 rounded-md flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-          <span>{errorMsg}</span>
+        <div className="p-4 bg-gradient-to-r from-red-900/20 to-red-800/20 border border-red-700/40 rounded-lg flex items-start gap-3 backdrop-blur-sm">
+          <div className="p-1 rounded-full bg-red-500/20 mt-0.5">
+            <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-red-300">Error</p>
+            <p className="text-sm text-red-200">{errorMsg}</p>
+          </div>
         </div>
       )}
 
-      {/* Action Buttons - Justify End */}
-      <div className="flex pt-2 space-x-3 justify-end items-center">
+      {/* Action Buttons */}
+      <div className="flex pt-2 space-x-4 justify-end items-center">
         <Button
-          variant="ghost" // Ghost variant for cancel
+          variant="ghost"
           size="sm"
           onClick={onCancel}
           disabled={isDeclaring}
-          className="text-dark-secondary hover:text-dark-primary hover:bg-primary/50"
+          className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 active:scale-95"
         >
-          <X className="h-4 w-4 mr-1.5" /> {/* Added icon */}
+          <X className="h-4 w-4 mr-2" />
           Cancel
         </Button>
         <Button
           size="sm"
           onClick={confirmDeclareWinner}
-          disabled={!winningOption || isDeclaring || options.length === 0} // Disable if no option selected, declaring, or no options exist
-          // Use secondary color for the primary action in this context
-          className="bg-secondary hover:bg-secondary/90 text-white min-w-[160px] flex items-center justify-center disabled:bg-secondary/50 disabled:cursor-not-allowed"
+          disabled={!winningOption || isDeclaring || options.length === 0}
+          className={`font-semibold px-8 py-3 rounded-lg transition-all duration-300 transform min-w-[180px] ${
+            !winningOption || isDeclaring || options.length === 0
+              ? "bg-gradient-to-r from-gray-700 to-gray-600 cursor-not-allowed opacity-60 text-gray-400"
+              : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 hover:shadow-xl shadow-emerald-500/20 text-white"
+          }`}
         >
           {isDeclaring ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Declaring...
-            </>
+            <div className="flex items-center justify-center">
+              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+              <span>Declaring Winner...</span>
+            </div>
           ) : (
-            "Confirm & Declare Winner"
+            <div className="flex items-center justify-center">
+              <span>Declare Winner</span>
+            </div>
           )}
         </Button>
       </div>

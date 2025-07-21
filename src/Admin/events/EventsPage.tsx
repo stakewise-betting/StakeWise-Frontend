@@ -18,9 +18,20 @@ interface EventsPageProps {
 const LoadingIndicator: React.FC<{ message?: string }> = ({
   message = "Loading Events...",
 }) => (
-  <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-dark-secondary">
-    <Loader2 className="h-8 w-8 animate-spin text-secondary" />
-    <p className="text-sm font-medium">{message}</p>
+  <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
+    <div className="relative">
+      <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <div
+        className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-purple-600 rounded-full animate-spin"
+        style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+      ></div>
+    </div>
+    <div className="space-y-2">
+      <h3 className="text-xl font-semibold text-white">{message}</h3>
+      <p className="text-slate-400">
+        Please wait while we fetch the latest data...
+      </p>
+    </div>
   </div>
 );
 
@@ -35,39 +46,44 @@ export const EventsPage: React.FC<EventsPageProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 min-h-screen bg-primary text-dark-primary">
-      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+    <div className="min-h-screen bg-[#1C1C27] text-white">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-dark-primary whitespace-nowrap">
-            Manage Betting Events
-          </h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
+              <div className="p-2 rounded-full flex items-center justify-center bg-secondary/20">
+                <PlusCircle className="w-6 h-6 text-secondary" />
+              </div>
+              Event Management
+            </h2>
+            <p className="text-slate-400 text-lg">
+              Create, manage, and monitor betting events
+            </p>
+          </div>
 
-          {/* Add Event Button - Focus ring removed */}
           <Button
             onClick={() => setIsAddModalOpen(true)}
-            variant="outline"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
-                       bg-secondary/10
-                       text-secondary
-                       border-secondary/50
-                       hover:bg-secondary/20
-                       hover:border-secondary/70
-                       hover:-translate-y-0.5
-                       transition-all duration-300 ease-in-out shadow-sm hover:shadow-md hover:shadow-secondary/20
-                       focus:outline-none focus:ring-0 focus:ring-offset-0 /* Removed focus ring */
-                       w-full sm:w-auto
-                       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             disabled={isLoading}
+            className="group flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-secondary/20 text-dark-primary border border-secondary/50 shadow-lg hover:bg-secondary/30 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none w-full sm:w-auto"
           >
-            <PlusCircle className="h-5 w-5" />
-            <span>Add New Event</span>
+            {/* Icon container matching sidebar style */}
+            <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-secondary/20 text-secondary shadow-lg">
+              <PlusCircle
+                className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300"
+                aria-hidden="true"
+              />
+            </div>
+
+            {/* Label matching sidebar style */}
+            <span className="text-sm font-semibold transition-colors duration-300 text-dark-primary">
+              Create New Event
+            </span>
           </Button>
-          {/* --- End Button Styling --- */}
         </div>
 
-        {/* Content Area: Shows loading indicator or the table */}
-        <div className="bg-card border border-gray-700/60 rounded-xl shadow-lg overflow-hidden">
+        {/* Content Area */}
+        <div className="bg-gradient-to-br from-[#1C1C27] to-[#262633] border border-gray-700/30 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
           {isLoading ? (
             <LoadingIndicator />
           ) : (

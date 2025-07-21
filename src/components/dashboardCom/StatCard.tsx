@@ -8,16 +8,39 @@ interface StatCardProps {
   iconColor?: string;
 }
 
-const StatCard = ({ title, value, percentage, icon, iconColor = "#E27625" }: StatCardProps) => {
+const StatCard = ({
+  title,
+  value,
+  percentage,
+  icon,
+  iconColor = "#E27625",
+}: StatCardProps) => {
   return (
-    <div className="flex items-center justify-between overflow-hidden rounded-[20px] shadow-lg bg-gradient-to-b bg-[#333447] px-5 py-4 backdrop-blur-sm">
-      <div>
-        <p className="text-sm text-[#A0AEC0]">{title}</p>
-        <p className="text-2xl font-bold text-white">{value}</p>
-        {percentage && <p className="text-xs font-bold text-[#01B574]">{percentage}</p>}
-      </div>
-      <div className={`rounded-lg p-2`} style={{ backgroundColor: iconColor }}>
-        {icon}
+    <div className="group bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl hover:shadow-3xl rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105">
+      <div className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-zinc-400 uppercase tracking-wide">
+              {title}
+            </p>
+            <p className="text-3xl font-bold text-zinc-100 group-hover:text-white transition-colors">
+              {value}
+            </p>
+            {percentage && (
+              <p className="text-sm font-semibold text-emerald-400 flex items-center gap-1">
+                {percentage}
+              </p>
+            )}
+          </div>
+          <div
+            className="p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300"
+            style={{
+              background: `linear-gradient(135deg, ${iconColor}, ${iconColor}dd)`,
+            }}
+          >
+            <div className="text-white">{icon}</div>
+          </div>
+        </div>
       </div>
     </div>
   );

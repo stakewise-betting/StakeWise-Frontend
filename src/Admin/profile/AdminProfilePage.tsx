@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   CircleUserRound,
@@ -23,6 +22,8 @@ import {
   XCircle,
   AlertCircle,
   CheckCircle,
+  Settings,
+  CreditCard,
 } from "lucide-react";
 import { IUser } from "@/types/user.types"; // Adjust path if necessary
 import {
@@ -146,260 +147,396 @@ const AdminProfilePage: React.FC = () => {
   // --- Render Functions ---
 
   const renderLoading = () => (
-    <Card className="bg-card border border-gray-700/60 shadow-lg">
-      <CardHeader>
-        <Skeleton className="h-6 w-1/3 bg-gray-700/50" />
-        <Skeleton className="h-4 w-1/2 bg-gray-700/50 mt-2" />
+    <Card className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] border-gray-600/50 shadow-2xl shadow-black/20 rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-[#2A2A3E] to-[#252538] border-b border-gray-600/30 p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg w-1/3"></div>
+          <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-1/2"></div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-20 w-20 rounded-full bg-gray-700/50" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24 bg-gray-700/50" />
-            <Skeleton className="h-4 w-32 bg-gray-700/50" />
+      <CardContent className="space-y-8 p-8">
+        <div className="flex items-center space-x-6">
+          <div className="animate-pulse">
+            <div className="h-20 w-20 rounded-full bg-gradient-to-r from-gray-600 to-gray-500"></div>
+          </div>
+          <div className="space-y-3 flex-1">
+            <div className="animate-pulse space-y-2">
+              <div className="h-6 bg-gradient-to-r from-gray-600 to-gray-500 rounded w-48"></div>
+              <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-32"></div>
+            </div>
           </div>
         </div>
-        <Skeleton className="h-8 w-full bg-gray-700/50" />
-        <Skeleton className="h-8 w-full bg-gray-700/50" />
-        <Skeleton className="h-8 w-full bg-gray-700/50" />
+        <div className="space-y-4">
+          <div className="animate-pulse">
+            <div className="h-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl w-full"></div>
+          </div>
+          <div className="animate-pulse">
+            <div className="h-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl w-full"></div>
+          </div>
+          <div className="animate-pulse">
+            <div className="h-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl w-full"></div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
 
   const renderError = () => (
-    <Alert
-      variant="destructive"
-      className="dark border-red-500/50 bg-red-900/20 text-red-300"
-    >
-      <AlertCircle className="h-4 w-4 !text-red-400" />
-      <AlertTitle className="text-red-300">Error</AlertTitle>
-      <AlertDescription className="text-red-400">
-        {error} - Please{" "}
-        <button onClick={loadUserData} className="underline font-semibold">
-          try again
-        </button>
-        .
-      </AlertDescription>
+    <Alert className="bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border-2 border-[#EF4444]/50 rounded-xl shadow-2xl shadow-[#EF4444]/20 p-6">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#EF4444] to-[#DC2626] flex items-center justify-center shadow-lg shadow-[#EF4444]/30">
+          <AlertCircle className="h-6 w-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <AlertTitle className="text-[#EF4444] font-bold text-xl flex items-center gap-2">
+            <AlertCircle className="h-5 w-5" />
+            Error Loading Profile
+          </AlertTitle>
+          <AlertDescription className="text-gray-300 mt-2 text-base">
+            {error} - Please{" "}
+            <button
+              onClick={loadUserData}
+              className="underline font-semibold text-[#3B82F6] hover:text-[#1D4ED8] transition-colors duration-200"
+            >
+              try again
+            </button>
+            .
+          </AlertDescription>
+        </div>
+      </div>
     </Alert>
   );
 
   const renderProfileDisplay = () => (
-    <>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-20 w-20 border-2 border-secondary">
-            <AvatarImage
-              src={user?.picture || user?.avatarSrc || ""}
-              alt={user?.username}
-            />
-            <AvatarFallback className="text-2xl bg-secondary/20 text-secondary font-semibold">
-              {getUserInitials(user)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h3 className="text-xl font-semibold text-dark-primary">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <Avatar className="h-24 w-24 border-4 border-gradient-to-r from-[#3B82F6] to-[#1D4ED8] shadow-2xl shadow-[#3B82F6]/30 ring-4 ring-[#3B82F6]/20">
+              <AvatarImage
+                src={user?.picture || user?.avatarSrc || ""}
+                alt={user?.username}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-3xl bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] text-white font-bold shadow-inner">
+                {getUserInitials(user)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg">
+              <CheckCircle className="h-4 w-4 text-white" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-white">
               {user?.fname || user?.lname
                 ? `${user.fname || ""} ${user.lname || ""}`.trim()
                 : user?.username}
             </h3>
-            <p className="text-sm text-dark-secondary">
+            <p className="text-gray-400 text-base flex items-center gap-2">
+              <span>Email:</span>
               {user?.email || "No email provided"}
             </p>
+            <div className="flex items-center gap-3 mt-3">
+              <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[#E27625]/20 to-[#F59E0B]/20 border border-[#E27625]/30">
+                <span className="text-[#E27625] font-semibold text-sm">
+                  {user?.role?.toUpperCase()}
+                </span>
+              </div>
+              {user?.isAccountVerified && (
+                <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[#10B981]/20 to-[#059669]/20 border border-[#10B981]/30">
+                  <span className="text-[#10B981] font-semibold text-sm">
+                    Verified
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {!isEditing && (
           <Button
-            variant="outline"
-            size="sm"
             onClick={() => setIsEditing(true)}
-            className="dark:border-gray-600 dark:hover:bg-gray-700"
+            className="bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#3B82F6] text-white font-semibold px-6 py-3 transition-all duration-300 hover:scale-105 shadow-lg shadow-[#3B82F6]/30"
           >
-            <Pencil className="mr-2 h-4 w-4" /> Edit Profile
+            <Pencil className="mr-2 h-5 w-5" />
+            Edit Profile
           </Button>
         )}
       </div>
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">Username</Label>
-          <p className="col-span-2 text-dark-primary font-medium">
-            {user?.username || "N/A"}
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Personal Information Card */}
+        <div className="bg-gradient-to-r from-[#1C1C27] to-[#252538] rounded-xl p-6 border border-gray-600/30 shadow-lg">
+          <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <CircleUserRound className="h-5 w-5" />
+            Personal Information
+          </h4>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2 border-b border-gray-600/20">
+              <Label className="text-gray-400 font-medium">Username</Label>
+              <p className="text-white font-semibold">
+                {user?.username || "N/A"}
+              </p>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-600/20">
+              <Label className="text-gray-400 font-medium">First Name</Label>
+              <p className="text-white">
+                {user?.fname || (
+                  <span className="italic text-gray-500">Not set</span>
+                )}
+              </p>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <Label className="text-gray-400 font-medium">Last Name</Label>
+              <p className="text-white">
+                {user?.lname || (
+                  <span className="italic text-gray-500">Not set</span>
+                )}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">First Name</Label>
-          <p className="col-span-2 text-dark-primary">
-            {user?.fname || (
-              <span className="italic text-dark-secondary/70">Not set</span>
-            )}
-          </p>
+        {/* Account Details Card */}
+        <div className="bg-gradient-to-r from-[#1C1C27] to-[#252538] rounded-xl p-6 border border-gray-600/30 shadow-lg">
+          <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Account Details
+          </h4>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2 border-b border-gray-600/20">
+              <Label className="text-gray-400 font-medium">Role</Label>
+              <p className="text-white font-semibold capitalize">
+                {user?.role}
+              </p>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-gray-600/20">
+              <Label className="text-gray-400 font-medium">Joined</Label>
+              <p className="text-white">
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString()
+                  : "N/A"}
+              </p>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <Label className="text-gray-400 font-medium">Auth Provider</Label>
+              <p className="text-white capitalize">{user?.authProvider}</p>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">Last Name</Label>
-          <p className="col-span-2 text-dark-primary">
-            {user?.lname || (
-              <span className="italic text-dark-secondary/70">Not set</span>
-            )}
-          </p>
-        </div>
-        {/* Add more fields to display as needed */}
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">Role</Label>
-          <p className="col-span-2 text-dark-primary capitalize font-semibold">
-            {user?.role}
-          </p>
-        </div>
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">Joined</Label>
-          <p className="col-span-2 text-dark-primary">
-            {user?.createdAt
-              ? new Date(user.createdAt).toLocaleDateString()
-              : "N/A"}
-          </p>
-        </div>
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">
-            Account Verified
-          </Label>
-          <p
-            className={`col-span-2 font-medium ${
-              user?.isAccountVerified ? "text-green" : "text-orange-500"
-            }`}
-          >
-            {user?.isAccountVerified ? (
-              <CheckCircle className="inline h-4 w-4 mr-1" />
-            ) : (
-              <AlertCircle className="inline h-4 w-4 mr-1" />
-            )}
-            {user?.isAccountVerified ? "Verified" : "Not Verified"}
-          </p>
-        </div>
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-dark-secondary">
-            Auth Provider
-          </Label>
-          <p className="col-span-2 text-dark-primary capitalize">
-            {user?.authProvider}
-          </p>
-        </div>
-        {user?.walletAddress && (
-          <div className="grid grid-cols-3 items-center gap-4">
-            <Label className="text-right text-dark-secondary">
-              Wallet Address
-            </Label>
-            <p
-              className="col-span-2 text-dark-primary font-mono text-xs break-all"
-              title={user.walletAddress}
+      </div>
+
+      {/* Status Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Verification Status Card */}
+        <div
+          className={`rounded-xl p-6 border shadow-lg ${
+            user?.isAccountVerified
+              ? "bg-gradient-to-r from-[#10B981]/10 to-[#059669]/10 border-[#10B981]/30"
+              : "bg-gradient-to-r from-[#E27625]/10 to-[#F59E0B]/10 border-[#E27625]/30"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                user?.isAccountVerified
+                  ? "bg-gradient-to-r from-[#10B981] to-[#059669]"
+                  : "bg-gradient-to-r from-[#E27625] to-[#F59E0B]"
+              }`}
             >
-              {user.walletAddress}
-            </p>
+              {user?.isAccountVerified ? (
+                <CheckCircle className="h-5 w-5 text-white" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-white" />
+              )}
+            </div>
+            <div>
+              <h4
+                className={`font-semibold ${
+                  user?.isAccountVerified ? "text-[#10B981]" : "text-[#E27625]"
+                }`}
+              >
+                Account Status
+              </h4>
+              <p className="text-white font-medium">
+                {user?.isAccountVerified ? "Verified" : "Not Verified"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Wallet Card */}
+        {user?.walletAddress && (
+          <div className="bg-gradient-to-r from-[#3B82F6]/10 to-[#1D4ED8]/10 rounded-xl p-6 border border-[#3B82F6]/30 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] flex items-center justify-center">
+                <CreditCard className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-[#3B82F6]">Wallet Address</h4>
+                <p
+                  className="text-white font-mono text-xs break-all"
+                  title={user.walletAddress}
+                >
+                  {user.walletAddress}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 
   const renderProfileForm = () => (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {error && ( // Display submission error within the form
-        <Alert
-          variant="destructive"
-          className="dark border-red-500/50 bg-red-900/20 text-red-300"
-        >
-          <AlertCircle className="h-4 w-4 !text-red-400" />
-          <AlertTitle className="text-red-300">Update Failed</AlertTitle>
-          <AlertDescription className="text-red-400">{error}</AlertDescription>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {error && (
+        <Alert className="bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border-2 border-[#EF4444]/50 rounded-xl shadow-lg p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#EF4444] to-[#DC2626] flex items-center justify-center">
+              <AlertCircle className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <AlertTitle className="text-[#EF4444] font-bold">
+                Update Failed
+              </AlertTitle>
+              <AlertDescription className="text-gray-300 mt-1">
+                {error}
+              </AlertDescription>
+            </div>
+          </div>
         </Alert>
       )}
-      <div className="flex items-center space-x-4 mb-6">
-        {/* Keep avatar display consistent */}
-        <Avatar className="h-20 w-20 border-2 border-secondary">
-          <AvatarImage
-            src={user?.picture || user?.avatarSrc || ""}
-            alt={user?.username}
-          />
-          <AvatarFallback className="text-2xl bg-secondary/20 text-secondary font-semibold">
-            {getUserInitials(user)}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="text-xl font-semibold text-dark-primary">
-            {user?.username}
-          </h3>
-          <p className="text-sm text-dark-secondary">
-            {user?.email || "No email provided"}
-          </p>
-          <p className="text-xs text-orange-400 mt-1">
-            Avatar and Email cannot be changed here.
-          </p>
-        </div>
-      </div>
-      {/* Form Fields */}
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="username" className="text-dark-secondary">
-            Username
-          </Label>
-          <Input
-            id="username"
-            className="mt-1 dark:bg-black/20 dark:border-gray-600"
-            {...register("username")}
-          />
-          {errors.username && (
-            <p className="text-red-400 text-xs mt-1">
-              {errors.username.message}
+
+      {/* Avatar Section */}
+      <div className="bg-gradient-to-r from-[#1C1C27] to-[#252538] rounded-xl p-6 border border-gray-600/30 shadow-lg">
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <Avatar className="h-24 w-24 border-4 border-gradient-to-r from-[#3B82F6] to-[#1D4ED8] shadow-2xl shadow-[#3B82F6]/30 ring-4 ring-[#3B82F6]/20">
+              <AvatarImage
+                src={user?.picture || user?.avatarSrc || ""}
+                alt={user?.username}
+                className="object-cover"
+              />
+              <AvatarFallback className="text-3xl bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] text-white font-bold shadow-inner">
+                {getUserInitials(user)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-[#E27625] to-[#F59E0B] flex items-center justify-center shadow-lg">
+              <Pencil className="h-4 w-4 text-white" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-white">{user?.username}</h3>
+            <p className="text-gray-400 flex items-center gap-2">
+              <span>Email:</span>
+              {user?.email || "No email provided"}
             </p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor="fname" className="text-dark-secondary">
-            First Name
-          </Label>
-          <Input
-            id="fname"
-            className="mt-1 dark:bg-black/20 dark:border-gray-600"
-            {...register("fname")}
-            placeholder="Enter first name (optional)"
-          />
-          {errors.fname && (
-            <p className="text-red-400 text-xs mt-1">{errors.fname.message}</p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor="lname" className="text-dark-secondary">
-            Last Name
-          </Label>
-          <Input
-            id="lname"
-            className="mt-1 dark:bg-black/20 dark:border-gray-600"
-            {...register("lname")}
-            placeholder="Enter last name (optional)"
-          />
-          {errors.lname && (
-            <p className="text-red-400 text-xs mt-1">{errors.lname.message}</p>
-          )}
+            <p className="text-[#E27625] text-sm font-medium flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Avatar and Email cannot be changed here
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Form Fields */}
+      <div className="bg-gradient-to-r from-[#1C1C27] to-[#252538] rounded-xl p-6 border border-gray-600/30 shadow-lg">
+        <h4 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <Pencil className="h-5 w-5" />
+          Edit Information
+        </h4>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label
+              htmlFor="username"
+              className="text-gray-300 font-medium flex items-center gap-2"
+            >
+              <CircleUserRound className="h-4 w-4" />
+              Username
+            </Label>
+            <Input
+              id="username"
+              className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] border-gray-600/50 text-white placeholder-gray-400 focus:border-[#3B82F6] focus:ring-[#3B82F6]/20 transition-all duration-300 h-12"
+              {...register("username")}
+            />
+            {errors.username && (
+              <p className="text-[#EF4444] text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.username.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="fname"
+              className="text-gray-300 font-medium flex items-center gap-2"
+            >
+              <CircleUserRound className="h-4 w-4" />
+              First Name
+            </Label>
+            <Input
+              id="fname"
+              className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] border-gray-600/50 text-white placeholder-gray-400 focus:border-[#10B981] focus:ring-[#10B981]/20 transition-all duration-300 h-12"
+              {...register("fname")}
+              placeholder="Enter first name (optional)"
+            />
+            {errors.fname && (
+              <p className="text-[#EF4444] text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.fname.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="lname"
+              className="text-gray-300 font-medium flex items-center gap-2"
+            >
+              <CircleUserRound className="h-4 w-4" />
+              Last Name
+            </Label>
+            <Input
+              id="lname"
+              className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] border-gray-600/50 text-white placeholder-gray-400 focus:border-[#10B981] focus:ring-[#10B981]/20 transition-all duration-300 h-12"
+              {...register("lname")}
+              placeholder="Enter last name (optional)"
+            />
+            {errors.lname && (
+              <p className="text-[#EF4444] text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.lname.message}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-4 bg-gradient-to-r from-[#252538]/50 to-[#2A2A3E]/50 p-6 rounded-xl border border-gray-600/30">
         <Button
           type="button"
-          variant="outline"
           onClick={handleCancelEdit}
           disabled={isSaving}
-          className="dark:border-gray-600 dark:hover:bg-gray-700"
+          className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] hover:from-[#2A2A3E] hover:to-[#252538] border-gray-600/50 text-white hover:text-white transition-all duration-300 px-6 py-3"
         >
-          <XCircle className="mr-2 h-4 w-4" /> Cancel
+          <XCircle className="mr-2 h-5 w-5" />
+          Cancel
         </Button>
-        <Button type="submit" variant="secondary" disabled={isSaving}>
+        <Button
+          type="submit"
+          disabled={isSaving}
+          className="bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#059669] hover:to-[#10B981] text-white font-semibold px-8 py-3 transition-all duration-300 hover:scale-105 shadow-lg shadow-[#10B981]/30"
+        >
           {isSaving ? (
             <>
-              <span className="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-2"></span>{" "}
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               Saving...
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> Save Changes
+              <Save className="mr-2 h-5 w-5" />
+              Save Changes
             </>
           )}
         </Button>
@@ -408,32 +545,48 @@ const AdminProfilePage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
-        <CircleUserRound className="w-7 h-7 text-secondary" />
-        My Profile
-      </h2>
-      {loading && renderLoading()}
-      {!loading && error && !user && renderError()}{" "}
-      {/* Show fetch error if no user data */}
-      {!loading && user && (
-        <Card className="bg-card border border-gray-700/60 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl text-dark-primary">
-              Account Information
-            </CardTitle>
-            <CardDescription className="text-dark-secondary">
-              {isEditing
-                ? "Update your profile details."
-                : "View your account details."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? renderProfileForm() : renderProfileDisplay()}
-          </CardContent>
-        </Card>
-      )}
-      {/* Maybe add sections for password change, avatar upload later */}
+    <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#2A2A3E] min-h-screen p-6 -m-6">
+      <div className="space-y-8 max-w-4xl mx-auto">
+        {/* Page Header */}
+        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-2xl p-8 shadow-2xl shadow-black/20 border border-gray-700/50">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] bg-clip-text text-transparent flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] flex items-center justify-center shadow-lg shadow-[#3B82F6]/30">
+              <CircleUserRound className="w-6 h-6 text-white" />
+            </div>
+            My Profile
+          </h2>
+          <p className="text-gray-400 mt-2 text-lg">
+            Manage your account information and preferences
+          </p>
+        </div>
+        {/* Loading State */}
+        {loading && renderLoading()}
+
+        {/* Error State */}
+        {!loading && error && !user && renderError()}
+
+        {/* Profile Content */}
+        {!loading && user && (
+          <Card className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] border-gray-600/50 shadow-2xl shadow-black/20 rounded-2xl overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-[#2A2A3E] to-[#252538] border-b border-gray-600/30 p-8">
+              <CardTitle className="text-2xl text-white font-bold flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#10B981] to-[#059669] flex items-center justify-center">
+                  <span className="text-white text-lg">ℹ️</span>
+                </div>
+                Account Information
+              </CardTitle>
+              <CardDescription className="text-gray-400 text-lg mt-2">
+                {isEditing
+                  ? "✏️ Update your profile details and save changes"
+                  : "📋 View and manage your account details"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-8">
+              {isEditing ? renderProfileForm() : renderProfileDisplay()}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

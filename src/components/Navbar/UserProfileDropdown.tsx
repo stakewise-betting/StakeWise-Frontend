@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   User,
   ChevronDown,
-  Moon,
   LogOut,
   Eye,
   BarChart3,
@@ -27,7 +26,6 @@ const UserProfileDropdown: React.FC = () => {
   const navigate = useNavigate();
   const context = useContext(AppContext);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false); // Add real dark mode logic if needed
   const [picture, setPicture] = useState("");
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -113,15 +111,6 @@ const UserProfileDropdown: React.FC = () => {
     }
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // Implement your actual dark mode switching logic here
-    // e.g., document.documentElement.classList.toggle('dark');
-    // localStorage.setItem('darkMode', !isDarkMode);
-    console.log("Dark mode toggled (implement actual logic)");
-    setProfileOpen(false);
-  };
-
   // Render nothing if user not logged in
   if (!isLoggedin || !userData) {
     return null;
@@ -130,8 +119,8 @@ const UserProfileDropdown: React.FC = () => {
   return (
     <DropdownMenu onOpenChange={setProfileOpen} open={profileOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center space-x-1 rounded-full p-0.5 sm:p-1 hover:bg-gray-700 transition">
-          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-white font-bold">
+        <button className="flex items-center space-x-2 rounded-xl p-2 hover:bg-secondary/20 transition-all duration-300 border border-transparent hover:border-secondary/30 hover:shadow-lg">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-dark-primary font-bold border-2 border-gray-700/60 hover:border-secondary/50 transition-colors duration-300">
             {userData?.picture ? (
               <img
                 key={picture}
@@ -140,105 +129,87 @@ const UserProfileDropdown: React.FC = () => {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : userData?.fname ? (
-              <div className="w-full h-full rounded-full flex items-center justify-center bg-[#b4b11e] text-[#1a1a2e] text-xs sm:text-sm">
+              <div className="w-full h-full rounded-full flex items-center justify-center bg-secondary/20 text-secondary text-sm font-bold">
                 {userData.fname[0].toUpperCase()}
               </div>
             ) : userData?.walletAddress ? (
               <img
                 src={MetamaskLogo}
                 alt="MetaMask Logo"
-                className="w-3/4 h-3/4 object-contain rounded-full"
+                className="w-6 h-6 object-contain rounded-full"
               />
             ) : (
-              <User className="h-3 w-3 sm:h-4 sm:w-4" />
+              <User className="h-5 w-5 text-secondary" />
             )}
           </div>
           <ChevronDown
-            className={`h-4 w-4 sm:h-6 sm:w-6 transition-transform ${
-              profileOpen ? "rotate-180" : ""
+            className={`h-4 w-4 text-dark-primary transition-all duration-300 ${
+              profileOpen ? "rotate-180 text-secondary" : ""
             }`}
           />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-48 sm:w-56 bg-[#1C1C27] text-white border-gray-700 mt-2 sm:mt-3 mr-2"
+        className="w-56 bg-[#1C1C27] text-dark-primary border border-gray-700/60 mt-2 mr-2 shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
       >
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
             navigate("/profile");
             setProfileOpen(false);
           }}
         >
-          <User className="h-4 w-4 mr-2" />
-          Profile
+          <User className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
             navigate("/watchlist");
             setProfileOpen(false);
           }}
         >
-          <Eye className="h-4 w-4 mr-2" />
-          Watch List
+          <Eye className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Watch List</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
             navigate("/dashboard");
             setProfileOpen(false);
           }}
         >
-          <LayoutDashboard className="h-4 w-4 mr-2" />
-          Dashboard
+          <LayoutDashboard className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Dashboard</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
             navigate("/results");
             setProfileOpen(false);
           }}
         >
-          <BarChart3 className="h-4 w-4 mr-2" />
-          Results
+          <BarChart3 className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Results</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
             navigate("/contactus");
             setProfileOpen(false);
           }}
         >
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Contact
+          <MessageSquare className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Contact</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-gray-700/60 mx-2 my-2" />
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-sm"
-          onClick={() => toggleDarkMode()}
-        >
-          <Moon className="h-4 w-4 mr-2" />
-          {isDarkMode ? "Light" : "Dark"} Mode
-          <div
-            className={`ml-auto w-6 h-3 sm:w-8 sm:h-4 rounded-full ${
-              isDarkMode ? "bg-orange-500" : "bg-gray-600"
-            } relative`}
-          >
-            <div
-              className={`absolute top-0.5 ${
-                isDarkMode ? "right-0.5" : "left-0.5"
-              } w-2 h-2 sm:w-3 sm:h-3 bg-white rounded-full transition-all`}
-            ></div>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-[#8488AC]" />
-        <DropdownMenuItem
-          className="flex items-center cursor-pointer text-red-400 text-sm"
+          className="flex items-center cursor-pointer text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-2"
           onClick={handleLogout}
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          Log out
+          <LogOut className="h-4 w-4 mr-3" />
+          <span className="font-medium">Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

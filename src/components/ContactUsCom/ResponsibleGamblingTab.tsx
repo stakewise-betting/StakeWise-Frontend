@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Shield, Phone, FileQuestion, Mail } from "lucide-react";
+import {
+  Shield,
+  Phone,
+  FileQuestion,
+  Mail,
+  AlertTriangle,
+  Clock,
+  Users,
+  HeartHandshake,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "react-toastify";
@@ -81,67 +91,96 @@ const ResponsibleGamblingTab = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <div className="bg-[#333447] rounded-2xl p-6 mb-8 border-l-4 border-[#E27625] shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Responsible Gambling</h1>
-        </div>
-        <p className="text-gray-300 text-sm">
-          We're committed to promoting responsible gambling practices and
-          providing tools to help you stay in control.
-        </p>
-        {!isLoggedin && (
-          <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-3 mt-4">
-            <p className="text-red-200 text-sm">
-              Please log in to access responsible gambling features.
-            </p>
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] rounded-2xl p-8 mb-10 shadow-2xl overflow-hidden">
+        <div className="bg-gradient-to-r from-[#EF4444]/10 to-[#F87171]/10 rounded-xl p-6 border border-[#EF4444]/20">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-gradient-to-r from-[#EF4444] to-[#F87171] rounded-xl shadow-lg">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-zinc-100">
+                Responsible Gambling
+              </h1>
+              <p className="text-zinc-400 mt-1">
+                Your safety and wellbeing matter most to us
+              </p>
+            </div>
           </div>
-        )}
+          <p className="text-zinc-300 leading-relaxed">
+            We're committed to promoting responsible gambling practices and
+            providing comprehensive tools to help you stay in control of your
+            gaming experience.
+          </p>
+          {!isLoggedin && (
+            <div className="flex items-center gap-3 mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+              <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-red-400 font-medium">
+                Please log in to access responsible gambling features and set
+                your personal limits.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-[#333447] overflow-hidden shadow-lg rounded-xl border-0 transition-all hover:shadow-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-white rounded-full">
-                <Shield className="h-5 w-5 text-[#E27625]" />
+      {/* Main Tools Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        {/* Deposit Limits Card */}
+        <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <div className="bg-gradient-to-r from-[#3B82F6]/10 to-[#60A5FA]/10 p-6 border-b border-[#333447]">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-xl shadow-lg">
+                <Shield className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">Deposit Limits</h3>
+              <h3 className="text-xl font-bold text-zinc-100">
+                Deposit Limits
+              </h3>
             </div>
-            <p className="text-sm text-gray-300 mb-6">
-              Take control of your gambling by setting daily, weekly or monthly
-              deposit limits.
+            <p className="text-zinc-400 leading-relaxed">
+              Take complete control of your gambling by setting personalized
+              daily, weekly or monthly deposit limits that work for you.
             </p>
+          </div>
+          <div className="p-6">
             <Button
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              className="w-full py-4 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] hover:from-[#2563EB] hover:to-[#3B82F6] disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
               onClick={() => setIsDepositLimitDialogOpen(true)}
               disabled={!isLoggedin}
             >
-              Set Limits
+              <Shield className="w-5 h-5 mr-2" />
+              Set Your Limits
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="bg-[#333447] overflow-hidden shadow-lg rounded-xl border-0 transition-all hover:shadow-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-white rounded-full">
-                <FileQuestion className="h-5 w-5 text-[#E27625]" />
+        {/* Self-Assessment Card */}
+        <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <div className="bg-gradient-to-r from-[#F59E0B]/10 to-[#FBBF24]/10 p-6 border-b border-[#333447]">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] rounded-xl shadow-lg">
+                <FileQuestion className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">Self-Assessment</h3>
+              <h3 className="text-xl font-bold text-zinc-100">
+                Self-Assessment
+              </h3>
             </div>
-            <p className="text-sm text-gray-300 mb-6">
-              Not sure if your gambling habits are becoming a problem? Take our
-              confidential self-assessment.
+            <p className="text-zinc-400 leading-relaxed">
+              Not sure if your gambling habits are becoming concerning? Take our
+              confidential self-assessment to get personalized insights.
             </p>
+          </div>
+          <div className="p-6">
             <Link
               to="/self-assessment"
-              className="flex items-center cursor-pointer"
+              className="block"
               onClick={() => window.scrollTo(0, 0)}
             >
               <Button
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                onClick={() => {
+                className="w-full py-4 bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] hover:from-[#D97706] hover:to-[#F59E0B] disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
+                onClick={(e) => {
                   if (!isLoggedin) {
+                    e.preventDefault();
                     toast.error(
                       "You must be logged in to take the self-assessment"
                     );
@@ -150,119 +189,181 @@ const ResponsibleGamblingTab = ({
                 }}
                 disabled={!isLoggedin}
               >
+                <FileQuestion className="w-5 h-5 mr-2" />
                 Start Assessment
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="bg-[#333447] overflow-hidden shadow-lg rounded-xl border-0 transition-all hover:shadow-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-white rounded-full">
-                <Mail className="h-5 w-5 text-[#E27625]" />
+        {/* Contact Support Card */}
+        <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 hover:scale-105">
+          <div className="bg-gradient-to-r from-[#10B981]/10 to-[#34D399]/10 p-6 border-b border-[#333447]">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-xl shadow-lg">
+                <HeartHandshake className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-semibold text-lg">Contact Support</h3>
+              <h3 className="text-xl font-bold text-zinc-100">Get Support</h3>
             </div>
-            <p className="text-sm text-gray-300 mb-6">
-              Worried about your gambling or someone else's? Reach out to our
-              support team for help.
+            <p className="text-zinc-400 leading-relaxed">
+              Concerned about your gambling or someone else's? Our dedicated
+              support team is here to help you every step of the way.
             </p>
-
+          </div>
+          <div className="p-6">
             <Link
               to="/contactus"
-              className="flex items-center cursor-pointer"
+              className="block"
               onClick={() => {
                 window.scrollTo(0, 0);
                 window.location.assign("/contactus");
               }}
             >
               <Button
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                className="w-full py-4 bg-gradient-to-r from-[#10B981] to-[#34D399] hover:from-[#059669] hover:to-[#10B981] disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 disabled={!isLoggedin}
               >
-                Contact Team
+                <HeartHandshake className="w-5 h-5 mr-2" />
+                Contact Our Team
               </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <Card className="bg-[#333447] overflow-hidden rounded-xl border-0 mb-8  shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)]">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-white rounded-full">
-              <Phone className="h-5 w-5 text-[#E27625]" />
+      {/* Gambling Helplines Section */}
+      <div className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden mb-10">
+        <div className="bg-gradient-to-r from-[#8B5CF6]/10 to-[#A78BFA]/10 p-6 border-b border-[#333447]">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] rounded-xl shadow-lg">
+              <Phone className="h-6 w-6 text-white" />
             </div>
-            <h3 className="font-semibold text-lg">Gambling Helplines</h3>
+            <h3 className="text-2xl font-bold text-zinc-100">
+              24/7 Gambling Helplines
+            </h3>
           </div>
+          <p className="text-zinc-400 text-lg ml-16">
+            Professional help is available anytime you need it. These services
+            are free and confidential.
+          </p>
+        </div>
 
+        <div className="p-8">
           <div className="grid gap-4">
-            <div className="flex items-center justify-between p-3 bg-[#1C1C27] rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-10 bg-[#E27625] rounded-full"></div>
-                <span className="text-sm font-medium">
-                  National Problem Gambling Helpline
-                </span>
+            <div className="group bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#EF4444]/50 rounded-xl p-6 transition-all duration-300 hover:shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-1 h-12 bg-gradient-to-b from-[#EF4444] to-[#F87171] rounded-full"></div>
+                  <div>
+                    <h4 className="font-semibold text-zinc-100 text-lg">
+                      National Problem Gambling Helpline
+                    </h4>
+                    <p className="text-zinc-400 text-sm">
+                      24/7 confidential support and crisis intervention
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-xl text-zinc-100">
+                    1-800-GAMBLER
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400 text-sm font-medium">
+                      Available 24/7
+                    </span>
+                  </div>
+                </div>
               </div>
-              <span className="font-bold text-sm px-3 py-1 rounded-full">
-                1-800-GAMBLER
-              </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-[#1C1C27] rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-10 bg-[#E27625] rounded-full"></div>
-                <span className="text-sm font-medium">Gamblers Anonymous</span>
+            <div className="group bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#3B82F6]/50 rounded-xl p-6 transition-all duration-300 hover:shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-1 h-12 bg-gradient-to-b from-[#3B82F6] to-[#60A5FA] rounded-full"></div>
+                  <div>
+                    <h4 className="font-semibold text-zinc-100 text-lg">
+                      Gamblers Anonymous
+                    </h4>
+                    <p className="text-zinc-400 text-sm">
+                      Peer support and recovery meetings nationwide
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-xl text-zinc-100">
+                    1-626-960-3500
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Users className="w-4 h-4 text-blue-400" />
+                    <span className="text-blue-400 text-sm font-medium">
+                      Group Support
+                    </span>
+                  </div>
+                </div>
               </div>
-              <span className="font-bold text-sm px-3 py-1 rounded-full">
-                1-626-960-3500
-              </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-[#1C1C27] rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-10 bg-[#E27625] rounded-full"></div>
-                <span className="text-sm font-medium">Stakewise</span>
+            <div className="group bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#10B981]/50 rounded-xl p-6 transition-all duration-300 hover:shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-1 h-12 bg-gradient-to-b from-[#10B981] to-[#34D399] rounded-full"></div>
+                  <div>
+                    <h4 className="font-semibold text-zinc-100 text-lg">
+                      StakeWise Support
+                    </h4>
+                    <p className="text-zinc-400 text-sm">
+                      Direct platform support and account assistance
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-xl text-zinc-100">
+                    0808 8020 133
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <ExternalLink className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400 text-sm font-medium">
+                      Platform Help
+                    </span>
+                  </div>
+                </div>
               </div>
-              <span className="font-bold text-sm px-3 py-1 rounded-full">
-                0808 8020 133
-              </span>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Deposit Limit Dialog */}
       <Dialog
         open={isDepositLimitDialogOpen}
         onOpenChange={setIsDepositLimitDialogOpen}
       >
-        <DialogContent className="bg-[#1C1C27] border-0 p-0 overflow-hidden w-full max-w-md rounded-xl">
-          <div className="bg-[#333447] p-6 border-b border-[#E27625]/20">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-white rounded-full">
-                <Shield className="h-5 w-5 text-[#E27625]" />
+        <DialogContent className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] p-0 overflow-hidden w-full max-w-md rounded-2xl shadow-2xl">
+          <div className="bg-gradient-to-r from-[#3B82F6]/10 to-[#60A5FA]/10 p-6 border-b border-[#333447]">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="p-3 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-xl shadow-lg">
+                <Shield className="h-6 w-6 text-white" />
               </div>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle className="text-2xl font-bold text-zinc-100">
                 Set Deposit Limits
               </DialogTitle>
             </div>
-            <DialogDescription className="text-gray-400 ml-11">
-              Limit how much you can deposit in a given period to help manage
-              your gambling.
+            <DialogDescription className="text-zinc-400 text-lg ml-16">
+              Create personalized limits to help you maintain control over your
+              gambling spending.
             </DialogDescription>
           </div>
 
-          <div className="p-6">
-            <div className="space-y-6">
+          <div className="p-8">
+            <div className="space-y-8">
               <div>
                 <Label
                   htmlFor="limit-type"
-                  className="text-sm font-medium flex items-center gap-2 mb-2"
+                  className="text-zinc-200 font-medium flex items-center gap-3 mb-3"
                 >
-                  <span className="inline-block w-2 h-2 rounded-full"></span>
-                  Limit Type
+                  <div className="w-2 h-2 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-full"></div>
+                  Limit Period
                 </Label>
                 <Select
                   value={limitType}
@@ -272,14 +373,29 @@ const ResponsibleGamblingTab = ({
                 >
                   <SelectTrigger
                     id="limit-type"
-                    className="bg-[#333447] border border-[#444560] focus:border-[#1C1C27] focus:ring-1 focus:ring-[#1C1C27] rounded-lg"
+                    className="w-full py-4 px-4 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3B82F6] hover:border-[#3B82F6]/50 transition-all duration-200 text-zinc-100"
                   >
-                    <SelectValue placeholder="Select limit type" />
+                    <SelectValue placeholder="Select your preferred limit period" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#333447] border-[#444560]">
-                    <SelectItem value="daily">Daily Limit</SelectItem>
-                    <SelectItem value="weekly">Weekly Limit</SelectItem>
-                    <SelectItem value="monthly">Monthly Limit</SelectItem>
+                  <SelectContent className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl shadow-2xl">
+                    <SelectItem
+                      value="daily"
+                      className="hover:bg-[#3B82F6]/10 focus:bg-[#3B82F6]/10"
+                    >
+                      Daily Limit
+                    </SelectItem>
+                    <SelectItem
+                      value="weekly"
+                      className="hover:bg-[#3B82F6]/10 focus:bg-[#3B82F6]/10"
+                    >
+                      Weekly Limit
+                    </SelectItem>
+                    <SelectItem
+                      value="monthly"
+                      className="hover:bg-[#3B82F6]/10 focus:bg-[#3B82F6]/10"
+                    >
+                      Monthly Limit
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -287,10 +403,10 @@ const ResponsibleGamblingTab = ({
               <div>
                 <Label
                   htmlFor="limit-amount"
-                  className="text-sm font-medium flex items-center gap-2 mb-2"
+                  className="text-zinc-200 font-medium flex items-center gap-3 mb-3"
                 >
-                  <span className="inline-block w-2 h-2 rounded-full"></span>
-                  Amount ($)
+                  <div className="w-2 h-2 bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] rounded-full"></div>
+                  Amount (ETH)
                 </Label>
                 <div className="relative">
                   <Input
@@ -298,46 +414,53 @@ const ResponsibleGamblingTab = ({
                     type="number"
                     value={limitAmount}
                     onChange={(e) => setLimitAmount(e.target.value)}
-                    placeholder="Enter amount"
-                    className="bg-[#333447] border border-[#444560] focus:border-[#1C1C27] focus:ring-1 focus:ring-[#1C1C27] pl-16 rounded-lg"
+                    placeholder="Enter your limit amount"
+                    className="w-full py-4 pl-16 pr-4 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3B82F6] hover:border-[#3B82F6]/50 transition-all duration-200 text-zinc-100 placeholder-zinc-500"
                     min="0"
+                    step="0.01"
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                    ETH
-                  </span>
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] rounded-full"></div>
+                    <span className="text-zinc-400 font-medium">ETH</span>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-2 ml-4">
-                  {limitType === "daily" &&
-                    "Maximum amount you can deposit in a 24-hour period"}
-                  {limitType === "weekly" &&
-                    "Maximum amount you can deposit in a 7-day period"}
-                  {limitType === "monthly" &&
-                    "Maximum amount you can deposit in a 30-day period"}
-                </p>
+                <div className="mt-3 p-3 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-lg">
+                  <p className="text-sm text-zinc-400">
+                    {limitType === "daily" &&
+                      "This is the maximum amount you can deposit within any 24-hour period"}
+                    {limitType === "weekly" &&
+                      "This is the maximum amount you can deposit within any 7-day period"}
+                    {limitType === "monthly" &&
+                      "This is the maximum amount you can deposit within any 30-day period"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-4 border-t border-[#333447]">
-              <div className="flex justify-end gap-3">
+            <div className="mt-10 pt-6 border-t border-[#333447]">
+              <div className="flex gap-4">
                 <Button
                   variant="outline"
                   onClick={() => setIsDepositLimitDialogOpen(false)}
-                  className="border-[#444560] hover:bg-[#333447] hover:text-white"
+                  className="flex-1 py-3 bg-transparent border-2 border-[#333447] hover:border-[#555] hover:bg-[#2A2A3A] text-zinc-300 hover:text-white transition-all duration-200 rounded-xl"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSetLimitSubmit}
                   disabled={!limitAmount || isLimitSubmitting}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="flex-1 py-3 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] hover:from-[#2563EB] hover:to-[#3B82F6] disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105 disabled:transform-none disabled:cursor-not-allowed"
                 >
                   {isLimitSubmitting ? (
                     <>
-                      <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                      Setting...
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      Setting Limit...
                     </>
                   ) : (
-                    "Set Limit"
+                    <>
+                      <Shield className="w-5 h-5 mr-2" />
+                      Set Limit
+                    </>
                   )}
                 </Button>
               </div>

@@ -18,30 +18,41 @@ const MetaMaskLogin = () => {
 
   const loginWithMetaMask = async () => {
     console.log("MetaMask login button clicked");
+    setIsSubmitting(true);
+
     if (!window.ethereum) {
-      alert("MetaMask is not installed!");
+      toast.error(
+        "MetaMask is not installed! Please install MetaMask extension."
+      );
+      setIsSubmitting(false);
       return;
     }
 
-    const provider = new ethers.BrowserProvider(window.ethereum); // connect to user's MetaMask
-    const signer = await provider.getSigner(); // to send transactions and to approve transactions
-    const address = await signer.getAddress(); // get user's public wallet address
-
-    // 1. Request Nonce from Backend
-    // to ensures every login request is unique
-    // to prevent replay attacks
-    const { data } = await axios.get(`${backendUrl}/api/auth/metamask-nonce`, {
-      params: { address },
-    });
-    const nonce = data.nonce;
-
-    // 2. Sign Nonce
-    // metamask will prompt user to sign the nonce(pop-up)
-    const signature = await signer.signMessage(nonce); // (long hex string)
-
     try {
-      // Send Google token to backend for verification
+      console.log("Requesting MetaMask connection...");
+      const provider = new ethers.BrowserProvider(window.ethereum); // connect to user's MetaMask
+      const signer = await provider.getSigner(); // to send transactions and to approve transactions
+      const address = await signer.getAddress(); // get user's public wallet address
+      console.log("Connected to address:", address);
+
+      // 1. Request Nonce from Backend
+      console.log("Requesting nonce from backend...");
+      const { data } = await axios.get(
+        `${backendUrl}/api/auth/metamask-nonce`,
+        {
+          params: { address },
+        }
+      );
+      const nonce = data.nonce;
+      console.log("Received nonce:", nonce);
+
+      // 2. Sign Nonce
+      console.log("Requesting signature from user...");
+      const signature = await signer.signMessage(nonce); // (long hex string)
+      console.log("Signature received:", signature.substring(0, 20) + "...");
+
       // 3. Send Signature to Backend
+      console.log("Sending signature to backend...");
       const response = await axios.post(
         `${backendUrl}/api/auth/metamask-login`,
         { address, signature },
@@ -75,21 +86,26 @@ const MetaMaskLogin = () => {
   //   }; // for testing purposes
 
   return (
-    <div>
-      {/* MetaMask Login Button */}
-      <div className="flex justify-center my-4">
-        <button
-          onClick={loginWithMetaMask}
-          disabled={isSubmitting}
-          className={`flex items-center justify-center gap-5 w-3/4 py-2 px-4 bg-blue-500 text-white rounded-lg transition ${
-            isSubmitting ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-          }`}
-        >
-          <img src={MetamaskLogo} className="w-8 h-8" alt="MetaMask Logo" />
-          {isSubmitting ? "Connecting..." : "Connect with MetaMask"}
-        </button>
-      </div>
-      {/* <button onClick={checkProtected} className="bg-red">Check Protected Route</button> */}
+    <div className="w-full mb-2">
+      <button
+        onClick={loginWithMetaMask}
+        disabled={isSubmitting}
+        className={`w-full flex items-center justify-center gap-3 py-3 px-5 bg-gray-800/40 hover:bg-gray-700/50 border border-gray-600/50 hover:border-gray-500/60 text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none text-sm ${
+          isSubmitting ? "" : ""
+        }`}
+      >
+        {isSubmitting ? (
+          <>
+            <div className="w-4 h-4 border-2 border-white/70 border-t-white rounded-full animate-spin"></div>
+            <span>Connecting...</span>
+          </>
+        ) : (
+          <>
+            <img src={MetamaskLogo} className="w-4 h-4" alt="MetaMask Logo" />
+            <span>Continue with MetaMask</span>
+          </>
+        )}
+      </button>
     </div>
   );
 };

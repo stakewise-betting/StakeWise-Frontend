@@ -183,47 +183,83 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
   };
 
   return (
-    <div className="animate-admin-fade-in space-y-8">
+    <div className="animate-admin-fade-in space-y-8 bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#2A2A3E] min-h-screen p-6 -m-6">
       {/* Page Header */}
-      <div className="admin-section-header">
-        <h1 className="admin-section-title">
-          <span className="mr-2">🎟️</span> Raffle Draws Management
-        </h1>
+      <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-2xl p-8 shadow-2xl shadow-black/20 border border-gray-700/50">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#E27625] to-[#F59E0B] flex items-center justify-center shadow-lg shadow-[#E27625]/30">
+                <span className="text-2xl">🎟️</span>
+              </div>
+              Raffle Draws Management
+            </h1>
+            <p className="text-gray-400 mt-2 text-lg">
+              Create, manage, and monitor raffle draws for your platform
+            </p>
+          </div>
 
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing || loading}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
-          <Button
-            onClick={() => setShowAddModal(true)}
-            className="bg-orange-500 hover:bg-orange-600"
-          >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Create Raffle
-          </Button>
+          <div className="flex space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] hover:from-[#2A2A3E] hover:to-[#252538] border-gray-600/50 text-white hover:text-white transition-all duration-300 hover:scale-105 shadow-lg"
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              />
+              🔄 Refresh
+            </Button>
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="bg-gradient-to-r from-[#E27625] to-[#F59E0B] hover:from-[#F59E0B] hover:to-[#E27625] text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-[#E27625]/30"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />➕ Create Raffle
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-3 rounded-md">
-          {error}
+        <div className="bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border-2 border-[#EF4444]/50 rounded-xl p-6 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#EF4444] to-[#DC2626] flex items-center justify-center">
+              <span className="text-white text-xl">⚠️</span>
+            </div>
+            <div>
+              <h3 className="text-[#EF4444] font-semibold text-lg">
+                Error Loading Raffles
+              </h3>
+              <p className="text-gray-300 mt-1">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Loading State */}
       {loading && !raffles.length ? (
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-full bg-gray-700/50" />
-          <Skeleton className="h-64 w-full bg-gray-700/50" />
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 border border-gray-600/50 shadow-lg">
+            <div className="animate-pulse space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="h-6 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg w-1/4"></div>
+                <div className="h-8 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg w-32"></div>
+              </div>
+              <div className="space-y-3">
+                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-full"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-3/4"></div>
+                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-8 border border-gray-600/50 shadow-lg">
+            <div className="animate-pulse">
+              <div className="h-64 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl"></div>
+            </div>
+          </div>
         </div>
       ) : (
         <RaffleListTable

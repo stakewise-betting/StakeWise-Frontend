@@ -13,6 +13,8 @@ import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 import StatCard from "@/components/dashboardCom/StatCard";
 import OnlineUsersWS from "@/components/OnlineUsersWS/OnlineUsersWS";
 import { useUserStats } from "@/hooks/useUserStats";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Activity } from "lucide-react";
 
 const Dashboard = () => {
   const { userData } = useContext(AppContext)!;
@@ -42,121 +44,175 @@ const Dashboard = () => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="min-h-screen"
     >
-      <div>
-        <div className="min-h-[200px] py-10 lg:mx-24 md:mx-16 mx-8">
-          {/* Profile Section */}
-          <div className="mb-4 flex items-center justify-center gap-5">
-            <Avatar className="h-32 w-32 border-2 border-zinc-800">
-              <AvatarImage alt="Profile" />
-              <AvatarFallback className="bg-zinc-800 text-zinc-100 text-4xl">
-                {userData?.picture ? (
-                  <img
-                    src={userData.picture}
-                    alt="User profile"
-                    width={115}
-                    height={115}
-                    className="bject-cover rounded-full"
-                  />
-                ) : userData?.fname ? (
-                  userData.fname[0].toUpperCase()
-                ) : userData?.walletAddress ? (
-                  <img
-                    src={MetamaskLogo}
-                    alt="MetaMask Logo"
-                    width={115}
-                    height={115}
-                    className="object-contain rounded-full"
-                  />
-                ) : (
-                  ""
-                )}
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-4">
-                <h2 className="text-lg font-semibold text-white">
-                  {userData?.fname ||
-                    (userData?.walletAddress ? "MetaMask User" : "User")}
-                </h2>
-                <OnlineUsersWS wsUrl={wsUrl} />
-              </div>
-
-              <p className="text-sm text-slate-400">
-                {userData?.email ||
-                  (userData?.walletAddress
-                    ? userData.walletAddress.slice(0, 6) +
-                      "..." +
-                      userData.walletAddress.slice(-4)
-                    : "")}
-              </p>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-11 sm:grid-cols-2 lg:grid-cols-4 py-10">
-            {statsLoading ? (
-              // Loading state
-              Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="bg-[#333447] p-6 rounded-[20px] animate-pulse">
-                  <div className="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
-                  <div className="h-8 bg-gray-600 rounded w-1/2 mb-2"></div>
-                  <div className="h-4 bg-gray-600 rounded w-1/4"></div>
-                </div>
-              ))
-            ) : statsError ? (
-              // Error state
-              <div className="col-span-full text-center text-red-500 py-8">
-                Error loading statistics: {statsError}
-              </div>
-            ) : (
-              // Real statistics
-              <>
-                <StatCard
-                  title="Total Earned"
-                  value={`${formatNumber(totalEarned)} ETH`}
-                  percentage={totalEarned > 0 ? `+${formatNumber(totalEarned)}` : "0%"}
-                  icon={<GiReceiveMoney className="h-6 w-6 text-white" />}
-                />
-
-                <StatCard
-                  title="Total Loss"
-                  value={`${formatNumber(totalLoss)} ETH`}
-                  percentage={totalLoss > 0 ? `-${formatNumber(totalLoss)}` : "0%"}
-                  icon={<BsGraphDownArrow className="h-6 w-6 text-white" />}
-                />
-
-                <StatCard
-                  title="Net Profit"
-                  value={`${netProfit >= 0 ? '+' : ''}${formatNumber(netProfit)} ETH`}
-                  percentage={`${winRate.toFixed(1)}% Win Rate`}
-                  icon={
-                    netProfit >= 0 ? (
-                      <BsGraphUpArrow className="h-6 w-6 text-white" />
+      {/* Profile Section */}
+      <div className="lg:mx-24 md:mx-16 mx-8 py-12">
+        <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden">
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* Profile Avatar */}
+              <div className="relative">
+                <Avatar className="h-32 w-32 border-4 border-[#333447] shadow-xl">
+                  <AvatarImage alt="Profile" />
+                  <AvatarFallback className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] text-zinc-100 text-4xl font-bold">
+                    {userData?.picture ? (
+                      <img
+                        src={userData.picture}
+                        alt="User profile"
+                        width={128}
+                        height={128}
+                        className="object-cover rounded-full"
+                      />
+                    ) : userData?.fname ? (
+                      userData.fname[0].toUpperCase()
+                    ) : userData?.walletAddress ? (
+                      <img
+                        src={MetamaskLogo}
+                        alt="MetaMask Logo"
+                        width={96}
+                        height={96}
+                        className="object-contain"
+                      />
                     ) : (
-                      <BsGraphDownArrow className="h-6 w-6 text-white" />
-                    )
-                  }
-                />
+                      <Users className="w-12 h-12 text-zinc-400" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 p-2 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-full shadow-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+              </div>
 
-                <StatCard
-                  title="Total Bets Placed"
-                  value={totalBetsPlaced.toString()}
-                  percentage={totalAmountWagered > 0 ? `${formatNumber(totalAmountWagered)} ETH Wagered` : "No bets"}
-                  icon={<GiCardRandom className="h-6 w-6 text-white" />}
-                />
-              </>
-            )}
-          </div>
+              {/* Profile Info */}
+              <div className="text-center md:text-left space-y-3">
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <h2 className="text-2xl font-bold text-zinc-100">
+                    {userData?.fname ||
+                      (userData?.walletAddress
+                        ? "MetaMask User"
+                        : "Welcome Back")}
+                  </h2>
+                  <OnlineUsersWS wsUrl={wsUrl} />
+                </div>
 
-        </div>
+                <p className="text-lg text-zinc-400 font-medium">
+                  {userData?.email ||
+                    (userData?.walletAddress
+                      ? userData.walletAddress.slice(0, 8) +
+                        "..." +
+                        userData.walletAddress.slice(-6)
+                      : "Betting Dashboard")}
+                </p>
 
-        <OngoingTable />
-        <Achievements />
-        <BetHistory />
-        <TransactionTable />
+                <div className="flex flex-col md:flex-row gap-4 mt-4">
+                  <div className="px-4 py-2 bg-gradient-to-r from-[#3B82F6]/20 to-[#60A5FA]/20 border border-[#3B82F6]/30 rounded-full">
+                    <span className="text-[#3B82F6] font-medium text-sm">
+                      Premium Member
+                    </span>
+                  </div>
+                  <div className="px-4 py-2 bg-gradient-to-r from-[#10B981]/20 to-[#34D399]/20 border border-[#10B981]/30 rounded-full">
+                    <span className="text-emerald-400 font-medium text-sm">
+                      Verified Account
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Stats Grid */}
+      <div className="lg:mx-24 md:mx-16 mx-8 mb-16">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {statsLoading ? (
+            // Loading state
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] p-8 rounded-2xl animate-pulse"
+              >
+                <div className="h-4 bg-zinc-600 rounded w-3/4 mb-4"></div>
+                <div className="h-8 bg-zinc-600 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-zinc-600 rounded w-1/3"></div>
+              </div>
+            ))
+          ) : statsError ? (
+            // Error state
+            <div className="col-span-full">
+              <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl">
+                <CardContent className="p-16">
+                  <div className="text-center">
+                    <div className="text-red-500 mb-4">⚠️</div>
+                    <p className="text-red-400 text-lg font-medium">
+                      Error loading statistics
+                    </p>
+                    <p className="text-zinc-500 text-sm">{statsError}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            // Real statistics
+            <>
+              <StatCard
+                title="Total Earned"
+                value={`${formatNumber(totalEarned)} ETH`}
+                percentage={
+                  totalEarned > 0 ? `+${formatNumber(totalEarned)}` : "0%"
+                }
+                icon={<GiReceiveMoney className="h-7 w-7" />}
+                iconColor="#10B981"
+              />
+
+              <StatCard
+                title="Total Loss"
+                value={`${formatNumber(totalLoss)} ETH`}
+                percentage={
+                  totalLoss > 0 ? `-${formatNumber(totalLoss)}` : "0%"
+                }
+                icon={<BsGraphDownArrow className="h-7 w-7" />}
+                iconColor="#EF4444"
+              />
+
+              <StatCard
+                title="Net Profit"
+                value={`${netProfit >= 0 ? "+" : ""}${formatNumber(
+                  netProfit
+                )} ETH`}
+                percentage={`${winRate.toFixed(1)}% Win Rate`}
+                icon={
+                  netProfit >= 0 ? (
+                    <BsGraphUpArrow className="h-7 w-7" />
+                  ) : (
+                    <BsGraphDownArrow className="h-7 w-7" />
+                  )
+                }
+                iconColor={netProfit >= 0 ? "#10B981" : "#EF4444"}
+              />
+
+              <StatCard
+                title="Total Bets Placed"
+                value={totalBetsPlaced.toString()}
+                percentage={
+                  totalAmountWagered > 0
+                    ? `${formatNumber(totalAmountWagered)} ETH Wagered`
+                    : "No bets"
+                }
+                icon={<GiCardRandom className="h-7 w-7" />}
+                iconColor="#3B82F6"
+              />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Dashboard Components */}
+      <OngoingTable />
+      <Achievements />
+      <BetHistory />
+      <TransactionTable />
     </motion.div>
   );
 };

@@ -163,34 +163,36 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-[#1C1C27] text-white h-16 px-2 sm:px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg">
+    <nav className="bg-[#1C1C27] border-b border-gray-700/60 text-white h-16 px-2 sm:px-4 flex items-center justify-between sticky top-0 z-50 shadow-lg backdrop-blur-sm">
       <div className="flex items-center px-1 sm:px-2">
         <Link
           to="/"
           onClick={() => window.scrollTo(0, 0)}
-          className="flex items-center"
+          className="flex items-center hover:opacity-80 transition-opacity duration-300"
         >
-          <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl mr-2 sm:mr-3 font-saira-stencil">
+          <span className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mr-1 sm:mr-2 lg:mr-3 font-saira-stencil text-secondary font-bold">
             STAKEWISE
           </span>
           <img
             src={TeamLogo}
             alt="Team Logo"
-            className="logo-icon w-[28px] h-[22px] sm:w-[35px] sm:h-[28px] md:w-[42px] md:h-[34px]"
+            className="logo-icon w-[24px] h-[20px] sm:w-[28px] sm:h-[22px] md:w-[32px] md:h-[26px] lg:w-[38px] lg:h-[30px] xl:w-[42px] xl:h-[34px] drop-shadow-lg"
           />
         </Link>
       </div>
 
-      <div className="hidden lg:flex items-center space-x-4 xl:space-x-8 mt-2 ml-4 xl:ml-10 text-[12px] xl:text-[13px] font-bold">
+      <div className="hidden lg:flex items-center space-x-2 xl:space-x-4 text-[10px] lg:text-[11px] xl:text-[12px] font-semibold">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.href}
             onClick={() => window.scrollTo(0, 0)}
             className={({ isActive }) =>
-              `flex items-center ${
-                isActive ? "text-[#E27625]" : "text-[#8488AC]"
-              } hover:text-[#E27625] hover:border-b-[3px] hover:border-[#E27625] transition-color pb-2 ${
+              `flex items-center px-2 lg:px-2.5 xl:px-3 py-1.5 lg:py-2 rounded-lg transition-all duration-300 hover:bg-secondary/10 hover:shadow-lg ${
+                isActive
+                  ? "text-secondary bg-secondary/20 border border-secondary/30 shadow-md"
+                  : "text-[#8488AC] hover:text-secondary"
+              } ${
                 item.breakpoint === "xl"
                   ? "hidden xl:flex"
                   : item.breakpoint === "lg"
@@ -205,7 +207,7 @@ const Navbar: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6">
+      <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
         {isLoggedin ? (
           <>
             <WalletConnect isLoggedin={isLoggedin} />
@@ -218,30 +220,32 @@ const Navbar: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden text-[#ffffff] !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 transition"
+                  className="lg:hidden text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
                 >
                   <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-48 sm:w-56 bg-[#252538] text-white border-gray-700 mr-2"
+                className="w-48 sm:w-56 bg-[#252538] text-white border border-gray-700 mr-2 shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
               >
-                {navItems.map((item) => (
-                  <DropdownMenuItem key={`mobile-${item.name}`} asChild>
-                    <Link
-                      to={item.href}
-                      className="flex items-center cursor-pointer text-sm"
-                      onClick={() => {
-                        window.scrollTo(0, 0);
-                        setMenuOpen(false);
-                      }}
-                    >
-                      {item.icon}
-                      <span className="ml-2">{item.name}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                <div className="p-2">
+                  {navItems.map((item) => (
+                    <DropdownMenuItem key={`mobile-${item.name}`} asChild>
+                      <Link
+                        to={item.href}
+                        className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mb-1 font-medium"
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <span className="text-secondary mr-3">{item.icon}</span>
+                        <span>{item.name}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </>
@@ -249,13 +253,13 @@ const Navbar: React.FC = () => {
           <>
             <Button
               variant="ghost"
-              className="hidden sm:flex text-orange-500 hover:text-orange-400 text-sm px-2 py-1"
+              className="hidden sm:flex text-secondary hover:text-secondary/80 hover:bg-secondary/10 text-sm px-3 py-1 font-semibold rounded-lg transition-all duration-300"
               onClick={() => navigate("/login")}
             >
               Login
             </Button>
             <Button
-              className="hidden sm:flex bg-orange-500 hover:bg-orange-600 text-white rounded-full text-sm px-3 py-1"
+              className="hidden sm:flex bg-secondary hover:bg-secondary/80 text-white rounded-lg text-sm px-3 py-1 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
               onClick={() => navigate("/signup")}
             >
               Sign Up
@@ -266,74 +270,76 @@ const Navbar: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-[#ffffff] !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 transition"
+                  className="text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
                 >
                   <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-48 sm:w-56 bg-[#252538] text-white border-gray-700 mr-2"
+                className="w-48 sm:w-56 bg-[#252538] text-white border border-gray-700 mr-2 shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
               >
-                {navItems.map((item) => (
-                  <DropdownMenuItem
-                    key={`mobile-${item.name}`}
-                    asChild
-                    className="lg:hidden"
-                  >
+                <div className="p-2">
+                  {navItems.map((item) => (
+                    <DropdownMenuItem
+                      key={`mobile-${item.name}`}
+                      asChild
+                      className="lg:hidden"
+                    >
+                      <Link
+                        to={item.href}
+                        className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mb-1 font-medium"
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <span className="text-secondary mr-3">{item.icon}</span>
+                        <span>{item.name}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+
+                  <DropdownMenuSeparator className="lg:hidden bg-gray-700/60 mx-2 my-2" />
+                  <DropdownMenuItem asChild className="sm:hidden">
+                    <Button
+                      className="w-full bg-secondary hover:bg-secondary/80 text-white rounded-lg mt-2 justify-center text-sm font-semibold shadow-lg mx-2 mb-1"
+                      onClick={() => {
+                        navigate("/signup");
+                        setMenuOpen(false);
+                      }}
+                    >
+                      Sign Up
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="sm:hidden">
+                    <Button
+                      variant="outline"
+                      className="w-full rounded-lg mt-2 justify-center text-secondary border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 text-sm font-semibold mx-2 mb-1"
+                      onClick={() => {
+                        navigate("/login");
+                        setMenuOpen(false);
+                      }}
+                    >
+                      Login
+                    </Button>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="bg-gray-700/60 mx-2 my-2" />
+                  <DropdownMenuItem asChild>
                     <Link
-                      to={item.href}
-                      className="flex items-center cursor-pointer text-sm"
+                      to="/contactus"
+                      className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1 font-medium"
                       onClick={() => {
                         window.scrollTo(0, 0);
                         setMenuOpen(false);
                       }}
                     >
-                      {item.icon}
-                      <span className="ml-2">{item.name}</span>
+                      <MessageSquare className="h-4 w-4 mr-3 text-secondary" />
+                      <span>Contact Us</span>
                     </Link>
                   </DropdownMenuItem>
-                ))}
-
-                <DropdownMenuSeparator className="lg:hidden bg-gray-700" />
-                <DropdownMenuItem asChild className="sm:hidden">
-                  <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full mt-2 justify-center text-sm"
-                    onClick={() => {
-                      navigate("/signup");
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Sign Up
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="sm:hidden">
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full mt-2 justify-center text-orange-500 border border-orange-500 hover:bg-gray-700 text-sm"
-                    onClick={() => {
-                      navigate("/login");
-                      setMenuOpen(false);
-                    }}
-                  >
-                    Login
-                  </Button>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator className="bg-gray-700" />
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/contactus"
-                    className="flex items-center cursor-pointer text-sm"
-                    onClick={() => {
-                      window.scrollTo(0, 0);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Contact Us
-                  </Link>
-                </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </>

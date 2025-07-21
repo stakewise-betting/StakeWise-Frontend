@@ -414,20 +414,29 @@ export const EventForm: React.FC<EventFormProps> = ({
                   onValueChange={handleCategoryChange}
                   required
                 >
-                  <SelectTrigger
-                    className={clsx(
-                      inputBaseClasses,
-                      "text-left justify-start"
-                    )}
-                  >
-                    <SelectValue placeholder="Select event category..." />
+                  <SelectTrigger className="w-full bg-[#1C1C27] border border-gray-600/70 text-white placeholder:text-gray-400 rounded-md shadow-sm focus:ring-1 focus:ring-offset-0 focus:ring-secondary/50 focus:border-secondary/70 text-sm px-3 py-2 transition-colors duration-200 hover:border-gray-500/70">
+                    <SelectValue
+                      placeholder="Select event category..."
+                      className="text-white"
+                    />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border border-gray-600/70 text-dark-primary">
+                  <SelectContent
+                    className="relative z-[99999] min-w-[8rem] overflow-hidden rounded-md border bg-[#1C1C27] border-gray-600/70 text-white shadow-2xl"
+                    style={{
+                      backgroundColor: "#1C1C27",
+                      borderColor: "rgba(156, 163, 175, 0.7)",
+                      zIndex: 99999,
+                      color: "white",
+                    }}
+                    sideOffset={4}
+                    position="popper"
+                  >
                     {eventCategories.map((cat) => (
                       <SelectItem
                         key={cat}
                         value={cat}
-                        className="focus:bg-secondary/15 focus:text-secondary hover:bg-secondary/10 cursor-pointer"
+                        className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-secondary/20 focus:text-secondary data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-white hover:bg-secondary/10 hover:text-secondary"
+                        style={{ color: "white" }}
                       >
                         {cat}
                       </SelectItem>

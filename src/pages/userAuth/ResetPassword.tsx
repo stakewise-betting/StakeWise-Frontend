@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mail, Shield, Lock } from "lucide-react";
 
 const ResetPassword = () => {
   const appContext = useContext(AppContext);
@@ -114,20 +115,45 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="bg-[#1C1C27] border-none w-full max-w-md shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)] rounded-lg p-6">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-semibold">
-            Reset Password
-          </CardTitle>
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-gradient-to-br from-[#1C1C27] to-[#252538] border border-gray-700/60 shadow-2xl backdrop-blur-sm rounded-2xl p-6">
+        <CardHeader className="text-center space-y-4">
+          <div className="relative mx-auto">
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-secondary/20 to-secondary/10 border border-secondary/30 shadow-lg w-fit">
+              {!isEmailSent ? (
+                <Mail className="h-8 w-8 text-secondary" />
+              ) : !isOtpSubmitted ? (
+                <Shield className="h-8 w-8 text-secondary" />
+              ) : (
+                <Lock className="h-8 w-8 text-secondary" />
+              )}
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full animate-pulse"></div>
+          </div>
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              {!isEmailSent
+                ? "Reset Password"
+                : !isOtpSubmitted
+                ? "Verify Code"
+                : "New Password"}
+            </CardTitle>
+            <p className="text-slate-400 leading-relaxed">
+              {!isEmailSent
+                ? "Enter your email to receive a reset code"
+                : !isOtpSubmitted
+                ? "Enter the 6-digit code sent to your email"
+                : "Create your new secure password"}
+            </p>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6">
           {!isEmailSent ? (
-            <form onSubmit={onSubmitEmail} className="space-y-4">
+            <form onSubmit={onSubmitEmail} className="space-y-6">
               <input
-                className="w-full border-none p-3 bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full p-4 bg-gray-800/40 border border-gray-600/50 rounded-xl text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-transparent hover:border-gray-500/60 transition-all duration-300"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,21 +161,14 @@ const ResetPassword = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full py-3 bg-blue-500 text-white rounded-lg transition ${
-                  isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-600"
-                }`}
+                className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl hover:shadow-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               >
-                {isSubmitting ? "Sending OTP..." : "Send OTP"}
+                {isSubmitting ? "Sending OTP..." : "Send Reset Code"}
               </Button>
             </form>
           ) : !isOtpSubmitted ? (
-            <form onSubmit={onSubmitOtp} className="space-y-4">
-              <div
-                className="flex justify-center space-x-2 text-black"
-                onPaste={handlePaste}
-              >
+            <form onSubmit={onSubmitOtp} className="space-y-6">
+              <div className="flex justify-center gap-3" onPaste={handlePaste}>
                 {Array(6)
                   .fill(0)
                   .map((_, i) => (
@@ -160,41 +179,34 @@ const ResetPassword = () => {
                       onKeyDown={(e) => handleKeyDown(e, i)}
                       type="text"
                       maxLength={1}
-                      className="w-10 h-10 text-center text-lg font-semibold border rounded-md"
+                      className="w-14 h-14 text-center text-xl font-bold bg-gray-800/40 border border-gray-600/50 text-white placeholder:text-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary/50 focus:border-secondary/70 transition-all duration-300 hover:border-gray-500/60 hover:bg-gray-800/60"
                     />
                   ))}
               </div>
               <Button
                 type="submit"
-                className={`w-full py-3 bg-blue-500 text-white rounded-lg transition ${
-                  isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-600"
-                }`}
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl hover:shadow-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               >
-                {isSubmitting ? "Verifying OTP..." : "Verify OTP"}
+                {isSubmitting ? "Verifying..." : "Verify Code"}
               </Button>
             </form>
           ) : (
-            <form onSubmit={onSubmitNewPassword} className="space-y-4">
+            <form onSubmit={onSubmitNewPassword} className="space-y-6">
               <input
                 type="password"
-                placeholder="New password"
+                placeholder="Enter your new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="w-full border-none p-3 bg-[#333447] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full p-4 bg-gray-800/40 border border-gray-600/50 rounded-xl text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-transparent hover:border-gray-500/60 transition-all duration-300"
               />
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full py-3 bg-blue-500 text-white rounded-lg transition ${
-                  isSubmitting
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-600"
-                }`}
+                className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white font-semibold py-4 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl hover:shadow-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               >
-                {isSubmitting ? "Resetting Password..." : "Reset Password"}
+                {isSubmitting ? "Updating Password..." : "Reset Password"}
               </Button>
             </form>
           )}

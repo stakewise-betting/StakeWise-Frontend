@@ -96,142 +96,171 @@ export const NewsDisplayPage: React.FC<NewsDisplayPageProps> = ({
   };
 
   return (
-    <div className="bg-primary min-h-screen py-10 lg:mx-24 md:mx-16 mx-8 text-dark-primary">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-[#1C1C27] via-[#1E1E2E] to-[#1C1C27] py-10 lg:mx-24 md:mx-16 mx-8">
+      {/* Header Section */}
       <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2 text-dark-primary flex items-center gap-3">
-          News & Updates
-        </h2>
-        <p className="text-dark-secondary max-w-2xl">
-          Latest news, announcements, and updates from our team.
-        </p>
+        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-8 shadow-xl border border-[#333447]">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent flex items-center gap-3">
+            <Newspaper className="text-[#E27625]" size={40} />
+            News & Updates
+          </h2>
+          <p className="text-[#A1A1AA] text-lg max-w-2xl">
+            Stay updated with the latest news, announcements, and developments
+            from our betting platform.
+          </p>
+        </div>
       </div>
 
       {/* Category Filter */}
-      <div className="mt-6 mb-6 flex flex-wrap gap-2">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() =>
-              setSelectedCategory(category === "All" ? null : category)
-            }
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all
-                            ${
-                              selectedCategory === category ||
-                              (category === "All" && !selectedCategory)
-                                ? "bg-secondary text-white shadow-md"
-                                : "bg-gray-800/40 text-dark-secondary hover:bg-gray-700/60"
-                            }
-                        `}
-          >
-            {category}
-          </button>
-        ))}
+      <div className="mt-6 mb-8">
+        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
+            Categories
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() =>
+                  setSelectedCategory(category === "All" ? null : category)
+                }
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
+                  selectedCategory === category ||
+                  (category === "All" && !selectedCategory)
+                    ? "bg-gradient-to-r from-[#E27625] to-[#F59E0B] text-white shadow-lg shadow-[#E27625]/30 scale-105"
+                    : "bg-gradient-to-r from-[#333447] to-[#404153] text-[#A1A1AA] hover:from-[#404153] hover:to-[#525266] hover:text-white hover:scale-105"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-10 h-10 text-secondary animate-spin" />
-          <span className="ml-3 text-dark-secondary">
-            Loading news articles...
-          </span>
+        <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-12 shadow-xl border border-[#333447]">
+          <div className="flex justify-center items-center">
+            <div className="relative">
+              <Loader2 className="w-12 h-12 text-[#E27625] animate-spin" />
+              <div className="absolute inset-0 w-12 h-12 border-2 border-[#E27625]/20 rounded-full animate-pulse"></div>
+            </div>
+            <span className="ml-4 text-[#A1A1AA] text-lg">
+              Loading news articles...
+            </span>
+          </div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-900/20 border border-red-500/30 text-red-500 p-4 rounded-lg flex items-start gap-3 max-w-2xl mx-auto">
-          <AlertCircle className="w-5 h-5 mt-0.5" />
-          <div>
-            <h3 className="font-medium mb-1">Error Loading News</h3>
-            <p className="text-sm">{error}</p>
+        <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-8 shadow-xl border border-[#EF4444]/30">
+          <div className="bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border border-[#EF4444]/30 text-[#FCA5A5] p-6 rounded-xl flex items-start gap-4 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-[#EF4444] to-[#DC2626] rounded-full p-2">
+              <AlertCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2 text-lg text-[#FCA5A5]">
+                Error Loading News
+              </h3>
+              <p className="text-[#A1A1AA]">{error}</p>
+            </div>
           </div>
         </div>
       )}
 
       {/* No News State */}
       {!loading && !error && filteredNews.length === 0 && (
-        <div className="text-center py-16">
-          <div className="inline-flex p-3 rounded-full bg-gray-800/40 mb-4">
-            <Newspaper className="w-8 h-8 text-dark-secondary" />
+        <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-16 shadow-xl border border-[#333447]">
+          <div className="text-center">
+            <div className="bg-gradient-to-r from-[#333447] to-[#404153] rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <Newspaper className="w-10 h-10 text-[#A1A1AA]" />
+            </div>
+            <h3 className="text-2xl font-semibold text-white mb-3">
+              No News Articles Yet
+            </h3>
+            <p className="text-[#A1A1AA] max-w-md mx-auto text-lg">
+              {selectedCategory
+                ? `There are no articles in the "${selectedCategory}" category.`
+                : "There are no news articles to display yet. Check back later for updates."}
+            </p>
           </div>
-          <h3 className="text-xl font-medium text-dark-primary mb-2">
-            No News Articles Yet
-          </h3>
-          <p className="text-dark-secondary max-w-md mx-auto">
-            {selectedCategory
-              ? `There are no articles in the "${selectedCategory}" category.`
-              : "There are no news articles to display yet. Check back later for updates."}
-          </p>
         </div>
       )}
 
       {/* News Grid */}
       {!loading && !error && filteredNews.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredNews.map((item) => (
-            <Card
-              key={item._id}
-              className="bg-card text-dark-primary rounded-xl shadow-lg border border-gray-700/60 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col"
-            >
-              {/* Image Section */}
-              <div className="relative w-full h-48 overflow-hidden">
-                {item.newsId ? (
-                  <img
-                    src={`${backendBaseUrl}/api/news/${item.newsId}/image`}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback if image fails to load
-                      const target = e.target as HTMLImageElement;
-                      if (!target.src.includes("/api/placeholder/400/300")) {
-                        target.src = "/api/placeholder/400/300";
-                        target.alt = "Placeholder image";
-                      }
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-800/40 flex items-center justify-center">
-                    <ImageIcon className="w-12 h-12 text-dark-secondary/50" />
+        <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-8 shadow-xl border border-[#333447]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredNews.map((item) => (
+              <Card
+                key={item._id}
+                className="bg-gradient-to-br from-[#1C1C27] to-[#252538] hover:from-[#252538] hover:to-[#2A2A3E] text-white rounded-xl shadow-xl border border-[#404153] overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group hover:scale-105 hover:border-[#E27625]/30"
+              >
+                {/* Image Section */}
+                <div className="relative w-full h-48 overflow-hidden">
+                  {item.newsId ? (
+                    <img
+                      src={`${backendBaseUrl}/api/news/${item.newsId}/image`}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes("/api/placeholder/400/300")) {
+                          target.src = "/api/placeholder/400/300";
+                          target.alt = "Placeholder image";
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#333447] to-[#404153] flex items-center justify-center">
+                      <ImageIcon className="w-12 h-12 text-[#A1A1AA]/50" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute top-3 left-3">
+                    <span className="px-3 py-1 bg-gradient-to-r from-[#E27625] to-[#F59E0B] text-white text-xs font-semibold rounded-full shadow-lg">
+                      {item.category}
+                    </span>
                   </div>
-                )}
-                <div className="absolute top-3 left-3">
-                  <span className="px-2.5 py-0.5 bg-secondary/90 text-white text-xs font-medium rounded-full">
-                    {item.category}
+                </div>
+
+                <CardHeader className="px-5 pt-5 pb-3">
+                  <CardTitle className="text-lg font-bold text-white line-clamp-2 group-hover:text-[#E27625] transition-colors duration-300">
+                    {item.title}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-2 text-xs text-[#A1A1AA] mt-2">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      {formatDate(item.publishDate)}
+                    </div>
+                    <span className="mx-1 text-[#525266]">•</span>
+                    <div className="flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-[#10B981]" />
+                      {item.author}
+                    </div>
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="px-5 py-2 flex-grow">
+                  <div className="text-[#A1A1AA] text-sm line-clamp-3 leading-relaxed">
+                    {item.content}
+                  </div>
+                </CardContent>
+
+                <CardFooter className="px-5 py-4 border-t border-[#404153]/50 flex justify-between items-center bg-gradient-to-r from-[#333447]/30 to-[#404153]/30">
+                  <span className="text-xs text-[#6B7280] font-medium">
+                    ID: {item.newsId}
                   </span>
-                </div>
-              </div>
-
-              <CardHeader className="px-4 pt-4 pb-2">
-                <CardTitle className="text-xl font-semibold text-dark-primary">
-                  {item.title}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-xs text-dark-secondary/80">
-                  <Calendar className="w-3.5 h-3.5" />
-                  {formatDate(item.publishDate)}
-                  <span className="mx-1">•</span>
-                  <User className="w-3.5 h-3.5" />
-                  {item.author}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="px-4 py-2 flex-grow">
-                <div className="text-dark-secondary text-sm line-clamp-3">
-                  {item.content}
-                </div>
-              </CardContent>
-
-              <CardFooter className="px-4 py-3 border-t border-gray-700/50 flex justify-between">
-                <span className="text-xs text-dark-secondary/70">
-                  News ID: {item.newsId}
-                </span>
-                <button className="text-sm text-secondary hover:text-secondary/80 font-medium">
-                  Read More
-                </button>
-              </CardFooter>
-            </Card>
-          ))}
+                  <button className="text-sm bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white px-3 py-1.5 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                    Read More
+                  </button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
     </div>

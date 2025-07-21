@@ -106,25 +106,30 @@ export default function EmailVerify() {
   }, [isLoggedin, userData]); // Redirect to home if the user is already logged in and verified
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <Card className="w-full border-none max-w-md mx-auto shadow-[0px_40px_80px_-20px_rgba(0,0,0,0.6)] rounded-2xl p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] flex items-center justify-center p-4">
+      <Card className="w-full border-none max-w-md mx-auto bg-gradient-to-br from-[#1C1C27] to-[#252538] border border-gray-700/60 shadow-2xl backdrop-blur-sm rounded-2xl p-6">
         <CardHeader>
-          <div className="flex flex-col items-center space-y-2">
-            <div className="p-2 rounded-full bg-white">
-              <Mail className="h-6 w-6 text-black" />
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-secondary/20 to-secondary/10 border border-secondary/30 shadow-lg">
+                <Mail className="h-8 w-8 text-secondary" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full animate-pulse"></div>
             </div>
-            <CardTitle className="text-2xl text-center">
-              Verify Your Email
-            </CardTitle>
-            <CardDescription className="text-center">
-              Enter the 6-digit code sent to your email
-            </CardDescription>
+            <div className="space-y-2 text-center">
+              <CardTitle className="text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Verify Your Email
+              </CardTitle>
+              <CardDescription className="text-slate-400 leading-relaxed">
+                Enter the 6-digit code sent to your email address
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
         <form onSubmit={onSubmitHandler}>
-          <CardContent>
+          <CardContent className="px-6">
             <div
-              className="flex justify-center gap-2 my-6 text-black"
+              className="flex justify-center gap-3 my-8"
               onPaste={handlePaste}
             >
               {Array(6)
@@ -140,29 +145,30 @@ export default function EmailVerify() {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={1}
-                    className="w-12 h-12 text-center text-lg font-medium"
+                    className="w-14 h-14 text-center text-xl font-bold bg-gray-800/40 border border-gray-600/50 text-white placeholder:text-gray-400 rounded-xl shadow-sm focus:ring-2 focus:ring-secondary/50 focus:border-secondary/70 transition-all duration-300 hover:border-gray-500/60 hover:bg-gray-800/60"
                     aria-label={`Digit ${i + 1} of verification code`}
                   />
                 ))}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
+          <CardFooter className="flex flex-col space-y-4 px-6">
             <Button
               type="submit"
-              className="w-full"
+              className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl hover:shadow-secondary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
               disabled={verificationCode.join("").length !== 6}
             >
-              <ShieldCheck className="mr-2 h-4 w-4" />
+              <ShieldCheck className="mr-2 h-5 w-5" />
               Verify Email
             </Button>
             <Button
-              variant="link"
+              variant="ghost"
               type="button"
-              className="text-sm text-white"
+              className="text-sm text-slate-400 hover:text-white bg-gray-800/20 hover:bg-gray-700/40 border border-gray-600/30 hover:border-gray-500/50 rounded-xl py-2 transition-all duration-300"
               // onClick={handleResendOtp}
             >
               Didn't receive a code?{" "}
-              <ArrowRight className="ml-1 h-3 w-3 inline" /> Resend
+              <ArrowRight className="ml-2 h-4 w-4 inline transition-transform group-hover:translate-x-1" />
+              Resend
             </Button>
           </CardFooter>
         </form>

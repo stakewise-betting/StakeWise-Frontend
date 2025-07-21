@@ -190,34 +190,36 @@ const ResultsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15]">
       {/* Hero Section with Background Image */}
-      <div
-        className="relative h-[250px] w-full overflow-hidden bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBackgroundImage})` }}
-      >
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+      <div className="relative h-[300px] w-full overflow-hidden bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27]">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 to-transparent"></div>
+        </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <div className="mb-4 p-4 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20">
+            <Trophy className="w-12 h-12 text-secondary" />
+          </div>
+          <h1 className="text-5xl font-bold text-white mb-3 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             Betting Results
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl">
-            Explore all completed events and their outcomes. Check final prize
-            pools, and all event details.
+          <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
+            Explore all completed events and their outcomes. Check winners,
+            final prize pools, and comprehensive event details.
           </p>
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="mx-auto max-w-6xl px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 h-5 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search events..."
-              className="w-full rounded-lg bg-[#333447] border-none px-4 py-2 pl-10 text-white placeholder-gray-400 focus:outline-none"
+              className="w-full rounded-xl bg-gray-800/40 border border-gray-600/50 hover:border-gray-500/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 px-4 py-3 pl-12 text-white placeholder:text-slate-400 focus:outline-none transition-all duration-300"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -225,23 +227,41 @@ const ResultsPage: React.FC = () => {
         </div>
 
         {/* Results List */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {loading ? (
-            <div className="text-center p-4 text-white">Loading results...</div>
+            <div className="text-center py-12">
+              <div className="inline-flex items-center px-6 py-3 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                <div className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin mr-3"></div>
+                <span className="text-white font-medium">
+                  Loading results...
+                </span>
+              </div>
+            </div>
           ) : currentEvents.length === 0 ? (
-            <div className="text-center p-4 text-white">No results found.</div>
+            <div className="text-center py-16">
+              <div className="mb-4 p-4 rounded-full bg-gray-800/40 border border-gray-600/50 inline-flex">
+                <Search className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                No Results Found
+              </h3>
+              <p className="text-slate-400">
+                Try adjusting your search terms or check back later for new
+                results.
+              </p>
+            </div>
           ) : (
             currentEvents.map((event, index) => (
               <div
                 key={index}
-                className="rounded-lg bg-[#333447] overflow-hidden border-none"
+                className="rounded-2xl bg-gradient-to-br from-[#1C1C27] to-[#252538] overflow-hidden border border-gray-700/60 shadow-xl hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-300 hover:border-gray-600/70"
               >
                 <div
-                  className="flex items-center justify-between p-4 cursor-pointer"
+                  className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-800/20 transition-colors duration-200"
                   onClick={() => toggleEventExpansion(index)}
                 >
                   <div className="flex items-center">
-                    <div className="h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#1C1C27] border-none flex items-center justify-center">
+                    <div className="h-14 w-14 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-800 border border-gray-600/50 flex items-center justify-center shadow-lg">
                       <img
                         src={
                           event.imageURL ||
@@ -251,12 +271,13 @@ const ResultsPage: React.FC = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="ml-4">
-                      <h3 className="font-semibold text-white text-lg">
+                    <div className="ml-6">
+                      <h3 className="font-bold text-white text-xl mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                         {event.name}
                       </h3>
-                      <div className="flex items-center text-sm text-gray-400">
-                        <span className="mr-2">
+                      <div className="flex items-center text-sm text-slate-400">
+                        <CalendarDays className="w-4 h-4 mr-2" />
+                        <span className="mr-4">
                           {new Date(
                             parseInt(event.startTime) * 1000
                           ).toLocaleDateString()}{" "}
@@ -265,27 +286,37 @@ const ResultsPage: React.FC = () => {
                             parseInt(event.endTime) * 1000
                           ).toLocaleDateString()}
                         </span>
+                        <Coins className="w-4 h-4 mr-2 text-secondary" />
+                        <span className="text-secondary font-medium">
+                          {event.prizePool
+                            ? `${Web3.utils.fromWei(
+                                event.prizePool,
+                                "ether"
+                              )} ETH`
+                            : "0 ETH"}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium 
-                      ${
+                      className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors duration-200 ${
                         event.name.toLowerCase().includes("crypto")
-                          ? "bg-purple-600 text-white"
+                          ? "bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30"
                           : event.name.toLowerCase().includes("sports")
-                          ? "bg-blue-600 text-white"
-                          : "bg-green-600 text-white"
+                          ? "bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
+                          : event.name.toLowerCase().includes("esports")
+                          ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30"
+                          : "bg-secondary/20 text-secondary border-secondary/30 hover:bg-secondary/30"
                       }`}
                     >
                       {determineCategory(event.name)}
                     </span>
-                    <button className="ml-4 text-gray-400">
+                    <button className="p-2 rounded-lg hover:bg-gray-700/50 transition-colors duration-200 text-slate-400 hover:text-white">
                       {expandedEvent === index ? (
-                        <ChevronUp className="h-5 w-5" />
+                        <ChevronUp className="h-6 w-6" />
                       ) : (
-                        <ChevronDown className="h-5 w-5" />
+                        <ChevronDown className="h-6 w-6" />
                       )}
                     </button>
                   </div>
@@ -293,112 +324,142 @@ const ResultsPage: React.FC = () => {
 
                 {/* Expanded Content */}
                 {expandedEvent === index && (
-                  <div className="p-4 border-t border-[#353846] bg-[#1e2233] text-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <div className="flex items-center mb-3 text-gray-300">
-                          <h4 className="font-semibold text-base text-white">
-                            Event Details
-                          </h4>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex items-start">
-                            <CalendarDays className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-gray-400 w-24 flex-shrink-0">
-                              Start Date
-                            </span>
-                            <span className="text-white ml-2 break-words">
-                              {new Date(
-                                parseInt(event.startTime) * 1000
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                              ,{" "}
-                              {new Date(
-                                parseInt(event.startTime) * 1000
-                              ).toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })}
-                            </span>
+                  <div className="px-6 pb-6 border-t border-gray-700/50 bg-gradient-to-br from-[#0F0F15] to-[#1C1C27]">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
+                      <div className="space-y-6">
+                        <div>
+                          <div className="flex items-center mb-4">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-3">
+                              <CalendarDays className="w-5 h-5 text-secondary" />
+                            </div>
+                            <h4 className="font-bold text-xl text-white">
+                              Event Details
+                            </h4>
                           </div>
+                          <div className="space-y-4">
+                            <div className="flex items-start p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <CalendarDays className="w-5 h-5 mr-3 text-secondary mt-1 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                  Start Date
+                                </span>
+                                <span className="text-white font-semibold text-base break-words">
+                                  {new Date(
+                                    parseInt(event.startTime) * 1000
+                                  ).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })}
+                                  {" at "}
+                                  {new Date(
+                                    parseInt(event.startTime) * 1000
+                                  ).toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </span>
+                              </div>
+                            </div>
 
-                          <div className="flex items-start">
-                            <Clock className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
-                            <span className="text-gray-400 w-24 flex-shrink-0">
-                              End Date
-                            </span>
-                            <span className="text-white ml-2 break-words">
-                              {new Date(
-                                parseInt(event.endTime) * 1000
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                              ,{" "}
-                              {new Date(
-                                parseInt(event.endTime) * 1000
-                              ).toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <Tag className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-400 w-24 flex-shrink-0">
-                              Event Type
-                            </span>
-                            <span className="text-white ml-2">
-                              {determineCategory(event.name)}
-                            </span>
+                            <div className="flex items-start p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <Clock className="w-5 h-5 mr-3 text-secondary mt-1 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                  End Date
+                                </span>
+                                <span className="text-white font-semibold text-base break-words">
+                                  {new Date(
+                                    parseInt(event.endTime) * 1000
+                                  ).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })}
+                                  {" at "}
+                                  {new Date(
+                                    parseInt(event.endTime) * 1000
+                                  ).toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <Tag className="w-5 h-5 mr-3 text-secondary flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                  Category
+                                </span>
+                                <span className="text-white font-semibold text-base">
+                                  {determineCategory(event.name)}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div>
-                        <div className="flex items-center mb-3 text-gray-300">
-                          <h4 className="font-semibold text-base text-white">
-                            Description
-                          </h4>
-                        </div>
-                        <p className="text-gray-300 mb-4 text-sm">
-                          {event.description || "No description provided."}
-                        </p>
-                        <div className="flex items-center mb-3 text-gray-300">
-                          <h4 className="font-semibold text-base text-white">
-                            Results
-                          </h4>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex items-center">
-                            <Trophy className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-400 w-24 flex-shrink-0">
-                              Winner
-                            </span>
-                            <span className="text-green-400 font-semibold ml-2">
-                              {event.winningOption || "N/A"}
-                            </span>
+                      <div className="space-y-6">
+                        <div>
+                          <div className="flex items-center mb-4">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-3">
+                              <Trophy className="w-5 h-5 text-secondary" />
+                            </div>
+                            <h4 className="font-bold text-xl text-white">
+                              Results
+                            </h4>
                           </div>
+                          <div className="space-y-4">
+                            <div className="flex items-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30">
+                              <Trophy className="w-5 h-5 mr-3 text-green-400 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                  Winner
+                                </span>
+                                <span className="text-green-400 font-bold text-lg">
+                                  {event.winningOption || "N/A"}
+                                </span>
+                              </div>
+                            </div>
 
-                          <div className="flex items-center">
-                            <Coins className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-400 w-24 flex-shrink-0">
-                              Prize Pool
-                            </span>
-                            <span className="text-green-400 ml-2">
-                              {event.prizePool
-                                ? `${Web3.utils.fromWei(
-                                    event.prizePool,
-                                    "ether"
-                                  )} ETH`
-                                : "0 ETH"}
-                            </span>
+                            <div className="flex items-center p-4 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/30">
+                              <Coins className="w-5 h-5 mr-3 text-secondary flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                  Prize Pool
+                                </span>
+                                <span className="text-secondary font-bold text-lg">
+                                  {event.prizePool
+                                    ? `${Web3.utils.fromWei(
+                                        event.prizePool,
+                                        "ether"
+                                      )} ETH`
+                                    : "0 ETH"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center mb-4">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 mr-3">
+                              <Tag className="w-5 h-5 text-blue-400" />
+                            </div>
+                            <h4 className="font-bold text-xl text-white">
+                              Description
+                            </h4>
+                          </div>
+                          <div className="p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                            <p className="text-slate-300 leading-relaxed">
+                              {event.description ||
+                                "No description provided for this event."}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -412,50 +473,54 @@ const ResultsPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-center gap-1">
+          <div className="mt-12 flex items-center justify-center gap-2">
             <button
-              className="rounded px-3 py-1 text-white bg-[#2a2e3e] hover:bg-[#3a3e4e]"
+              className="rounded-xl px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Previous</span>
             </button>
 
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              // Logic to show a window of page numbers around current page
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = currentPage - 2 + i;
-              }
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                // Logic to show a window of page numbers around current page
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
 
-              return (
-                <button
-                  key={pageNum}
-                  className={`rounded w-8 h-8 flex items-center justify-center ${
-                    currentPage === pageNum
-                      ? "bg-[#f97316] text-white"
-                      : "bg-[#2a2e3e] text-gray-400 hover:bg-[#3a3e4e]"
-                  }`}
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={pageNum}
+                    className={`rounded-xl w-10 h-10 flex items-center justify-center font-semibold transition-all duration-300 ${
+                      currentPage === pageNum
+                        ? "bg-gradient-to-r from-secondary to-secondary/80 text-white shadow-lg hover:shadow-xl hover:shadow-secondary/30 transform hover:scale-105"
+                        : "bg-gray-800/40 border border-gray-600/50 text-slate-400 hover:bg-gray-700/50 hover:border-gray-500/60 hover:text-white"
+                    }`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
 
             <button
-              className="rounded px-3 py-1 text-white bg-[#2a2e3e] hover:bg-[#3a3e4e]"
+              className="rounded-xl px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               onClick={() =>
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
             >
+              <span className="hidden sm:inline">Next</span>
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
