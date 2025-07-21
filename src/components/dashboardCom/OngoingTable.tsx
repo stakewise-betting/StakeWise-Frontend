@@ -7,12 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Clock,
-  RefreshCw,
-  Activity,
-  AlertCircle,
-} from "lucide-react";
+import { Clock, RefreshCw, Activity, AlertCircle } from "lucide-react";
 import { useUserBets, UserBet } from "@/hooks/useUserBets";
 import {
   Card,

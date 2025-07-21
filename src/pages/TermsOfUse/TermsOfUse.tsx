@@ -11,17 +11,13 @@ export default function TermsTerms() {
           title="Introduction"
           content="Welcome to StakeWise, an innovative blockchain-based betting platform developed by Team Paradox. By accessing or using the platform, you agree to comply with these Terms of Use (the “Terms”). If you do not agree with these Terms, you must not access or use StakeWise."
         />
-        
+
         <TermsSection
           title="Acceptance of terms"
           content="By creating an account, clicking “I Agree”, or using the platform, you confirm your acceptance of these Terms, including any additional rules or policies referenced herein."
         />
 
-
-        <TermsSection
-          title="Eligibility"
-          content="To use StakeWise, you must:"
-        >
+        <TermsSection title="Eligibility" content="To use StakeWise, you must:">
           <TermsList
             items={[
               "Be of legal gambling age in your jurisdiction (18 or older, depending on local laws).",
@@ -58,11 +54,8 @@ export default function TermsTerms() {
           />
         </TermsSection>
 
-        <TermsSection
-          title="Restricted Activities"
-          content="You may not:"
-        >
-            <TermsList
+        <TermsSection title="Restricted Activities" content="You may not:">
+          <TermsList
             items={[
               "Use the platform to conduct unauthorized or fraudulent transactions.",
               "Circumvent geographical restrictions via VPNs or other anonymization tools",
@@ -97,7 +90,7 @@ export default function TermsTerms() {
           title="Intellectual Property"
           content="All content on the platform, including software, logos, and trademarks, is owned or licensed by StakeWise. Users may not reproduce or distribute any proprietary content without explicit permission."
         />
-        
+
         <TermsSection
           title="Assumption of Risks"
           content="Using StakeWise involves inherent risks, including:"
@@ -139,7 +132,6 @@ export default function TermsTerms() {
           title="Governing Law"
           content="These Terms are governed by the laws of [Insert Jurisdiction], excluding its conflict of laws principles."
         />
-        
       </article>
     </main>
   );

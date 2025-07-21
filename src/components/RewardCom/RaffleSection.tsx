@@ -1,6 +1,14 @@
 //components/RewardCom/RaffleSection.tsx
-import { useState, useEffect, useContext } from "react"
-import { TicketIcon, ClockIcon, UsersIcon, CoinsIcon, CheckCircleIcon, Loader2Icon, WalletIcon } from "lucide-react"
+import { useState, useEffect, useContext } from "react";
+import {
+  TicketIcon,
+  ClockIcon,
+  UsersIcon,
+  CoinsIcon,
+  CheckCircleIcon,
+  Loader2Icon,
+  WalletIcon,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -8,162 +16,167 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { ConfirmationModal } from "@/components/RewardCom/Confirmation-model"
-import { AppContext } from "@/context/AppContext"
-import { useWallet } from "@/context/WalletContext" // Import the wallet context
-import raffleBlockchainService, { RaffleData } from "@/services/raffleBlockchainService"
-import { toast } from "react-toastify"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ConfirmationModal } from "@/components/RewardCom/Confirmation-model";
+import { AppContext } from "@/context/AppContext";
+import { useWallet } from "@/context/WalletContext"; // Import the wallet context
+import raffleBlockchainService, {
+  RaffleData,
+} from "@/services/raffleBlockchainService";
+import { toast } from "react-toastify";
 
 const RaffleSection = () => {
   const { isLoggedin } = useContext(AppContext) || {};
-  const { isConnected, walletAddress, connectWallet, isConnecting } = useWallet(); // Use the wallet context
-  
-  const [selectedRaffle, setSelectedRaffle] = useState<RaffleData | null>(null)
-  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false)
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false)
-  const [ticketQuantity, setTicketQuantity] = useState(1)
-  const [enrolledRaffles, setEnrolledRaffles] = useState<number[]>([])
-  const [raffles, setRaffles] = useState<RaffleData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isProcessing, setIsProcessing] = useState(false)
-  
+  const { isConnected, walletAddress, connectWallet, isConnecting } =
+    useWallet(); // Use the wallet context
+
+  const [selectedRaffle, setSelectedRaffle] = useState<RaffleData | null>(null);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [ticketQuantity, setTicketQuantity] = useState(1);
+  const [enrolledRaffles, setEnrolledRaffles] = useState<number[]>([]);
+  const [raffles, setRaffles] = useState<RaffleData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   // Fetch active raffles and user's enrolled raffles
   useEffect(() => {
     const fetchRaffles = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         // Initialize blockchain service
-        await raffleBlockchainService.init()
-        
+        await raffleBlockchainService.init();
+
         // Fetch active raffles from blockchain
-        const activeRaffles = await raffleBlockchainService.getActiveRaffles()
-        
+        const activeRaffles = await raffleBlockchainService.getActiveRaffles();
+
         // Sort raffles by end time (closest to ending first)
-        activeRaffles.sort((a, b) => a.endTime - b.endTime)
-        
-        setRaffles(activeRaffles)
-        
+        activeRaffles.sort((a, b) => a.endTime - b.endTime);
+
+        setRaffles(activeRaffles);
+
         // If user is logged in and wallet is connected, check which raffles they've entered
         if (isLoggedin && isConnected && walletAddress) {
-          const userEnrolledRaffles: number[] = []
-          
+          const userEnrolledRaffles: number[] = [];
+
           for (const raffle of activeRaffles) {
-            const userTickets = await raffleBlockchainService.getUserTickets(raffle.raffleId)
+            const userTickets = await raffleBlockchainService.getUserTickets(
+              raffle.raffleId
+            );
             if (userTickets.length > 0) {
-              userEnrolledRaffles.push(raffle.raffleId)
+              userEnrolledRaffles.push(raffle.raffleId);
             }
           }
-          
-          setEnrolledRaffles(userEnrolledRaffles)
+
+          setEnrolledRaffles(userEnrolledRaffles);
         }
       } catch (error) {
-        console.error("Error fetching raffles:", error)
-        toast.error("Failed to load raffles. Please try again later.")
+        console.error("Error fetching raffles:", error);
+        toast.error("Failed to load raffles. Please try again later.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    
-    fetchRaffles()
-  }, [isLoggedin, isConnected, walletAddress]) // Added wallet connection states to dependencies
+    };
+
+    fetchRaffles();
+  }, [isLoggedin, isConnected, walletAddress]); // Added wallet connection states to dependencies
 
   const handleBuyTicket = async (raffle: RaffleData) => {
     if (!isLoggedin) {
-      toast.error("Please log in to purchase tickets")
-      return
+      toast.error("Please log in to purchase tickets");
+      return;
     }
-    
+
     if (!isConnected || !walletAddress) {
       try {
         // Try to connect the wallet first
-        toast.info("Please connect your wallet to continue")
-        await connectWallet()
+        toast.info("Please connect your wallet to continue");
+        await connectWallet();
         // If we reach here, the wallet is connected
       } catch (error) {
-        console.error("Failed to connect wallet:", error)
-        toast.error("Failed to connect wallet. Please try again.")
-        return
+        console.error("Failed to connect wallet:", error);
+        toast.error("Failed to connect wallet. Please try again.");
+        return;
       }
     }
-    
+
     // Once we're sure the wallet is connected, proceed with buying the ticket
     if (isConnected && walletAddress) {
-      setSelectedRaffle(raffle)
-      setIsPurchaseModalOpen(true)
+      setSelectedRaffle(raffle);
+      setIsPurchaseModalOpen(true);
     } else {
-      toast.error("Please connect your wallet to purchase tickets")
+      toast.error("Please connect your wallet to purchase tickets");
     }
-  }
+  };
 
   const handleConfirmPurchase = async () => {
-    if (!selectedRaffle) return
-    
+    if (!selectedRaffle) return;
+
     try {
-      setIsProcessing(true)
-      
+      setIsProcessing(true);
+
       // Buy tickets from blockchain
       const success = await raffleBlockchainService.buyTickets(
         selectedRaffle.raffleId,
         ticketQuantity,
         selectedRaffle.ticketPrice
-      )
-      
+      );
+
       if (success) {
-        setIsPurchaseModalOpen(false)
-        setIsConfirmationModalOpen(true)
-        setEnrolledRaffles([...enrolledRaffles, selectedRaffle.raffleId])
-        
+        setIsPurchaseModalOpen(false);
+        setIsConfirmationModalOpen(true);
+        setEnrolledRaffles([...enrolledRaffles, selectedRaffle.raffleId]);
+
         // Update raffle data to reflect new ticket purchase
-        const updatedRaffles = raffles.map(raffle => {
+        const updatedRaffles = raffles.map((raffle) => {
           if (raffle.raffleId === selectedRaffle.raffleId) {
             return {
               ...raffle,
               totalTicketsSold: raffle.totalTicketsSold + ticketQuantity,
-              participants: (raffle.participants || 0) + 1
-            }
+              participants: (raffle.participants || 0) + 1,
+            };
           }
-          return raffle
-        })
-        
-        setRaffles(updatedRaffles)
+          return raffle;
+        });
+
+        setRaffles(updatedRaffles);
       }
     } catch (error) {
-      console.error("Error purchasing tickets:", error)
-      toast.error("Failed to purchase tickets. Please try again.")
+      console.error("Error purchasing tickets:", error);
+      toast.error("Failed to purchase tickets. Please try again.");
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
-  
+  };
+
   const handleCloseConfirmation = (open: boolean) => {
-    setIsConfirmationModalOpen(open)
-    setSelectedRaffle(null)
-    setTicketQuantity(1)
-  }
-  
-  const isEnrolled = (raffleId: number) => enrolledRaffles.includes(raffleId)
-  
+    setIsConfirmationModalOpen(open);
+    setSelectedRaffle(null);
+    setTicketQuantity(1);
+  };
+
+  const isEnrolled = (raffleId: number) => enrolledRaffles.includes(raffleId);
+
   // Format time left for display
   const formatTimeLeft = (endTime: number) => {
-    return raffleBlockchainService.formatTimeLeft(endTime)
-  }
-  
+    return raffleBlockchainService.formatTimeLeft(endTime);
+  };
+
   // Format currency
   const formatCurrency = (value: string, currency: string = "ETH") => {
-    return `${value} ${currency}`
-  }
+    return `${value} ${currency}`;
+  };
 
   return (
     <section className="py-10">
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl font-bold">Active Raffles</h2>
-        
+
         {/* Add wallet connect button */}
         {isLoggedin && !isConnected && (
-          <Button 
-            onClick={connectWallet} 
+          <Button
+            onClick={connectWallet}
             disabled={isConnecting}
             className="mr-4 bg-[#E27625] hover:bg-[#d46222]"
           >
@@ -180,12 +193,12 @@ const RaffleSection = () => {
             )}
           </Button>
         )}
-        
+
         <button className="px-4 py-2 text-sm bg-transparent border border-[#E27625] text-[#ffffff] hover:bg-[#E27625] rounded-lg transition">
           View All
         </button>
       </div>
-      
+
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <Loader2Icon className="h-12 w-12 text-[#E27625] animate-spin" />
@@ -193,7 +206,9 @@ const RaffleSection = () => {
       ) : raffles.length === 0 ? (
         <div className="text-center py-12 bg-[#333447] rounded-xl">
           <h3 className="text-xl mb-2">No Active Raffles</h3>
-          <p className="text-gray-400">Check back soon for new opportunities!</p>
+          <p className="text-gray-400">
+            Check back soon for new opportunities!
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -229,23 +244,31 @@ const RaffleSection = () => {
                 <div className="bg-[#505279] rounded-lg p-3 mb-4">
                   <div className="text-center">
                     <p className="text-sm text-gray-400">Prize Pool</p>
-                    <p className="text-xl font-bold text-[#00BD58]">{formatCurrency(raffle.prizeAmount, "ETH")}</p>
+                    <p className="text-xl font-bold text-[#00BD58]">
+                      {formatCurrency(raffle.prizeAmount, "ETH")}
+                    </p>
                   </div>
                 </div>
                 <div className="flex justify-between mb-4">
                   <div className="flex items-center">
                     <ClockIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">Ends in {formatTimeLeft(raffle.endTime)}</span>
+                    <span className="text-sm">
+                      Ends in {formatTimeLeft(raffle.endTime)}
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <UsersIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">{raffle.totalTicketsSold} tickets</span>
+                    <span className="text-sm">
+                      {raffle.totalTicketsSold} tickets
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <TicketIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">{formatCurrency(raffle.ticketPrice, "ETH")}</span>
+                    <span className="text-sm">
+                      {formatCurrency(raffle.ticketPrice, "ETH")}
+                    </span>
                   </div>
                   {isEnrolled(raffle.raffleId) ? (
                     <div className="flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg text-white">
@@ -272,8 +295,12 @@ const RaffleSection = () => {
       <Dialog open={isPurchaseModalOpen} onOpenChange={setIsPurchaseModalOpen}>
         <DialogContent className="bg-[#252638] border border-gray-700 text-white max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Buy Raffle Tickets</DialogTitle>
-            <DialogDescription className="text-gray-400">Purchase tickets for {selectedRaffle?.name}</DialogDescription>
+            <DialogTitle className="text-xl font-bold">
+              Buy Raffle Tickets
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Purchase tickets for {selectedRaffle?.name}
+            </DialogDescription>
           </DialogHeader>
 
           {selectedRaffle && (
@@ -288,27 +315,37 @@ const RaffleSection = () => {
                 </div>
                 <div>
                   <h4 className="font-medium">{selectedRaffle.name}</h4>
-                  <p className="text-sm text-gray-400">Prize: {formatCurrency(selectedRaffle.prizeAmount, "ETH")}</p>
+                  <p className="text-sm text-gray-400">
+                    Prize: {formatCurrency(selectedRaffle.prizeAmount, "ETH")}
+                  </p>
                 </div>
               </div>
 
               <div className="bg-[#333447] p-4 rounded-lg">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Ticket Price:</span>
-                  <span className="font-medium">{formatCurrency(selectedRaffle.ticketPrice, "ETH")}</span>
+                  <span className="font-medium">
+                    {formatCurrency(selectedRaffle.ticketPrice, "ETH")}
+                  </span>
                 </div>
                 <div className="flex justify-between mb-4">
                   <span className="text-gray-400">Ends in:</span>
-                  <span className="font-medium">{formatTimeLeft(selectedRaffle.endTime)}</span>
+                  <span className="font-medium">
+                    {formatTimeLeft(selectedRaffle.endTime)}
+                  </span>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-400">Number of Tickets</label>
+                    <label className="text-sm text-gray-400">
+                      Number of Tickets
+                    </label>
                     <div className="flex items-center">
                       <button
                         className="h-8 w-8 flex items-center justify-center bg-[#505279] rounded-l-lg"
-                        onClick={() => setTicketQuantity(Math.max(1, ticketQuantity - 1))}
+                        onClick={() =>
+                          setTicketQuantity(Math.max(1, ticketQuantity - 1))
+                        }
                       >
                         -
                       </button>
@@ -329,13 +366,19 @@ const RaffleSection = () => {
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-400">Subtotal:</span>
                   <span className="font-medium">
-                    {ticketQuantity} × {formatCurrency(selectedRaffle.ticketPrice, "ETH")}
+                    {ticketQuantity} ×{" "}
+                    {formatCurrency(selectedRaffle.ticketPrice, "ETH")}
                   </span>
                 </div>
                 <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
                   <span>Total:</span>
                   <span className="text-[#00BD58]">
-                    {formatCurrency((parseFloat(selectedRaffle.ticketPrice) * ticketQuantity).toString(), "ETH")}
+                    {formatCurrency(
+                      (
+                        parseFloat(selectedRaffle.ticketPrice) * ticketQuantity
+                      ).toString(),
+                      "ETH"
+                    )}
                   </span>
                 </div>
               </div>
@@ -367,7 +410,7 @@ const RaffleSection = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Confirmation Modal */}
       <ConfirmationModal
         open={isConfirmationModalOpen}
@@ -376,7 +419,7 @@ const RaffleSection = () => {
         ticketQuantity={ticketQuantity}
       />
     </section>
-  )
-}
+  );
+};
 
-export default RaffleSection
+export default RaffleSection;
