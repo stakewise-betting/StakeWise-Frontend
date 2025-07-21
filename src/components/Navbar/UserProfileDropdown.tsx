@@ -130,10 +130,8 @@ const UserProfileDropdown: React.FC = () => {
   return (
     <DropdownMenu onOpenChange={setProfileOpen} open={profileOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center space-x-1 rounded-full p-1 hover:bg-gray-700 transition">
-          {" "}
-          {/* Adjusted button style to match My-Nav Bar */}
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold">
+        <button className="flex items-center space-x-1 rounded-full p-0.5 sm:p-1 hover:bg-gray-700 transition">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center text-white font-bold">
             {userData?.picture ? (
               <img
                 key={picture}
@@ -142,7 +140,7 @@ const UserProfileDropdown: React.FC = () => {
                 className="w-full h-full object-cover rounded-full"
               />
             ) : userData?.fname ? (
-              <div className="w-full h-full rounded-full flex items-center justify-center bg-[#b4b11e] text-[#1a1a2e]">
+              <div className="w-full h-full rounded-full flex items-center justify-center bg-[#b4b11e] text-[#1a1a2e] text-xs sm:text-sm">
                 {userData.fname[0].toUpperCase()}
               </div>
             ) : userData?.walletAddress ? (
@@ -152,11 +150,11 @@ const UserProfileDropdown: React.FC = () => {
                 className="w-3/4 h-3/4 object-contain rounded-full"
               />
             ) : (
-              <User className="h-4 w-4" />
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
           </div>
           <ChevronDown
-            className={`h-6 w-6 transition-transform ${
+            className={`h-4 w-4 sm:h-6 sm:w-6 transition-transform ${
               profileOpen ? "rotate-180" : ""
             }`}
           />
@@ -164,12 +162,10 @@ const UserProfileDropdown: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 bg-[#1C1C27] text-white border-gray-700 mt-3"
+        className="w-48 sm:w-56 bg-[#1C1C27] text-white border-gray-700 mt-2 sm:mt-3 mr-2"
       >
-        {" "}
-        {/* Adjusted dropdown style to match My-Nav Bar */}
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => {
             navigate("/profile");
             setProfileOpen(false);
@@ -179,7 +175,7 @@ const UserProfileDropdown: React.FC = () => {
           Profile
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => {
             navigate("/watchlist");
             setProfileOpen(false);
@@ -189,7 +185,7 @@ const UserProfileDropdown: React.FC = () => {
           Watch List
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => {
             navigate("/dashboard");
             setProfileOpen(false);
@@ -198,9 +194,8 @@ const UserProfileDropdown: React.FC = () => {
           <LayoutDashboard className="h-4 w-4 mr-2" />
           Dashboard
         </DropdownMenuItem>
-        {/* Contact Us and Results page links were added by Bhashitha */}
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => {
             navigate("/results");
             setProfileOpen(false);
@@ -210,7 +205,7 @@ const UserProfileDropdown: React.FC = () => {
           Results
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => {
             navigate("/contactus");
             setProfileOpen(false);
@@ -220,26 +215,26 @@ const UserProfileDropdown: React.FC = () => {
           Contact
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-sm"
           onClick={() => toggleDarkMode()}
         >
           <Moon className="h-4 w-4 mr-2" />
           {isDarkMode ? "Light" : "Dark"} Mode
           <div
-            className={`ml-auto w-8 h-4 rounded-full ${
+            className={`ml-auto w-6 h-3 sm:w-8 sm:h-4 rounded-full ${
               isDarkMode ? "bg-orange-500" : "bg-gray-600"
             } relative`}
           >
             <div
               className={`absolute top-0.5 ${
                 isDarkMode ? "right-0.5" : "left-0.5"
-              } w-3 h-3 bg-white rounded-full transition-all`}
+              } w-2 h-2 sm:w-3 sm:h-3 bg-white rounded-full transition-all`}
             ></div>
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-[#8488AC]" />
         <DropdownMenuItem
-          className="flex items-center cursor-pointer text-red-400"
+          className="flex items-center cursor-pointer text-red-400 text-sm"
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />

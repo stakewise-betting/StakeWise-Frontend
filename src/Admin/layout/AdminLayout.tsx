@@ -1,4 +1,5 @@
-// components/admin/layout/AdminLayout.tsx
+// components/admin/layout/AdminLayout.tsx   'Dinith meeka dala thiyenne meka waradi'
+//StakeWise-Frontend/src/Admin/layout/AdminLayout.tsx
 import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 
