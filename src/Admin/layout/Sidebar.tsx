@@ -4,13 +4,11 @@ import {
   LayoutDashboard,
   CalendarDays,
   Users,
-  Settings,
   CircleUserRound,
   Ticket,
   ImageIcon,
   Newspaper,
 } from "lucide-react";
-import clsx from "clsx";
 
 interface SidebarProps {
   activeSection: string;
@@ -30,9 +28,6 @@ const navItems = [
 
   //{ id: "settings", label: "Admin Details", icon: Settings },
 ];
-
-// Icon background accent color
-const iconBg = "bg-secondary/20 text-secondary";
 
 // Animated gradient logo text
 const Logo = () => (

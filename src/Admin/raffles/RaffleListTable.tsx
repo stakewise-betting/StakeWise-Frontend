@@ -8,11 +8,9 @@ import {
   Trophy,
   MoreVertical,
   Trash2,
-  Edit,
   CheckCircle,
   Star,
   Users,
-  CoinsIcon,
 } from "lucide-react";
 import {
   Table,
@@ -68,7 +66,6 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({
   raffles,
   onDeleteRaffle,
   onSelectWinner,
-  web3,
 }) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [winnerConfirmOpen, setWinnerConfirmOpen] = useState(false);

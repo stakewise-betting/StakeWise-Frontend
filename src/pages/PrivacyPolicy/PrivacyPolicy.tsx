@@ -1,4 +1,3 @@
-import * as React from "react";
 import { PrivacyHeader } from "@/components/Privacy/PrivacyHeader";
 import { PolicySection } from "@/components/Privacy/PolicySection";
 import { PolicyList } from "@/components/Privacy/PolicyList";

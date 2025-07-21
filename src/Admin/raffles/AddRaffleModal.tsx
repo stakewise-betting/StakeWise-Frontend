@@ -39,8 +39,6 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
   open,
   onOpenChange,
   onRaffleCreated,
-  contract,
-  web3,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [image, setImage] = useState<File | null>(null);

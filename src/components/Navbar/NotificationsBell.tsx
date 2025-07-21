@@ -237,7 +237,7 @@ const NotificationsBell: React.FC = () => {
       }
     };
 
-    ws.current.onclose = (e) => {
+    ws.current.onclose = () => {
       if (ws.current) {
         ws.current = null;
       } else {

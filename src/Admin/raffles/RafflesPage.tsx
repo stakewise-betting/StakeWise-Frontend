@@ -6,7 +6,6 @@ import AddRaffleModal from "@/Admin/raffles/AddRaffleModal";
 import RaffleListTable from "./RaffleListTable";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, RefreshCw } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface RaffleData {
   raffleId: number;
@@ -38,7 +37,6 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
   web3,
   onRaffleCreated,
   onWinnerSelected,
-  isLoading = false,
 }) => {
   const [raffles, setRaffles] = useState<RaffleData[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -135,12 +133,6 @@ export const RafflesPage: React.FC<RafflesPageProps> = ({
   const handleRaffleCreated = async () => {
     await loadRaffles();
     if (onRaffleCreated) onRaffleCreated();
-  };
-
-  // Handle winner selected
-  const handleWinnerSelected = async () => {
-    await loadRaffles();
-    if (onWinnerSelected) onWinnerSelected();
   };
 
   // Delete raffle

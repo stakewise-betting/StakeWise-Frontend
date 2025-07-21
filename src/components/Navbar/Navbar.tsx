@@ -46,10 +46,6 @@ const Navbar: React.FC = () => {
   const { backendUrl, isLoggedin, setUserData, setIsLoggedin } = appContext;
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [localWalletConnected, setLocalWalletConnected] = useState(false);
-  const [localUsdValue, setLocalUsdValue] = useState("0.00");
-  const [mobileUnreadCount, setMobileUnreadCount] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const connectWalletForMobile = async () => {
     if (window.ethereum) {
@@ -350,10 +346,9 @@ const Navbar: React.FC = () => {
         isOpen={menuOpen}
         closeMenu={closeMobileMenu}
         navLinks={navItems}
-        walletConnected={localWalletConnected}
-        usdValue={localUsdValue}
+        walletConnected={false}
+        usdValue="0.00"
         connectWallet={connectWalletForMobile}
-        unreadCount={mobileUnreadCount}
         handleLogout={handleLogoutForMobile}
         handleVerification={handleVerificationForMobile}
       />

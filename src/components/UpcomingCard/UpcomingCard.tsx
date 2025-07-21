@@ -31,13 +31,9 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
     Number(event.createdAt) * 1000
   ).toLocaleDateString();
   const startTime = new Date(Number(event.startTime) * 1000);
-  const endTime = new Date(Number(event.endTime) * 1000);
+  // const endTime = new Date(Number(event.endTime) * 1000);
   const eventDate = startTime.toLocaleDateString();
   const eventStartTime = startTime.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const eventEndTime = endTime.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });

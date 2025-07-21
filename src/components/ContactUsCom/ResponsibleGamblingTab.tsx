@@ -4,7 +4,6 @@ import {
   Shield,
   Phone,
   FileQuestion,
-  Mail,
   AlertTriangle,
   Clock,
   Users,
@@ -12,7 +11,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import responsibleGamblingService from "@/services/responsibleGamblingApiService";

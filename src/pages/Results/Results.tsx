@@ -27,9 +27,6 @@ const ResultsPage: React.FC = () => {
   );
   const eventsPerPage = 5;
 
-  // Hero section background image
-  const heroBackgroundImage = "/src/assets/images/ResultsBanner.jpg"; // Update this path to your image
-
   // Fetch events from blockchain
   useEffect(() => {
     const fetchEvents = async () => {

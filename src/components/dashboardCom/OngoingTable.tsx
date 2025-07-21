@@ -7,12 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FaClock, FaSync } from "react-icons/fa";
 import {
   Clock,
   RefreshCw,
   Activity,
-  TrendingUp,
   AlertCircle,
 } from "lucide-react";
 import { useUserBets, UserBet } from "@/hooks/useUserBets";

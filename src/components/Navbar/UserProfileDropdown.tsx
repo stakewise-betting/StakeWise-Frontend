@@ -1,6 +1,6 @@
 // src/components/navbar/UserProfileDropdown.tsx
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   ChevronDown,
@@ -58,29 +58,6 @@ const UserProfileDropdown: React.FC = () => {
   }, []);
 
   // --- User Actions ---
-  const handleVerification = async () => {
-    setProfileOpen(false);
-    const loadingToast = toast.loading("Sending verification email...");
-    try {
-      const { data } = await axios.post(
-        `${backendUrl}/api/auth/sendVerifyOtp`,
-        {},
-        { withCredentials: true }
-      );
-      toast.dismiss(loadingToast);
-      if (data.success) {
-        toast.success("Verification email sent! Please check your inbox.");
-        navigate("/email-verify");
-      } else {
-        toast.error(data.message || "Failed to send verification email.");
-      }
-    } catch (error: any) {
-      toast.dismiss(loadingToast);
-      console.error("Verification email sending error:", error);
-      toast.error(error.response?.data?.message || "An error occurred.");
-    }
-  };
-
   const handleLogout = async () => {
     setProfileOpen(false);
     const loadingToast = toast.loading("Logging out...");

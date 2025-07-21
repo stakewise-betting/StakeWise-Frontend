@@ -32,14 +32,6 @@ type EventOddsMap = {
   [eventId: string]: OptionOdds[] | null;
 };
 
-// Create a type for the BettingCardProps based on what you're passing to it
-// This is just for clarity in this file and doesn't change the BettingCard component
-interface BettingCardProps {
-  event: EventData;
-  web3: Web3 | null;
-  // We'll remove the eventOdds from direct passing and include it as odds in the event object
-}
-
 const slides = [
   { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
   { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },

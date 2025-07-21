@@ -1,7 +1,7 @@
 // components/admin/events/EventsPage.tsx
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { EventListTable } from "./EventListTable";
 import { AddEventModal } from "./AddEventModal";
 import Web3 from "web3";

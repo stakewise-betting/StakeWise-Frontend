@@ -1,6 +1,5 @@
 // StakeWise-Frontend/src/Admin/users/UserManagementPage.tsx
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users as UsersIcon, AlertCircle } from "lucide-react";

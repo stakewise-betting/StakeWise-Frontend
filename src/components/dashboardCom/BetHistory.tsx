@@ -28,7 +28,6 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RiChatHistoryFill } from "react-icons/ri";
-import { IoCalendar } from "react-icons/io5";
 import { useUserBets } from "@/hooks/useUserBets";
 import setupWeb3AndContract from "@/services/blockchainService";
 import {
@@ -364,7 +363,7 @@ export default function BetHistory() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredBets.map((bet, index) => (
+                    {filteredBets.map((bet) => (
                       <TableRow
                         key={bet.id}
                         className="border-b border-[#333447]/50 hover:bg-[#333447]/30 transition-colors duration-200"

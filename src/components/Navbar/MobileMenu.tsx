@@ -12,7 +12,6 @@ interface MobileMenuProps {
   walletConnected: boolean;
   usdValue: string;
   connectWallet: () => Promise<void>;
-  unreadCount: number;
   handleLogout: () => Promise<void>;
   handleVerification: () => Promise<void>;
 }
@@ -32,7 +31,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   walletConnected,
   usdValue,
   connectWallet,
-  unreadCount,
   handleLogout,
   handleVerification,
 }) => {

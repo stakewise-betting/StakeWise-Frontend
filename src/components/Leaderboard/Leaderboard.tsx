@@ -7,7 +7,6 @@ import {
 } from "../../hooks/useLeaderboard";
 import { AppContext } from "../../context/AppContext";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
 import {
   Trophy,
   Medal,

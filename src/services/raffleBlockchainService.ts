@@ -1,5 +1,4 @@
 import Web3 from "web3";
-import { ethers } from "ethers";
 import { toast } from "react-toastify";
 
 import { raffleContractAddress, raffleContractABI } from "@/config/raffleContractConfig";
@@ -26,20 +25,12 @@ export interface RaffleData {
 class RaffleBlockchainService {
   private web3: Web3 | null = null;
   private contract: any = null;
-  private provider: any = null;
-  private ethersContract: any = null;
 
   // Initialize Web3 and contract
   async init() {
     try {
       // Check if MetaMask is installed
       if (typeof window.ethereum !== 'undefined') {
-        // Use MetaMask provider
-        // Fix for ethers.js version compatibility
-        this.provider = new ethers.BrowserProvider(window.ethereum);
-        // or if using older ethers version:
-        // this.provider = new ethers.providers.Web3Provider(window.ethereum);
-        
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         
         // Initialize Web3 with MetaMask provider
@@ -49,14 +40,6 @@ class RaffleBlockchainService {
         this.contract = new this.web3.eth.Contract(
           raffleContractABI,
           raffleContractAddress
-        );
-        
-        // Initialize ethers contract
-        const signer = await this.provider.getSigner();
-        this.ethersContract = new ethers.Contract(
-          raffleContractAddress,
-          raffleContractABI,
-          signer
         );
         
         return true;
@@ -166,7 +149,7 @@ class RaffleBlockchainService {
       );
       
       // Buy tickets
-      const tx = await this.contract.methods.buyTicket(raffleId, quantity).send({
+      await this.contract.methods.buyTicket(raffleId, quantity).send({
         from: account,
         value: totalPriceWei
       });

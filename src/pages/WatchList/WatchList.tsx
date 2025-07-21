@@ -122,7 +122,8 @@ export default function WatchListPage() {
   // State for Web3 and dynamic odds
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [betContract, setBetContract] = useState<any>(null);
-  const [eventOdds, setEventOdds] = useState<EventOddsMap>({});
+  // const [eventOdds, setEventOdds] = useState<EventOddsMap>({});
+  const [, setEventOdds] = useState<EventOddsMap>({});
   const [isOddsLoading, setIsOddsLoading] = useState<boolean>(false);
 
   // Initialize Web3
@@ -169,10 +170,14 @@ export default function WatchListPage() {
       setIsOddsLoading(true);
       console.log(`Fetching odds for ${watchlistEvents.length} events...`);
 
-      const oddsPromises = watchlistEvents.map((event) =>
-        calculateEventOdds(betContract, String(event.eventId), event.options)
-          .then((odds) => ({ eventId: String(event.eventId), odds }))
-          .catch((err) => ({ eventId: String(event.eventId), odds: null }))
+      const oddsPromises = watchlistEvents.map(
+        (event) =>
+          calculateEventOdds(
+            betContract,
+            String(event.eventId),
+            event.options
+          ).then((odds) => ({ eventId: String(event.eventId), odds }))
+        // .catch((err) => ({ eventId: String(event.eventId), odds: null }))
       );
 
       try {

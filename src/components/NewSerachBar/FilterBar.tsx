@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useMemo } from "react";
-import { FlameIcon, SearchIcon, Filter, TrendingUp, Zap } from "lucide-react";
+import { SearchIcon, Filter, TrendingUp, Zap } from "lucide-react";
 
 // Define categories outside the component if they are static
 const initialCategories = [

@@ -21,7 +21,7 @@ const OnlineUsersCounter: React.FC<OnlineUsersCounterProps> = ({
 }) => {
   const [count, setCount] = useState<number>(0);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [isIncreasing, setIsIncreasing] = useState<boolean | null>(null);
+  const [, setIsIncreasing] = useState<boolean | null>(null);
 
   useEffect(() => {
     const ws = new WebSocket(wsUrl);

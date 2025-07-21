@@ -15,10 +15,9 @@ import { AppContext } from "@/context/AppContext"
 import { useWallet } from "@/context/WalletContext" // Import the wallet context
 import raffleBlockchainService, { RaffleData } from "@/services/raffleBlockchainService"
 import { toast } from "react-toastify"
-import axios from "axios"
 
 const RaffleSection = () => {
-  const { isLoggedin, userData, backendUrl } = useContext(AppContext) || {};
+  const { isLoggedin } = useContext(AppContext) || {};
   const { isConnected, walletAddress, connectWallet, isConnecting } = useWallet(); // Use the wallet context
   
   const [selectedRaffle, setSelectedRaffle] = useState<RaffleData | null>(null)
