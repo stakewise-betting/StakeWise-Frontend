@@ -421,7 +421,7 @@ const AdminProfilePage: React.FC = () => {
                 </Label>
                 <Input
                   id="username"
-                  className="border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors text-gray-900 font-medium"
+                  className="bg-gray-800/40 text-white border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors font-medium placeholder:text-gray-400"
                   {...register("username")}
                 />
                 {errors.username && (
@@ -438,7 +438,7 @@ const AdminProfilePage: React.FC = () => {
                 </Label>
                 <Input
                   id="fname"
-                  className="border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors text-gray-900 font-medium"
+                  className="bg-gray-800/40 text-white border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors font-medium placeholder:text-gray-400"
                   {...register("fname")}
                   placeholder="Enter your first name"
                 />
@@ -456,7 +456,7 @@ const AdminProfilePage: React.FC = () => {
                 </Label>
                 <Input
                   id="lname"
-                  className="border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors text-gray-900 font-medium"
+                  className="bg-gray-800/40 text-white border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors font-medium placeholder:text-gray-400"
                   {...register("lname")}
                   placeholder="Enter your last name"
                 />
