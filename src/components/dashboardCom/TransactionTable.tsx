@@ -1,5 +1,14 @@
 import * as React from "react";
-import { CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,6 +34,14 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useUserTransactions } from "@/hooks/useUserTransactions";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface PaginationProps {
   currentPage: number;
@@ -171,178 +188,295 @@ export default function TransactionTable() {
   };
 
   if (loading) {
-    return <div>Loading transactions...</div>;
+    return (
+      <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
+        <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl">
+          <CardContent className="p-16">
+            <div className="flex flex-col items-center justify-center">
+              <div className="animate-spin h-8 w-8 border-2 border-[#10B981] border-t-transparent rounded-full mb-4" />
+              <p className="text-zinc-400 text-lg">Loading transactions...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
+        <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl">
+          <CardContent className="p-16">
+            <div className="flex flex-col items-center justify-center">
+              <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+              <p className="text-red-400 text-lg font-medium">
+                Error loading transactions
+              </p>
+              <p className="text-zinc-500 text-sm">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="p-8 rounded-[20px] lg:mx-24 md:mx-16 mx-8 mb-[96px] bg-[#333447] min-h-[500px] space-y-6">
-      <div className="">
-        <h2 className="text-[20px] font-bold ">Transaction Details</h2>
-      </div>
+    <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
+      <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden">
+        {/* Header Section */}
+        <CardHeader className="bg-gradient-to-r from-[#10B981]/10 to-[#34D399]/10 border-b border-[#333447]">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-r from-[#10B981] to-[#34D399] rounded-xl shadow-lg">
+              <CreditCard className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-zinc-100">
+                Transaction History
+              </CardTitle>
+              <CardDescription className="text-lg text-zinc-400 mt-1">
+                Track all your betting activities and transactions
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 items-center justify-center lg:w-1/2 md:w-3/4 w-full gap-5 ">
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="bg-[#E27625] border-none rounded-[10px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1C1C27] border-none rounded-[10px]">
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="in progress">In Progress</SelectItem>
-            <SelectItem value="failed">Failed</SelectItem>
-          </SelectContent>
-        </Select>
+        <CardContent className="p-8 space-y-8">
+          {/* Filters Section */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 lg:w-2/3 md:w-3/4 w-full">
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#10B981]/50 rounded-xl transition-all duration-200">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl shadow-2xl">
+                <SelectItem
+                  value="completed"
+                  className="hover:bg-[#10B981]/10 focus:bg-[#10B981]/10"
+                >
+                  Completed
+                </SelectItem>
+                <SelectItem
+                  value="in progress"
+                  className="hover:bg-[#F59E0B]/10 focus:bg-[#F59E0B]/10"
+                >
+                  In Progress
+                </SelectItem>
+                <SelectItem
+                  value="failed"
+                  className="hover:bg-[#EF4444]/10 focus:bg-[#EF4444]/10"
+                >
+                  Failed
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
-        <Select value={transactionType} onValueChange={setTransactionType}>
-          <SelectTrigger className="bg-[#E27625] border-none rounded-[10px]">
-            <SelectValue placeholder="Transaction Type" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1C1C27] border-none text-white rounded-[10px]">
-            <SelectItem value="Bet Placed">Bet Placed</SelectItem>
-            <SelectItem value="Winnings Received">Winnings Received</SelectItem>
-          </SelectContent>
-        </Select>
+            <Select value={transactionType} onValueChange={setTransactionType}>
+              <SelectTrigger className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#3B82F6]/50 rounded-xl transition-all duration-200">
+                <SelectValue placeholder="Transaction Type" />
+              </SelectTrigger>
+              <SelectContent className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl shadow-2xl">
+                <SelectItem
+                  value="Bet Placed"
+                  className="hover:bg-[#3B82F6]/10 focus:bg-[#3B82F6]/10"
+                >
+                  Bet Placed
+                </SelectItem>
+                <SelectItem
+                  value="Winnings Received"
+                  className="hover:bg-[#10B981]/10 focus:bg-[#10B981]/10"
+                >
+                  Winnings Received
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
-        <Popover>
-          <PopoverTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start font-normal md:col-span-2 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#8B5CF6]/50 rounded-xl transition-all duration-200",
+                    date && "border-[#8B5CF6]/50 bg-[#8B5CF6]/10"
+                  )}
+                >
+                  <CalendarIcon className="mr-3 h-5 w-5 text-[#8B5CF6]" />
+                  <span className="text-zinc-300">
+                    {date ? format(date, "PPP") : "Select Date"}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl shadow-2xl">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
             <Button
               variant="outline"
-              className={cn(
-                "justify-start text-left font-normal",
-                "bg-[#E27625] border-none rounded-[10px] md:col-span-2 text-center",
-                date && "text-white"
-              )}
+              onClick={() => {
+                setStatus("");
+                setTransactionType("");
+                setDate(undefined);
+              }}
+              disabled={!status && !transactionType && !date}
+              className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#E27625]/50 hover:bg-[#E27625]/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 text-zinc-300 hover:text-white"
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Select Date</span>}
+              Clear Filters
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-[#1C1C27] border-none rounded-[10px] shadow-lg">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+          </div>
 
-        <Button
-          variant="outline"
-          className={cn(
-            " bg-[#E27625] border-none rounded-[10px]",
-            !status &&
-              !transactionType &&
-              !date &&
-              "opacity-50 cursor-not-allowed"
-          )}
-          onClick={() => {
-            setStatus("");
-            setTransactionType("");
-            setDate(undefined);
-          }}
-          disabled={!status && !transactionType && !date}
-        >
-          Clear
-        </Button>
-      </div>
-
-      <div className="rounded-[20px] max-h-[500px]">
-        <Table>
-          <TableHeader className="">
-            <TableRow className="border-[#56577A] text-[#A0AEC0] font-medium lg:text-lg text-sm">
-              <TableHead>EVENT NAME</TableHead>
-              <TableHead>DATE</TableHead>
-              <TableHead>TRANSACTION TYPE</TableHead>
-              <TableHead>AMOUNT</TableHead>
-              <TableHead>STATUS</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+          {/* Table Section */}
+          <div className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl overflow-hidden">
             {paginatedTransactions.length > 0 ? (
-              paginatedTransactions.map((transaction, index) => (
-                <TableRow
-                  key={index}
-                  className="border-[#56577A] hover:bg-slate-800 lg:text-sm text-xs"
-                >
-                  <TableCell>{transaction.eventName}</TableCell>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>
-                    <span
-                      className={cn("px-3 py-2 rounded font-medium text-sm", {
-                        "bg-blue-500/10 text-blue-500":
-                          transaction.transactionType === "Bet Placed",
-                        "bg-green-500/10 text-green-500":
-                          transaction.transactionType === "Winnings Received",
-                      })}
-                    >
-                      {transaction.transactionType}
-                    </span>
-                  </TableCell>
-                  <TableCell
-                    className={cn("font-medium", {
-                      "text-blue-500":
-                        transaction.transactionType === "Bet Placed",
-                      "text-green-500":
-                        transaction.transactionType === "Winnings Received",
-                    })}
-                  >
-                    {transaction.amount}
-                  </TableCell>
-                  <TableCell className="text-white">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn("h-2 w-2 rounded-full", {
-                          "bg-green-500": transaction.status === "Completed",
-                          "bg-orange-500": transaction.status === "In Progress",
-                          "bg-red-500": transaction.status === "Failed",
-                        })}
-                      />
-                      {transaction.status}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              <div className="max-h-[500px] overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-[#2A2A3A] to-[#1C1C27]">
+                    <TableRow className="border-b border-[#333447] hover:bg-transparent">
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Event Name
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Date
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Type
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Amount
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Status
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedTransactions.map((transaction, index) => (
+                      <TableRow
+                        key={index}
+                        className="border-b border-[#333447]/50 hover:bg-[#333447]/30 transition-colors duration-200"
+                      >
+                        <TableCell className="py-4">
+                          <div className="font-medium text-zinc-100 truncate max-w-[200px]">
+                            {transaction.eventName}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="text-zinc-300 text-sm">
+                            {transaction.date}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Badge
+                            className={cn(
+                              "font-medium px-3 py-1 rounded-full text-xs border-0",
+                              transaction.transactionType === "Bet Placed" &&
+                                "bg-[#3B82F6]/20 text-[#3B82F6]",
+                              transaction.transactionType ===
+                                "Winnings Received" &&
+                                "bg-emerald-500/20 text-emerald-400"
+                            )}
+                          >
+                            {transaction.transactionType === "Bet Placed" && (
+                              <TrendingDown className="w-3 h-3 mr-1" />
+                            )}
+                            {transaction.transactionType ===
+                              "Winnings Received" && (
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                            )}
+                            {transaction.transactionType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div
+                            className={cn(
+                              "font-mono font-bold flex items-center gap-2",
+                              transaction.transactionType === "Bet Placed" &&
+                                "text-[#3B82F6]",
+                              transaction.transactionType ===
+                                "Winnings Received" && "text-emerald-400"
+                            )}
+                          >
+                            {transaction.transactionType === "Bet Placed" && (
+                              <TrendingDown className="w-4 h-4" />
+                            )}
+                            {transaction.transactionType ===
+                              "Winnings Received" && (
+                              <TrendingUp className="w-4 h-4" />
+                            )}
+                            {transaction.amount}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Badge
+                            className={cn(
+                              "font-medium px-3 py-1 rounded-full text-xs border-0",
+                              transaction.status === "Completed" &&
+                                "bg-emerald-500/20 text-emerald-400",
+                              transaction.status === "In Progress" &&
+                                "bg-yellow-500/20 text-yellow-400",
+                              transaction.status === "Failed" &&
+                                "bg-red-500/20 text-red-400"
+                            )}
+                          >
+                            {transaction.status === "In Progress" && (
+                              <Clock className="w-3 h-3 mr-1" />
+                            )}
+                            {transaction.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-24 text-center text-slate-400"
-                >
-                  No transactions found matching the selected filters.
-                </TableCell>
-              </TableRow>
+              <div className="flex flex-col items-center justify-center py-20">
+                <CreditCard className="h-12 w-12 text-zinc-500 mb-4" />
+                <p className="text-zinc-400 text-lg font-medium">
+                  No transactions found
+                </p>
+                <p className="text-zinc-500 text-sm">
+                  No transactions match the selected filters
+                </p>
+              </div>
             )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
 
-      {/* Pagination Part */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-slate-400">
-          Showing{" "}
-          <span className="font-medium">
-            {Math.min(
-              (currentPage - 1) * pageSize + 1,
-              filteredTransactions.length
-            )}
-            {" - "}
-            {Math.min(currentPage * pageSize, filteredTransactions.length)}
-          </span>{" "}
-          of <span className="font-medium">{filteredTransactions.length}</span>
-        </div>
+          {/* Pagination Section */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-6 border-t border-[#333447]">
+              <div className="text-sm text-zinc-400">
+                Showing{" "}
+                <span className="font-medium text-zinc-300">
+                  {Math.min(
+                    (currentPage - 1) * pageSize + 1,
+                    filteredTransactions.length
+                  )}
+                  {" - "}
+                  {Math.min(
+                    currentPage * pageSize,
+                    filteredTransactions.length
+                  )}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-zinc-300">
+                  {filteredTransactions.length}
+                </span>{" "}
+                transactions
+              </div>
 
-        {totalPages > 0 && (
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        )}
-      </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

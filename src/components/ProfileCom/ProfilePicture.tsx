@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, type ChangeEvent } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import { Button } from "@/components/ui/button";
-import { Camera, Check } from "lucide-react";
+import { Camera, Check, User, Upload, Image } from "lucide-react";
 import SettingsCard from "./SettingsCard";
 import { AppContext } from "@/context/AppContext";
 import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
@@ -93,83 +93,160 @@ export default function ProfilePicture() {
   return (
     <SettingsCard
       title="Profile Picture"
-      description="Your profile picture will be visible to other users"
+      description="Upload a professional photo that represents you on the platform"
     >
-      <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
-        <div className="relative group">
-          <Avatar className="h-32 w-32 border-2 border-zinc-800">
-            <AvatarImage alt="Profile" src={avatarSrc} className="bg-[#1C1C27]"  />
-            <AvatarFallback className="bg-zinc-800 text-zinc-100 text-xl">
-              {userData?.picture ? (
-                <img
-                  src={userData.picture}
-                  alt="Google Profile"
-                  width={115}
-                  height={115}
-                  className="object-cover rounded-full"
-                />
-              ) : userData?.username ? (
-                userData.username[0].toUpperCase()
-              ) : userData?.walletAddress ? (
-                <img
-                  src={MetamaskLogo}
-                  alt="MetaMask Logo"
-                  width={115}
-                  height={115}
-                  className="object-contain rounded-full"
-                />
-              ) : (
-                ""
-              )}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-            <label
-              htmlFor="avatar-upload"
-              className="cursor-pointer p-2 rounded-full bg-zinc-800 hover:bg-zinc-700"
-            >
-              <Camera className="h-6 w-6" />
-            </label>
-            <input
-              id="avatar-upload"
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              disabled={isUploading}
-            />
+      <div className="flex flex-col items-center sm:flex-row sm:items-start gap-8">
+        {/* Profile Picture Section */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#E27625] to-[#F4A261] rounded-full blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
+            <Avatar className="relative h-32 w-32 border-2 border-[#333447] hover:border-[#E27625]/50 transition-all duration-300 shadow-2xl">
+              <AvatarImage
+                alt="Profile"
+                src={avatarSrc}
+                className="bg-gradient-to-br from-[#1C1C27] to-[#252538]"
+              />
+              <AvatarFallback className="bg-gradient-to-br from-[#1C1C27] to-[#252538] text-zinc-100 text-xl border border-[#333447]">
+                {userData?.picture ? (
+                  <img
+                    src={userData.picture}
+                    alt="Google Profile"
+                    width={115}
+                    height={115}
+                    className="object-cover rounded-full"
+                  />
+                ) : userData?.username ? (
+                  <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-[#E27625] to-[#F4A261] text-white font-bold text-2xl">
+                    {userData.username[0].toUpperCase()}
+                  </div>
+                ) : userData?.walletAddress ? (
+                  <img
+                    src={MetamaskLogo}
+                    alt="MetaMask Logo"
+                    width={80}
+                    height={80}
+                    className="object-contain rounded-full"
+                  />
+                ) : (
+                  <User className="h-12 w-12 text-zinc-400" />
+                )}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Upload Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/70 to-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <label
+                htmlFor="avatar-upload"
+                className="cursor-pointer p-3 rounded-full bg-gradient-to-r from-[#E27625] to-[#F4A261] hover:from-[#D16819] hover:to-[#E2955A] text-white shadow-lg transform transition-all duration-200 hover:scale-110"
+              >
+                {isUploading ? (
+                  <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full" />
+                ) : (
+                  <Camera className="h-6 w-6" />
+                )}
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                disabled={isUploading}
+              />
+            </div>
           </div>
+
+          {/* Upload Button */}
+          <label
+            htmlFor="avatar-upload"
+            className={`cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              isUploading
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#E27625] to-[#F4A261] hover:from-[#D16819] hover:to-[#E2955A] text-white shadow-lg hover:shadow-xl transform hover:scale-105"
+            }`}
+          >
+            {isUploading ? (
+              <>
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="h-4 w-4" />
+                Upload Photo
+              </>
+            )}
+          </label>
         </div>
-        <div className="space-y-4 flex-1">
-          <div>
-            <h3 className="font-medium text-zinc-100">
-              Profile Picture Guidelines
-            </h3>
-            <ul className="mt-2 text-sm text-zinc-400 space-y-1">
-              <li className="flex items-center">
-                <Check className="h-4 w-4 mr-2 text-emerald-500" />
-                Use a clear, recognizable photo
+
+        {/* Guidelines Section */}
+        <div className="flex-1 space-y-6">
+          <div className="bg-gradient-to-br from-[#1C1C27] to-[#252538] p-6 rounded-xl border border-[#333447] hover:border-[#E27625]/30 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-gradient-to-br from-[#10B981] to-[#34D399] rounded-lg">
+                <Image className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-100">
+                Upload Guidelines
+              </h3>
+            </div>
+
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-[#10B981] to-[#34D399] flex items-center justify-center mt-0.5">
+                  <Check className="h-3 w-3 text-white" />
+                </div>
+                <div>
+                  <span className="font-medium text-zinc-100">
+                    Clear & Professional
+                  </span>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Use a high-quality, well-lit photo of yourself
+                  </p>
+                </div>
               </li>
-              <li className="flex items-center">
-                <Check className="h-4 w-4 mr-2 text-emerald-500" />
-                Square images work best
+
+              <li className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-[#10B981] to-[#34D399] flex items-center justify-center mt-0.5">
+                  <Check className="h-3 w-3 text-white" />
+                </div>
+                <div>
+                  <span className="font-medium text-zinc-100">
+                    Square Format
+                  </span>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    Square images (1:1 ratio) work best for profile pictures
+                  </p>
+                </div>
               </li>
-              <li className="flex items-center">
-                <Check className="h-4 w-4 mr-2 text-emerald-500" />
-                Maximum file size: 5MB
+
+              <li className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-r from-[#10B981] to-[#34D399] flex items-center justify-center mt-0.5">
+                  <Check className="h-3 w-3 text-white" />
+                </div>
+                <div>
+                  <span className="font-medium text-zinc-100">
+                    File Requirements
+                  </span>
+                  <p className="text-sm text-zinc-400 mt-1">
+                    JPEG, PNG, or WEBP format • Maximum 5MB file size
+                  </p>
+                </div>
               </li>
             </ul>
           </div>
-          {/* <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className="py-3 bg-red-500 border-none rounded-lg hover:bg-red-600"
-              // onClick={handleResetAvatar}
-              disabled={isUploading}
-            >
-              Reset to Default
-            </Button>
-          </div> */}
+
+          {/* Upload Progress/Status */}
+          {isUploading && (
+            <div className="bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] p-4 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                <span className="text-white font-medium">
+                  Uploading your profile picture...
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </SettingsCard>

@@ -32,59 +32,58 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-40 transition-opacity duration-300 flex items-center justify-center"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 transition-opacity duration-300 flex items-center justify-center p-4"
       onClick={onClose}
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="bg-card rounded-lg shadow-xl max-w-sm w-full overflow-hidden border border-gray-700 m-4 animate-appear"
+        className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-2xl shadow-2xl max-w-md w-full border border-[#404153] transform transition-all duration-300 scale-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 sm:p-6">
-          <div className="sm:flex sm:items-start">
-            <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-admin-danger/10 sm:mx-0 sm:h-10 sm:w-10">
+        <div className="p-8">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-r from-[#EF4444] to-[#DC2626] shadow-lg shadow-[#EF4444]/30">
               <RiErrorWarningLine
-                className="h-6 w-6 text-admin-danger"
+                className="h-8 w-8 text-white"
                 aria-hidden="true"
               />
             </div>
-            <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <div className="flex-1 min-w-0">
               <h3
-                className="text-lg leading-6 font-semibold text-dark-primary"
+                className="text-xl font-bold text-white mb-3"
                 id="modal-title"
               >
                 {title}
               </h3>
-              <div className="mt-2">
-                <p className="text-sm text-sub">{message}</p>
-              </div>
+              <p className="text-[#A1A1AA] leading-relaxed">{message}</p>
             </div>
           </div>
         </div>
-        <div className="bg-primary/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-gray-700/60">
+
+        <div className="bg-gradient-to-r from-[#333447] to-[#404153] px-8 py-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 rounded-b-2xl border-t border-[#525266]">
           <button
             type="button"
-            className={`${dangerButtonClasses} w-full sm:ml-3 sm:w-auto`}
+            className={`${cancelButtonClasses} flex-1 sm:flex-initial`}
+            onClick={onClose}
+            disabled={isConfirming}
+          >
+            {cancelButtonText}
+          </button>
+          <button
+            type="button"
+            className={`${dangerButtonClasses} flex-1 sm:flex-initial min-w-[120px]`}
             onClick={onConfirm}
             disabled={isConfirming}
           >
             {isConfirming && (
               <AiOutlineLoading3Quarters
-                className="animate-spin mr-1.5"
+                className="animate-spin mr-2"
                 size={16}
               />
             )}
-            {isConfirming ? "Processing..." : confirmButtonText}
-          </button>
-          <button
-            type="button"
-            className={`${cancelButtonClasses} mt-3 w-full sm:mt-0 sm:w-auto`}
-            onClick={onClose}
-            disabled={isConfirming}
-          >
-            {cancelButtonText}
+            {isConfirming ? "Deleting..." : confirmButtonText}
           </button>
         </div>
       </div>

@@ -232,61 +232,68 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   };
 
   const baseButtonClasses = `
-    inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+    inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
     text-sm font-semibold
     transition-all duration-300 ease-in-out relative overflow-hidden
     border focus:outline-none focus:ring-2 focus:ring-offset-2
-    focus:ring-offset-card focus:ring-secondary/80
+    focus:ring-offset-card focus:ring-[#E27625]/50
   `;
 
   const primaryButtonClasses = `
     ${baseButtonClasses}
-    bg-secondary/90 border-secondary/90 text-white
-    hover:bg-secondary hover:border-secondary
-    hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-secondary/30
+    bg-gradient-to-r from-[#E27625] to-[#F59E0B] border-[#E27625] text-white
+    hover:from-[#F59E0B] hover:to-[#E27625] hover:border-[#F59E0B]
+    hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-[#E27625]/30
     disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none
-    disabled:shadow-none disabled:bg-secondary/50 disabled:border-secondary/50
+    disabled:shadow-none disabled:from-[#E27625]/50 disabled:to-[#F59E0B]/50
   `;
 
   const dangerButtonClasses = `
     ${baseButtonClasses}
-    bg-admin-danger/90 border-admin-danger/90 text-white
-    hover:bg-admin-danger hover:border-admin-danger
-    hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-admin-danger/30
+    bg-gradient-to-r from-[#EF4444] to-[#DC2626] border-[#EF4444] text-white
+    hover:from-[#DC2626] hover:to-[#EF4444] hover:border-[#DC2626]
+    hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-[#EF4444]/30
     disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none
-    disabled:shadow-none disabled:bg-admin-danger/50 disabled:border-admin-danger/50
+    disabled:shadow-none disabled:from-[#EF4444]/50 disabled:to-[#DC2626]/50
   `;
 
   const cancelButtonClasses = `
     ${baseButtonClasses}
-    bg-transparent border-gray-500 text-sub
-    hover:bg-gray-700/60 hover:text-dark-primary hover:border-gray-400
+    bg-gradient-to-r from-[#525266] to-[#6B7280] border-[#525266] text-white
+    hover:from-[#6B7280] hover:to-[#525266] hover:border-[#6B7280]
+    hover:scale-105 shadow-lg
     disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-    disabled:shadow-none disabled:bg-transparent
+    disabled:shadow-none
   `;
 
   return (
-    <div className="bg-primary text-dark-primary rounded-lg mt-4 border border-gray-700/50 shadow-sm">
-      <div className="p-4 sm:p-6">
-        <h3 className="text-lg sm:text-xl font-bold mb-4 text-dark-primary">
+    <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl mt-6 border border-[#404153] shadow-xl">
+      <div className="p-6 sm:p-8">
+        <h3 className="text-xl sm:text-2xl font-bold mb-6 bg-gradient-to-r from-white to-[#E5E5E5] bg-clip-text text-transparent flex items-center gap-3">
+          <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
           Comments
         </h3>
 
         {currentUserId && (
-          <div className="mb-5 p-4 bg-card rounded-lg border border-gray-700/60 shadow-inner">
-            <textarea
-              placeholder="Add a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="w-full p-2.5 rounded-md bg-primary border border-gray-600 focus:ring-1 focus:ring-secondary focus:border-secondary text-dark-primary placeholder-sub text-sm resize-none transition-colors duration-200"
-              rows={3}
-              aria-label="New comment text"
-              disabled={isPostingComment}
-            />
-            <div className="flex justify-end mt-2">
+          <div className="mb-8 p-6 bg-gradient-to-br from-[#333447] to-[#404153] rounded-xl border border-[#525266] shadow-lg">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#A1A1AA] mb-2">
+                Share your thoughts
+              </label>
+              <textarea
+                placeholder="Add a thoughtful comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="w-full p-4 rounded-xl bg-gradient-to-br from-[#1C1C27] to-[#252538] border border-[#525266] focus:ring-2 focus:ring-[#E27625] focus:border-[#E27625] text-white placeholder-[#6B7280] text-sm resize-none transition-all duration-300 hover:border-[#6B7280]"
+                rows={4}
+                aria-label="New comment text"
+                disabled={isPostingComment}
+              />
+            </div>
+            <div className="flex justify-end">
               <button
                 onClick={handleAddRootComment}
-                className={primaryButtonClasses}
+                className={`${primaryButtonClasses} shadow-lg shadow-[#E27625]/20`}
                 disabled={!newComment.trim() || isPostingComment}
               >
                 {isPostingComment && (
@@ -301,46 +308,115 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           </div>
         )}
         {!currentUserId && (
-          <p className="text-sm text-sub my-4 p-3 bg-card rounded-md border border-gray-700/60 text-center">
-            Please log in to comment or reply.
-          </p>
-        )}
-
-        {error && (
-          <div className="my-4 p-3 bg-admin-danger/10 border border-admin-danger/30 rounded-md text-sm text-red-400 flex items-center gap-2 animate-fade-in">
-            <RiErrorWarningLine size={18} className="flex-shrink-0" />
-            {error}
+          <div className="mb-8 p-6 bg-gradient-to-br from-[#333447] to-[#404153] rounded-xl border border-[#525266] shadow-lg text-center">
+            <div className="bg-gradient-to-r from-[#3B82F6] to-[#1D4ED8] rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </div>
+            <h4 className="font-semibold text-white mb-2">
+              Join the Conversation
+            </h4>
+            <p className="text-[#A1A1AA] text-sm">
+              Please log in to comment and engage with the community.
+            </p>
           </div>
         )}
 
-        <div className="mt-5">
+        {error && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border border-[#EF4444]/30 rounded-xl text-sm text-[#FCA5A5] flex items-center gap-3 shadow-lg">
+            <div className="bg-gradient-to-r from-[#EF4444] to-[#DC2626] rounded-full p-2 flex-shrink-0">
+              <RiErrorWarningLine size={18} className="text-white" />
+            </div>
+            <div>
+              <p className="font-medium">Something went wrong</p>
+              <p className="text-[#A1A1AA] text-xs mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6">
           {isLoading && (
-            <div className="flex items-center justify-center py-6 text-sub">
-              <AiOutlineLoading3Quarters className="animate-spin mr-2" />
-              Loading comments...
+            <div className="flex items-center justify-center py-12 bg-gradient-to-br from-[#333447] to-[#404153] rounded-xl border border-[#525266]">
+              <div className="relative">
+                <AiOutlineLoading3Quarters
+                  className="animate-spin mr-3 text-[#E27625]"
+                  size={24}
+                />
+                <div className="absolute inset-0 border-2 border-[#E27625]/20 rounded-full animate-pulse"></div>
+              </div>
+              <span className="text-[#A1A1AA] text-lg">
+                Loading comments...
+              </span>
             </div>
           )}
 
           {!isLoading && comments.length === 0 && !error && (
-            <p className="text-sm text-sub text-center py-6">
-              No comments yet. Be the first to share your thoughts!
-            </p>
+            <div className="text-center py-16 bg-gradient-to-br from-[#333447] to-[#404153] rounded-xl border border-[#525266] shadow-lg">
+              <div className="bg-gradient-to-r from-[#525266] to-[#6B7280] rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <svg
+                  className="w-8 h-8 text-[#A1A1AA]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+              </div>
+              <h4 className="text-lg font-semibold text-white mb-2">
+                No Comments Yet
+              </h4>
+              <p className="text-[#A1A1AA]">
+                Be the first to share your thoughts!
+              </p>
+            </div>
           )}
 
           {!isLoading && comments.length > 0 && (
-            <div className="space-y-4 border-t border-gray-700/60 pt-4">
-              {comments.map((comment) => (
-                <CommentItem
-                  key={comment._id}
-                  comment={comment}
-                  currentUserId={currentUserId}
-                  onLike={handleLikeToggle}
-                  onDeleteRequest={handleDeleteRequest}
-                  onReplySubmit={handleAddReply}
-                  level={0}
-                  likedComments={likedComments}
-                />
-              ))}
+            <div className="bg-gradient-to-br from-[#333447] to-[#404153] rounded-xl border border-[#525266] shadow-lg overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-2 h-2 bg-[#10B981] rounded-full"></div>
+                  <h4 className="text-lg font-semibold text-white">
+                    {comments.length} Comment{comments.length !== 1 ? "s" : ""}
+                  </h4>
+                </div>
+                <div className="space-y-6">
+                  {comments.map((comment, index) => (
+                    <div
+                      key={comment._id}
+                      className={
+                        index > 0 ? "border-t border-[#525266] pt-6" : ""
+                      }
+                    >
+                      <CommentItem
+                        comment={comment}
+                        currentUserId={currentUserId}
+                        onLike={handleLikeToggle}
+                        onDeleteRequest={handleDeleteRequest}
+                        onReplySubmit={handleAddReply}
+                        level={0}
+                        likedComments={likedComments}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

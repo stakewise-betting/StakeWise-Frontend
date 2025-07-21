@@ -117,18 +117,18 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
 
   // Render connect button or wallet info
   return isConnected ? (
-    <div className="flex items-center space-x-2 sm:space-x-3 bg-black/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
-      <FaWallet className="text-green-400 text-sm sm:text-lg" />
+    <div className="flex items-center space-x-3 bg-[#1C1C27] border border-gray-700/60 px-4 py-2 rounded-xl shadow-lg hover:shadow-xl hover:border-secondary/40 transition-all duration-300">
+      <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/30">
+        <FaWallet className="text-green-400 text-sm" />
+      </div>
       <div className="flex flex-col items-start leading-tight">
-        <span className="text-xs text-gray-400 hidden sm:block">Cash</span>
-        <span className="font-semibold text-green-400 text-xs sm:text-sm">
-          ${usdValue}
-        </span>
+        <span className="text-xs text-dark-secondary font-medium">Balance</span>
+        <span className="font-bold text-green-400 text-sm">${usdValue}</span>
       </div>
       <ButtonOutline
         onClick={() => navigate("/deposit")}
         small
-        className="ml-1 sm:ml-2 text-xs sm:text-sm px-2 sm:px-3 py-1"
+        className="ml-2 text-sm px-4 py-1.5 bg-secondary/10 hover:bg-secondary/20 text-secondary border-secondary/30 hover:border-secondary/50 font-medium transition-all duration-300 hover:shadow-lg"
       >
         <span className="hidden sm:inline">Deposit</span>
         <span className="sm:hidden">+</span>
@@ -139,7 +139,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ isLoggedin }) => {
       onClick={handleConnectWallet}
       small
       disabled={isConnecting || isLoading}
-      className="text-xs sm:text-sm px-2 sm:px-3 py-1"
+      className="text-sm px-4 py-2 bg-secondary/10 hover:bg-secondary/20 text-secondary border-secondary/30 hover:border-secondary/50 font-medium transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <span className="hidden sm:inline">
         {isConnecting || isLoading ? "Connecting..." : "Connect Wallet"}

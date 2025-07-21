@@ -84,129 +84,148 @@ const UserTable: React.FC<UserTableProps> = ({
   };
 
   return (
-    <Table className="min-w-full divide-y divide-gray-700">
-      <TableHeader className="bg-card">
-        <TableRow>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider w-[50px]">
-            Avatar
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Name/Username
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Email/Wallet
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Auth
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Role
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Verified
-          </TableHead>
-          <TableHead className="px-4 py-3 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Joined
-          </TableHead>
-          <TableHead className="px-4 py-3 text-right text-xs font-medium text-dark-secondary uppercase tracking-wider">
-            Actions
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody className="bg-primary divide-y divide-gray-700/50">
-        {users.map((user) => (
-          <TableRow
-            key={user._id}
-            className="hover:bg-card/50 transition-colors"
-          >
-            <TableCell className="px-4 py-3 whitespace-nowrap">
-              <Avatar className="h-9 w-9">
-                <AvatarImage
-                  src={user.picture || user.avatarSrc || ""}
-                  alt={user.username || "User"}
-                />
-                <AvatarFallback className="bg-secondary/20 text-secondary font-semibold">
-                  {getUserInitials(user)}
-                </AvatarFallback>
-              </Avatar>
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm font-medium text-dark-primary">
-              {user.fname || user.lname
-                ? `${user.fname || ""} ${user.lname || ""}`.trim()
-                : user.username || "N/A"}
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-dark-secondary truncate max-w-[200px]">
-              {user.email || user.walletAddress || "N/A"}
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-dark-secondary">
-              <Badge
-                variant={getAuthProviderBadgeVariant(user.authProvider)}
-                className="capitalize"
-              >
-                {user.authProvider}
-              </Badge>
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-dark-secondary">
-              <Badge
-                variant={getRoleBadgeVariant(user.role)}
-                className="capitalize"
-              >
-                {user.role}
-              </Badge>
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-dark-secondary">
-              <Badge
-                variant={user.isAccountVerified ? "default" : "secondary"}
-                className="capitalize"
-              >
-                {user.isAccountVerified ? "Yes" : "No"}
-              </Badge>
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-dark-secondary">
-              {format(new Date(user.createdAt), "MMM d, yyyy")}
-            </TableCell>
-            <TableCell className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-              <div className="flex items-center gap-2 justify-end">
-                {/* Role Change Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onChangeRole(user)}
-                  className="px-2 py-1 h-auto border-gray-600 text-dark-secondary hover:bg-gray-800"
-                  title="Change Role"
-                >
-                  <UserCog className="h-4 w-4" />
-                </Button>
-                
-                {/* Delete Button */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() =>
-                    handleDeleteClick(
-                      user._id,
-                      user.username ||
-                        user.email ||
-                        user.walletAddress ||
-                        user._id
-                    )
-                  }
-                  disabled={deletingUserId === user._id}
-                  className="px-2 py-1 h-auto"
-                  title="Delete User"
-                >
-                  {deletingUserId === user._id ? (
-                    <span className="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4"></span>
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </TableCell>
+    <div className="bg-[#1C1C27] rounded-xl border border-gray-700/30 backdrop-blur-sm overflow-hidden">
+      <Table className="w-full border-collapse text-sm text-white">
+        <TableHeader className="bg-[#1C1C27] backdrop-blur-sm [&_tr]:border-b [&_tr]:border-gray-700/30">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[50px]">
+              Avatar
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 min-w-[120px]">
+              Name
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 min-w-[150px]">
+              Contact
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[80px]">
+              Auth
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[70px]">
+              Role
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[70px]">
+              Status
+            </TableHead>
+            <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[90px]">
+              Joined
+            </TableHead>
+            <TableHead className="px-3 py-3 text-right text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[100px]">
+              Actions
+            </TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody className="[&_tr:last-child]:border-0">
+          {users.map((user) => (
+            <TableRow
+              key={user._id}
+              className="border-b border-gray-700/30 transition-all duration-300 hover:bg-gradient-to-r hover:from-gray-800/30 hover:to-gray-700/30 hover:border-gray-600/50 backdrop-blur-sm"
+            >
+              <TableCell className="px-3 py-3 whitespace-nowrap">
+                <Avatar className="h-8 w-8 ring-1 ring-gray-600/30">
+                  <AvatarImage
+                    src={user.picture || user.avatarSrc || ""}
+                    alt={user.username || "User"}
+                  />
+                  <AvatarFallback className="bg-secondary/20 text-secondary font-semibold text-xs">
+                    {getUserInitials(user)}
+                  </AvatarFallback>
+                </Avatar>
+              </TableCell>
+              <TableCell className="px-3 py-3 text-sm font-medium text-white">
+                <div className="truncate max-w-[120px]">
+                  {user.fname || user.lname
+                    ? `${user.fname || ""} ${user.lname || ""}`.trim()
+                    : user.username || "N/A"}
+                </div>
+              </TableCell>
+              <TableCell className="px-3 py-3 text-xs text-slate-300">
+                <div
+                  className="truncate max-w-[150px]"
+                  title={user.email || user.walletAddress || "N/A"}
+                >
+                  {user.email || user.walletAddress || "N/A"}
+                </div>
+              </TableCell>
+              <TableCell className="px-3 py-3 whitespace-nowrap">
+                <Badge
+                  variant={getAuthProviderBadgeVariant(user.authProvider)}
+                  className="capitalize text-xs px-1.5 py-0.5 bg-gradient-to-r from-purple-500/20 to-purple-600/20 text-purple-300 border-purple-500/40"
+                >
+                  {user.authProvider === "credentials"
+                    ? "Email"
+                    : user.authProvider === "metamask"
+                    ? "Web3"
+                    : user.authProvider}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-3 py-3 whitespace-nowrap">
+                <Badge
+                  variant={getRoleBadgeVariant(user.role)}
+                  className="capitalize text-xs px-1.5 py-0.5 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-300 border-emerald-500/40"
+                >
+                  {user.role}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-3 py-3 whitespace-nowrap">
+                <Badge
+                  variant={user.isAccountVerified ? "default" : "secondary"}
+                  className={`text-xs px-1.5 py-0.5 ${
+                    user.isAccountVerified
+                      ? "bg-gradient-to-r from-green-500/20 to-green-600/20 text-green-300 border-green-500/40"
+                      : "bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 border-amber-500/40"
+                  }`}
+                >
+                  {user.isAccountVerified ? "✓" : "✗"}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-3 py-3 whitespace-nowrap text-xs text-slate-300">
+                <div className="bg-gradient-to-r from-indigo-900/20 to-indigo-800/20 border border-indigo-700/30 rounded-lg px-1.5 py-1 text-center">
+                  {format(new Date(user.createdAt), "MMM d")}
+                </div>
+              </TableCell>
+              <TableCell className="px-3 py-3 whitespace-nowrap text-right">
+                <div className="flex items-center gap-1 justify-end">
+                  {/* Role Change Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onChangeRole(user)}
+                    className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 border border-gray-600/30 text-gray-300 hover:from-indigo-600/20 hover:to-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all duration-300 rounded-lg px-2 py-1 text-xs h-8 w-8 p-0"
+                    title="Change Role"
+                  >
+                    <UserCog className="h-3 w-3" />
+                  </Button>
+
+                  {/* Delete Button */}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() =>
+                      handleDeleteClick(
+                        user._id,
+                        user.username ||
+                          user.email ||
+                          user.walletAddress ||
+                          user._id
+                      )
+                    }
+                    disabled={deletingUserId === user._id}
+                    className="bg-gradient-to-r from-red-600/80 to-red-500/80 hover:from-red-600/90 hover:to-red-500/90 text-white border-0 rounded-lg shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-xs h-8 w-8 p-0"
+                    title="Delete User"
+                  >
+                    {deletingUserId === user._id ? (
+                      <div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Trash2 className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

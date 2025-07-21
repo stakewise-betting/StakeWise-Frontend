@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import Web3 from "web3";
-import FilterSidebar from "@/components/DropdownMenu/DropdownMenu";
+import FilterSidebar from "@/components/dropdownMenu/DropdownMenu";
 import BettingCard from "@/components/BettingCard/BettingCard";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import { AppContext } from "@/context/AppContext";
-import { useWatchlist } from '@/context/WatchlistContext';
+import { useWatchlist } from "@/context/WatchlistContext";
 import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection";
 
 // Interfaces
@@ -19,30 +19,47 @@ type EventOddsMap = {
 
 // --- Odds Calculation Logic (Helper function) ---
 type CalculateOddsFunction = (
-    betContract: any,
-    eventId: string,
-    options: string[]
+  betContract: any,
+  eventId: string,
+  options: string[]
 ) => Promise<OptionOdds[] | null>;
 
-const calculateEventOdds: CalculateOddsFunction = async (betContract, eventId, options) => {
+const calculateEventOdds: CalculateOddsFunction = async (
+  betContract,
+  eventId,
+  options
+) => {
   if (!options || options.length === 0) return null;
   try {
-    const totalVolumeWei = await betContract.methods.getTotalBetsForEvent(eventId).call();
+    const totalVolumeWei = await betContract.methods
+      .getTotalBetsForEvent(eventId)
+      .call();
     const totalVolume = BigInt(totalVolumeWei);
 
     if (totalVolume === 0n) {
       const equalPercentage = 100 / options.length;
-      return options.map((option) => ({ optionName: option, oddsPercentage: equalPercentage }));
+      return options.map((option) => ({
+        optionName: option,
+        oddsPercentage: equalPercentage,
+      }));
     }
 
     const oddsPromises = options.map(async (option) => {
       try {
-        const optionBetsWei = await betContract.methods.getBetsForOption(eventId, option).call();
+        const optionBetsWei = await betContract.methods
+          .getBetsForOption(eventId, option)
+          .call();
         const optionVolume = BigInt(optionBetsWei);
-        const percentage = totalVolume === 0n ? 0 : Number((optionVolume * 10000n) / totalVolume) / 100;
+        const percentage =
+          totalVolume === 0n
+            ? 0
+            : Number((optionVolume * 10000n) / totalVolume) / 100;
         return { optionName: option, oddsPercentage: percentage };
       } catch (error) {
-        console.error(`Error fetching odds for option ${option} in event ${eventId}:`, error);
+        console.error(
+          `Error fetching odds for option ${option} in event ${eventId}:`,
+          error
+        );
         return { optionName: option, oddsPercentage: 0 };
       }
     });
@@ -58,30 +75,40 @@ const calculateEventOdds: CalculateOddsFunction = async (betContract, eventId, o
 export default function WatchListPage() {
   // Filter items
   const filterItems = [
-    { title: "Categories", items: [
-      { name: "Politics", count: 21 },
-      { name: "Sports", count: 32 },
-      { name: "Games", count: 12 },
-    ] },
-    { title: "Locations", items: [
-      { name: "USA", count: 12 },
-      { name: "Sri Lanka", count: 34 },
-      { name: "India", count: 8 },
-      { name: "Australia", count: 15 },
-    ] },
-    { title: "Date Range", items: [
-      { name: "Today", count: 9 },
-      { name: "This Weekend", count: 14 },
-      { name: "Next Week", count: 8 },
-      { name: "Next 3 Months", count: 45 },
-    ] },
+    {
+      title: "Categories",
+      items: [
+        { name: "Politics", count: 21 },
+        { name: "Sports", count: 32 },
+        { name: "Games", count: 12 },
+      ],
+    },
+    {
+      title: "Locations",
+      items: [
+        { name: "USA", count: 12 },
+        { name: "Sri Lanka", count: 34 },
+        { name: "India", count: 8 },
+        { name: "Australia", count: 15 },
+      ],
+    },
+    {
+      title: "Date Range",
+      items: [
+        { name: "Today", count: 9 },
+        { name: "This Weekend", count: 14 },
+        { name: "Next Week", count: 8 },
+        { name: "Next 3 Months", count: 45 },
+      ],
+    },
   ];
 
   const [searchQuery, setSearchQuery] = useState("");
 
   // Get AppContext
   const appContext = useContext(AppContext);
-  if (!appContext) throw new Error("WatchListPage must be used within AppContextProvider");
+  if (!appContext)
+    throw new Error("WatchListPage must be used within AppContextProvider");
   const { isLoggedin } = appContext;
 
   // Get Watchlist Data from WatchlistContext
@@ -89,7 +116,7 @@ export default function WatchListPage() {
     watchlistEvents,
     isLoading: isWatchlistLoading,
     error: watchlistError,
-    refreshWatchlist
+    refreshWatchlist,
   } = useWatchlist();
 
   // State for Web3 and dynamic odds
@@ -106,7 +133,10 @@ export default function WatchListPage() {
           const web3Instance = new Web3(window.ethereum);
           setWeb3(web3Instance);
           try {
-            const contract = new web3Instance.eth.Contract(contractABI, contractAddress);
+            const contract = new web3Instance.eth.Contract(
+              contractABI,
+              contractAddress
+            );
             setBetContract(contract);
           } catch (contractError) {
             console.error("Error creating contract instance:", contractError);
@@ -139,10 +169,10 @@ export default function WatchListPage() {
       setIsOddsLoading(true);
       console.log(`Fetching odds for ${watchlistEvents.length} events...`);
 
-      const oddsPromises = watchlistEvents.map(event =>
+      const oddsPromises = watchlistEvents.map((event) =>
         calculateEventOdds(betContract, String(event.eventId), event.options)
-          .then(odds => ({ eventId: String(event.eventId), odds }))
-          .catch(err => ({ eventId: String(event.eventId), odds: null }))
+          .then((odds) => ({ eventId: String(event.eventId), odds }))
+          .catch((err) => ({ eventId: String(event.eventId), odds: null }))
       );
 
       try {
@@ -163,7 +193,7 @@ export default function WatchListPage() {
 
   // Filter events based on search query
   const filteredEvents = useMemo(() => {
-    return watchlistEvents.filter(event =>
+    return watchlistEvents.filter((event) =>
       event.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [watchlistEvents, searchQuery]);
@@ -171,19 +201,37 @@ export default function WatchListPage() {
   // Render content based on loading and error states
   const renderContent = () => {
     if (!isLoggedin) {
-      return <p className="text-gray-400 text-center mt-10">Please log in to view your watchlist</p>;
+      return (
+        <p className="text-gray-400 text-center mt-10">
+          Please log in to view your watchlist
+        </p>
+      );
     }
     if (isWatchlistLoading && !watchlistError) {
-      return <p className="text-gray-400 text-center mt-10">Loading watchlist...</p>;
+      return (
+        <p className="text-gray-400 text-center mt-10">Loading watchlist...</p>
+      );
     }
     if (watchlistError) {
-      return <p className="text-red-500 text-center mt-10">Error: {watchlistError}</p>;
+      return (
+        <p className="text-red-500 text-center mt-10">
+          Error: {watchlistError}
+        </p>
+      );
     }
     if (filteredEvents.length === 0) {
       if (searchQuery) {
-        return <p className="text-gray-400 text-center mt-10">No watchlist events match your search.</p>;
+        return (
+          <p className="text-gray-400 text-center mt-10">
+            No watchlist events match your search.
+          </p>
+        );
       }
-      return <p className="text-gray-400 text-center mt-10">Your watchlist is empty. Add events using the star icon!</p>;
+      return (
+        <p className="text-gray-400 text-center mt-10">
+          Your watchlist is empty. Add events using the star icon!
+        </p>
+      );
     }
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
@@ -198,7 +246,7 @@ export default function WatchListPage() {
               endTime: event.endTime,
               startTime: event.startTime,
               description: event.description,
-              prizePool: "0"
+              prizePool: "0",
             }}
             web3={web3}
           />
@@ -213,7 +261,11 @@ export default function WatchListPage() {
       <div className="grid gap-6 md:grid-cols-[240px,1fr]">
         <div className="space-y-6 text-[#ffffff]">
           {filterItems.map((filter, index) => (
-            <FilterSidebar key={index} title={filter.title} items={filter.items} />
+            <FilterSidebar
+              key={index}
+              title={filter.title}
+              items={filter.items}
+            />
           ))}
         </div>
         <div className="space-y-6">
@@ -224,7 +276,9 @@ export default function WatchListPage() {
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1 px-0 sm:px-0 md:px-0 lg:px-0 w-full">
-            {isOddsLoading && <p className="text-gray-400 text-center mt-4">Loading odds...</p>}
+            {isOddsLoading && (
+              <p className="text-gray-400 text-center mt-4">Loading odds...</p>
+            )}
             {renderContent()}
           </div>
         </div>

@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import {
+  Search,
+  Calendar as CalendarIcon,
+  History,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  Trophy,
+  AlertCircle,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -22,6 +31,14 @@ import { RiChatHistoryFill } from "react-icons/ri";
 import { IoCalendar } from "react-icons/io5";
 import { useUserBets } from "@/hooks/useUserBets";
 import setupWeb3AndContract from "@/services/blockchainService";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface HistoryBet {
   id: string;
@@ -43,7 +60,10 @@ export default function BetHistory() {
   const { bets, loading, error } = useUserBets();
 
   // Get actual transaction date from blockchain
-  const getTransactionDate = async (eventId: string, userAddress: string): Promise<Date> => {
+  const getTransactionDate = async (
+    eventId: string,
+    userAddress: string
+  ): Promise<Date> => {
     try {
       const { web3Instance, betContract } = await setupWeb3AndContract();
       if (!web3Instance || !betContract) return new Date();
@@ -55,7 +75,9 @@ export default function BetHistory() {
       });
 
       if (betPlacedEvents.length > 0) {
-        const block = await web3Instance.eth.getBlock(betPlacedEvents[0].blockNumber);
+        const block = await web3Instance.eth.getBlock(
+          betPlacedEvents[0].blockNumber
+        );
         return new Date(Number(block.timestamp) * 1000);
       }
 
@@ -67,20 +89,33 @@ export default function BetHistory() {
   };
 
   // Calculate winnings directly from smart contract
-  const calculateActualProfitLoss = async (bet: any, userAddress: string): Promise<{ profitLoss: number; betAmount: number; date: Date }> => {
+  const calculateActualProfitLoss = async (
+    bet: any,
+    userAddress: string
+  ): Promise<{ profitLoss: number; betAmount: number; date: Date }> => {
     try {
       const { web3Instance, betContract } = await setupWeb3AndContract();
-      if (!web3Instance || !betContract) return { profitLoss: 0, betAmount: 0, date: new Date() };
+      if (!web3Instance || !betContract)
+        return { profitLoss: 0, betAmount: 0, date: new Date() };
 
       // Get user's bet details from contract
-      const userBet = await betContract.methods.getUserBet(bet.eventId, userAddress).call();
+      const userBet = await betContract.methods
+        .getUserBet(bet.eventId, userAddress)
+        .call();
       const betAmountWei = userBet[1]; // amount in wei
-      const betAmount = parseFloat(web3Instance.utils.fromWei(betAmountWei, "ether"));
+      const betAmount = parseFloat(
+        web3Instance.utils.fromWei(betAmountWei, "ether")
+      );
 
       // Get transaction date
-      const transactionDate = await getTransactionDate(bet.eventId, userAddress);
+      const transactionDate = await getTransactionDate(
+        bet.eventId,
+        userAddress
+      );
 
-      console.log(`Bet ${bet.eventId}: Amount = ${betAmount} ETH, Status = ${bet.status}`);
+      console.log(
+        `Bet ${bet.eventId}: Amount = ${betAmount} ETH, Status = ${bet.status}`
+      );
 
       if (bet.status === "Lost") {
         return { profitLoss: -betAmount, betAmount, date: transactionDate };
@@ -88,8 +123,10 @@ export default function BetHistory() {
 
       if (bet.status === "Won") {
         // Get event details
-        const eventDetails = await betContract.methods.getEvent(bet.eventId).call();
-        
+        const eventDetails = await betContract.methods
+          .getEvent(bet.eventId)
+          .call();
+
         // Get all BetPlaced events for this event
         const allBetEvents = await betContract.getPastEvents("BetPlaced", {
           filter: { eventId: bet.eventId },
@@ -101,7 +138,9 @@ export default function BetHistory() {
         let totalWinnersBetAmount = 0;
         for (const betEvent of allBetEvents) {
           if (betEvent.returnValues.option === eventDetails.winningOption) {
-            totalWinnersBetAmount += parseFloat(web3Instance.utils.fromWei(betEvent.returnValues.amount, "ether"));
+            totalWinnersBetAmount += parseFloat(
+              web3Instance.utils.fromWei(betEvent.returnValues.amount, "ether")
+            );
           }
         }
 
@@ -110,16 +149,21 @@ export default function BetHistory() {
         }
 
         // Calculate winnings based on smart contract logic
-        const prizePool = parseFloat(web3Instance.utils.fromWei(eventDetails.prizePool, "ether"));
+        const prizePool = parseFloat(
+          web3Instance.utils.fromWei(eventDetails.prizePool, "ether")
+        );
         const adminFee = prizePool * 0.05; // 5% admin fee
         const remainingPrizePool = prizePool - adminFee;
-        const winnerReward = (betAmount * remainingPrizePool) / totalWinnersBetAmount;
-        
+        const winnerReward =
+          (betAmount * remainingPrizePool) / totalWinnersBetAmount;
+
         // Profit = winnings - bet amount
         const profitLoss = winnerReward - betAmount;
-        
-        console.log(`Won bet ${bet.eventId}: Bet=${betAmount}, Reward=${winnerReward}, Profit=${profitLoss}`);
-        
+
+        console.log(
+          `Won bet ${bet.eventId}: Bet=${betAmount}, Reward=${winnerReward}, Profit=${profitLoss}`
+        );
+
         return { profitLoss, betAmount, date: transactionDate };
       }
 
@@ -149,7 +193,8 @@ export default function BetHistory() {
 
         // Process all bets (completed and in progress)
         const detailedBetsPromises = bets.map(async (bet) => {
-          const { profitLoss, betAmount, date } = await calculateActualProfitLoss(bet, userAddress);
+          const { profitLoss, betAmount, date } =
+            await calculateActualProfitLoss(bet, userAddress);
           return {
             id: bet.eventId,
             eventName: bet.eventName,
@@ -159,13 +204,13 @@ export default function BetHistory() {
             date,
             outcome: bet.outcome,
             price: bet.price,
-            betAmount: parseFloat(betAmount.toFixed(6))
+            betAmount: parseFloat(betAmount.toFixed(6)),
           };
         });
 
         const resolvedBets = await Promise.all(detailedBetsPromises);
         setDetailedBets(resolvedBets);
-        
+
         // Log for debugging
         console.log("Detailed bets:", resolvedBets);
       } catch (error) {
@@ -195,161 +240,213 @@ export default function BetHistory() {
   const isLoading = loading || calculationLoading;
 
   return (
-    <div className="p-8 rounded-[20px] lg:mx-24 md:mx-16 mx-8 mb-[96px] bg-[#333447] min-h-[500px]">
-      <div className="space-y-6">
-        <div className="flex items-baseline justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-white">Bet History</h2>
-            <div className="text-sm font-bold text-[#A0AEC0] flex items-center gap-2">
-              <RiChatHistoryFill className="w-3 h-3 text-[#01B574]" />
-              <p className="text-sm text-slate-400">
+    <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
+      <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden">
+        {/* Header Section */}
+        <CardHeader className="bg-gradient-to-r from-[#3B82F6]/10 to-[#60A5FA]/10 border-b border-[#333447]">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-gradient-to-r from-[#3B82F6] to-[#60A5FA] rounded-xl shadow-lg">
+              <History className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-zinc-100">
+                Bet History
+              </CardTitle>
+              <CardDescription className="text-lg text-zinc-400 flex items-center gap-2 mt-1">
+                <RiChatHistoryFill className="w-4 h-4 text-[#3B82F6]" />
                 {filteredBets.length} bets (completed and in progress)
-              </p>
+              </CardDescription>
             </div>
           </div>
-        </div>
+        </CardHeader>
 
-        <div className="flex gap-3 lg:w-1/2 md:w-3/4 w-full">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4" />
-            <Input
-              placeholder="Search markets"
-              className="pl-9 bg-[#333447] border-[#56577A] rounded-[10px] border-[3px] placeholder:text-white"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "bg-[#333447] border-[#56577A] hover:bg-slate-700 border-[3px] rounded-[10px]",
-                  date && "text-slate-50"
-                )}
-              >
-                <IoCalendar className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : "Select Date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-[#1C1C27] border-none rounded-[10px]">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
+        <CardContent className="p-8 space-y-8">
+          {/* Search and Filters */}
+          <div className="flex gap-4 lg:w-2/3 md:w-3/4 w-full">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-zinc-400" />
+              <Input
+                placeholder="Search by event name or market..."
+                className="pl-12 py-3 text-sm bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#3B82F6] hover:border-[#3B82F6]/50 transition-all duration-200 text-zinc-100 placeholder-zinc-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </PopoverContent>
-          </Popover>
-          
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            className="bg-[#333447] border-[#56577A] hover:bg-slate-700 border-[3px] rounded-[10px]"
-            disabled={!searchQuery && !date}
-          >
-            Clear
-          </Button>
-        </div>
+            </div>
 
-        <div className="">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-[450px]">
-              <div className="text-slate-400">Loading bet history...</div>
-            </div>
-          ) : error ? (
-            <div className="flex justify-center items-center h-[450px]">
-              <div className="text-red-500">
-                Error loading bet history: {error}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "px-6 py-3 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#3B82F6]/50 rounded-xl transition-all duration-200 flex items-center gap-3",
+                    date && "border-[#3B82F6]/50 bg-[#3B82F6]/10"
+                  )}
+                >
+                  <CalendarIcon className="h-5 w-5 text-[#3B82F6]" />
+                  <span className="text-zinc-300">
+                    {date ? format(date, "PPP") : "Select Date"}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl shadow-2xl">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={!searchQuery && !date}
+              className="px-6 py-3 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#E27625]/50 hover:bg-[#E27625]/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200 text-zinc-300 hover:text-white"
+            >
+              Clear Filters
+            </Button>
+          </div>
+
+          {/* Table Section */}
+          <div className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-xl overflow-hidden">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="animate-spin h-8 w-8 border-2 border-[#3B82F6] border-t-transparent rounded-full mb-4" />
+                <p className="text-zinc-400 text-lg">
+                  Loading your betting history...
+                </p>
               </div>
-            </div>
-          ) : (
-            <div className="max-h-[450px] overflow-auto">
-              <Table>
-                <TableHeader className="sticky top-0 z-10">
-                  <TableRow className="border-[#56577A] text-[#A0AEC0] font-medium lg:text-lg text-sm">
-                    <TableHead>EVENT NAME</TableHead>
-                    <TableHead>MARKET</TableHead>
-                    <TableHead>OUTCOME</TableHead>
-                    <TableHead>BET AMOUNT</TableHead>
-                    <TableHead>RESULT</TableHead>
-                    <TableHead>PROFIT/LOSS</TableHead>
-                    <TableHead>DATE</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredBets.length > 0 ? (
-                    filteredBets.map((bet) => (
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+                <p className="text-red-400 text-lg font-medium">
+                  Error loading bet history
+                </p>
+                <p className="text-zinc-500 text-sm">{error}</p>
+              </div>
+            ) : filteredBets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <History className="h-12 w-12 text-zinc-500 mb-4" />
+                <p className="text-zinc-400 text-lg font-medium">
+                  No betting history found
+                </p>
+                <p className="text-zinc-500 text-sm">
+                  Your completed bets will appear here
+                </p>
+              </div>
+            ) : (
+              <div className="max-h-[500px] overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-[#2A2A3A] to-[#1C1C27]">
+                    <TableRow className="border-b border-[#333447] hover:bg-transparent">
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Event
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Market
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Outcome
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Bet Amount
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Profit/Loss
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Status
+                      </TableHead>
+                      <TableHead className="text-zinc-300 font-semibold text-sm uppercase tracking-wide py-4">
+                        Date
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBets.map((bet, index) => (
                       <TableRow
                         key={bet.id}
-                        className="border-[#56577A] hover:bg-slate-800 lg:text-sm text-xs"
+                        className="border-b border-[#333447]/50 hover:bg-[#333447]/30 transition-colors duration-200"
                       >
-                        <TableCell>{bet.eventName}</TableCell>
-                        <TableCell>{bet.market}</TableCell>
-                        <TableCell>{bet.outcome}</TableCell>
-                        <TableCell className="text-slate-300">
-                          {bet.betAmount} ETH
+                        <TableCell className="py-4">
+                          <div className="font-medium text-zinc-100 truncate max-w-[200px]">
+                            {bet.eventName}
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-block px-3 py-2 rounded font-medium ${
-                              bet.result === "Won"
-                                ? "bg-[#00BD58] bg-opacity-15 text-green-500"
-                                : bet.result === "Lost"
-                                ? "bg-[#BF3A19] bg-opacity-15 text-red-500"
-                                : "bg-gray-500 bg-opacity-15 text-gray-400"
+                        <TableCell className="py-4">
+                          <div className="text-zinc-300 text-sm">
+                            {bet.market}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="text-zinc-300 text-sm font-medium">
+                            {bet.outcome}
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="font-mono text-zinc-100 font-medium">
+                            {bet.betAmount.toFixed(4)} ETH
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div
+                            className={`font-mono font-bold flex items-center gap-2 ${
+                              bet.profitLoss > 0
+                                ? "text-emerald-400"
+                                : bet.profitLoss < 0
+                                ? "text-red-400"
+                                : "text-zinc-400"
                             }`}
                           >
+                            {bet.profitLoss > 0 && (
+                              <TrendingUp className="w-4 h-4" />
+                            )}
+                            {bet.profitLoss < 0 && (
+                              <TrendingDown className="w-4 h-4" />
+                            )}
+                            {bet.profitLoss === 0 && (
+                              <Clock className="w-4 h-4" />
+                            )}
+                            {bet.profitLoss >= 0 ? "+" : ""}
+                            {bet.profitLoss.toFixed(4)} ETH
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Badge
+                            className={cn(
+                              "font-medium px-3 py-1 rounded-full text-xs border-0",
+                              bet.result === "Won" &&
+                                "bg-emerald-500/20 text-emerald-400",
+                              bet.result === "Lost" &&
+                                "bg-red-500/20 text-red-400",
+                              bet.result === "In Progress" &&
+                                "bg-yellow-500/20 text-yellow-400"
+                            )}
+                          >
+                            {bet.result === "Won" && (
+                              <Trophy className="w-3 h-3 mr-1" />
+                            )}
+                            {bet.result === "In Progress" && (
+                              <Clock className="w-3 h-3 mr-1" />
+                            )}
                             {bet.result}
-                          </span>
+                          </Badge>
                         </TableCell>
-                        <TableCell>
-                          <span
-                            className={
-                              bet.profitLoss > 0
-                                ? "text-green-500"
-                                : bet.profitLoss < 0
-                                ? "text-red-500"
-                                : "text-gray-400"
-                            }
-                          >
-                            {bet.profitLoss > 0 ? "+" : ""}
-                            {bet.profitLoss === 0 && bet.result === "In Progress" ? "-" : bet.profitLoss}
-                            {bet.result !== "In Progress" && " ETH"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="">
-                          {format(bet.date, "MMM dd, yyyy")}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
-                          >
-                            •••
-                          </Button>
+                        <TableCell className="py-4">
+                          <div className="text-zinc-400 text-sm">
+                            {format(bet.date, "MMM dd, yyyy 'at' HH:mm")}
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        className="h-[352px] text-center text-slate-400"
-                      >
-                        No bets found
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
-      </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

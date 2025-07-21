@@ -3,46 +3,67 @@ import { TeamLogo } from "./TeamLogo";
 
 export const PartnersSection: React.FC = () => {
   return (
-    <section className="flex justify-between items-start px-0 py-10 max-md:flex-wrap max-md:gap-10 max-md:justify-center max-sm:flex-col max-sm:items-center">
-      <div className="flex flex-col gap-5 items-center max-md:w-[45%] max-sm:w-full">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/10aa9e1e059968d814c37ab21c635859122974ed"
-          alt="Main partner"
-          className="rounded-md max-h-[63px]"
-        />
-        <h3 className="text-xs font-bold text-center">MAIN PARTNER</h3>
-      </div>
-      <div className="flex flex-col gap-5 items-center mt-5 max-md:w-[45%] max-sm:mt-3.5 max-sm:w-full">
-        <div className="flex gap-1.5 items-center">
-          <TeamLogo />
-          <div className="flex flex-col">
-            <div className="font-saira-stencil text-base">STAKEWISE</div>
-            <div className="text-xs font-bold">TEAM</div>
+    <section className="py-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Main Partner */}
+        <div className="bg-[#1C1C27] border border-gray-700/60 rounded-xl p-6 text-center hover:border-secondary/40 transition-all duration-300 hover:shadow-lg">
+          <div className="mb-4">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/10aa9e1e059968d814c37ab21c635859122974ed"
+              alt="Main partner"
+              className="rounded-md max-h-[63px] mx-auto opacity-80 hover:opacity-100 transition-opacity duration-300"
+            />
           </div>
+          <h3 className="text-xs font-bold text-dark-secondary uppercase tracking-wide">
+            Main Partner
+          </h3>
         </div>
-        <h3 className="text-xs font-bold text-center">
-          EXCLUSIVE TITLE PARTNER
-        </h3>
-      </div>
-      <div className="flex flex-col gap-2.5 items-center mt-1 max-md:w-[45%] max-sm:w-full">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/e1a5a3a68e7c90b892c997d639e9ca1e14e85395"
-          alt="Compliance partner"
-          className="rounded-md max-h-[63px]"
-        />
-        <h3 className="text-xs font-bold text-center">
-          COMPLIANCE AND LICENSING PARTNER
-        </h3>
-      </div>
-      <div className="flex flex-col gap-5 items-center pl-3 max-md:w-[45%] max-sm:w-full">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/fb40b4ea0d8864cf0ad13cb794b0bc414569795c"
-          alt="Betting partner"
-          className="rounded-md max-h-[63px]"
-        />
-        <h3 className="text-xs font-bold text-center">
-          OFFICIAL BETTING PARTNER
-        </h3>
+
+        {/* Exclusive Title Partner */}
+        <div className="bg-[#1C1C27] border border-gray-700/60 rounded-xl p-6 text-center hover:border-secondary/40 transition-all duration-300 hover:shadow-lg">
+          <div className="mb-4">
+            <div className="flex justify-center items-center space-x-2">
+              <TeamLogo />
+              <div className="text-left">
+                <div className="font-saira-stencil text-base text-white">
+                  STAKEWISE
+                </div>
+                <div className="text-xs font-bold text-secondary">TEAM</div>
+              </div>
+            </div>
+          </div>
+          <h3 className="text-xs font-bold text-dark-secondary uppercase tracking-wide">
+            Exclusive Title Partner
+          </h3>
+        </div>
+
+        {/* Compliance Partner */}
+        <div className="bg-[#1C1C27] border border-gray-700/60 rounded-xl p-6 text-center hover:border-secondary/40 transition-all duration-300 hover:shadow-lg">
+          <div className="mb-4">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/e1a5a3a68e7c90b892c997d639e9ca1e14e85395"
+              alt="Compliance partner"
+              className="rounded-md max-h-[63px] mx-auto opacity-80 hover:opacity-100 transition-opacity duration-300"
+            />
+          </div>
+          <h3 className="text-xs font-bold text-dark-secondary uppercase tracking-wide">
+            Compliance and Licensing Partner
+          </h3>
+        </div>
+
+        {/* Official Betting Partner */}
+        <div className="bg-[#1C1C27] border border-gray-700/60 rounded-xl p-6 text-center hover:border-secondary/40 transition-all duration-300 hover:shadow-lg">
+          <div className="mb-4">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/fb40b4ea0d8864cf0ad13cb794b0bc414569795c"
+              alt="Betting partner"
+              className="rounded-md max-h-[63px] mx-auto opacity-80 hover:opacity-100 transition-opacity duration-300"
+            />
+          </div>
+          <h3 className="text-xs font-bold text-dark-secondary uppercase tracking-wide">
+            Official Betting Partner
+          </h3>
+        </div>
       </div>
     </section>
   );

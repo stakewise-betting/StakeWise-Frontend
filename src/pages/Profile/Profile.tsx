@@ -1,7 +1,7 @@
 import ProfilePicture from "@/components/ProfileCom/ProfilePicture";
 import PersonalInfoForm from "@/components/ProfileCom/PersonalInfoForm";
 import ContactInfoForm from "@/components/ProfileCom/ContactInfoForm";
-// import AccountPreferences from "@/components/ProfileCom/AccountPreferences";
+import AccountPreferences from "@/components/ProfileCom/AccountPreferences";
 // import PrivacySettings from "@/components/ProfileCom/PrivacySettings";
 import PasswordSecurity from "@/components/ProfileCom/PasswordSecurity";
 import DangerZone from "@/components/ProfileCom/DangerZone";
@@ -35,10 +35,11 @@ export default function ProfileSettings() {
                 <ProfilePicture />
                 <PersonalInfoForm />
                 <ContactInfoForm />
+                <AccountPreferences />
                 <PasswordSecurity />
               </>
             ) : null}
-            
+
             {/* Always show DangerZone */}
             <DangerZone />
           </div>
@@ -46,4 +47,4 @@ export default function ProfileSettings() {
       </div>
     </motion.div>
   );
-};
+}

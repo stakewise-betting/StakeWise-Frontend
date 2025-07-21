@@ -62,65 +62,67 @@ export const EventListTable: React.FC<EventListTableProps> = ({
     // Removed outer space-y-4, padding/margins handled by parent or within this component
     <div className="w-full">
       {/* --- Search and Filter Controls - Revised Layout --- */}
-      <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-end items-center px-4 py-3 md:px-6 md:py-4 border-b border-gray-700/60 bg-primary/20">
-        {/* Search Input */}
-        <div className="relative w-full md:w-auto md:max-w-xs flex-grow md:flex-grow-0">
-          {" "}
-          {/* Grow on mobile, fixed on md+ */}
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-dark-secondary pointer-events-none" />
-          <Input
-            type="search"
-            placeholder="Search by name, ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full bg-primary/50 border-gray-600/80 text-dark-primary focus:border-secondary/60 focus:ring-1 focus:ring-secondary/30 rounded-md shadow-sm h-9" // Adjusted height
-          />
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center px-6 py-5 border-b border-gray-700/30 bg-[#1C1C27] backdrop-blur-sm">
+        <div className="flex items-center space-x-3">
+          <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+          <h2 className="text-lg font-semibold text-white">Event Overview</h2>
         </div>
-        {/* Filter Button */}
-        <Button
-          variant="outline"
-          size="sm" // Consistent small size
-          className="w-full md:w-auto bg-primary/40 border-gray-600/80 text-dark-secondary hover:text-dark-primary hover:bg-primary/60 rounded-md shadow-sm flex-shrink-0 h-9" // Added flex-shrink-0, adjusted height
-          // onClick={() => {/* Open filter modal/popover */}}
-        >
-          <Filter className="h-4 w-4 mr-2" />
-          Filter
-        </Button>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          {/* Search Input */}
+          <div className="relative flex-1 md:w-80">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+            <Input
+              type="search"
+              placeholder="Search events by name, ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-12 w-full bg-gray-800/20 border-gray-600/20 text-white placeholder:text-gray-300 focus:border-indigo-500/50 focus:ring-indigo-500/30 focus:bg-gray-800/30 rounded-xl font-medium shadow-lg backdrop-blur-sm hover:border-gray-500/30 hover:bg-gray-800/25 transition-all duration-300"
+            />
+          </div>
+
+          {/* Filter Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-12 bg-gradient-to-r from-secondary/20 to-secondary/10 border-secondary/40 text-secondary hover:from-secondary/30 hover:to-secondary/20 hover:border-secondary/60 transition-all duration-300 rounded-xl px-6 font-medium shadow-lg backdrop-blur-sm"
+          >
+            <Filter className="h-5 w-5 mr-2" />
+            Filters
+          </Button>
+        </div>
       </div>
       {/* --- End Search/Filter Controls --- */}
 
-      {/* Table Container - Added overflow-x-auto for horizontal scroll on smaller screens if table is too wide */}
-      <div className="overflow-x-auto bg-noise">
+      {/* Table Container - Improved responsive design */}
+      <div className="overflow-x-auto bg-[#1C1C27] rounded-xl border border-gray-700/30 backdrop-blur-sm">
         {/* The Table component itself */}
-        <Table className="w-full border-collapse text-sm text-dark-primary">
-          {/* No caption needed if info is elsewhere */}
-          {/* <TableCaption>...</TableCaption> */}
-
+        <Table className="w-full border-collapse text-sm text-white">
           {/* Header hidden on small screens, displayed as table header group on medium+ */}
-          <TableHeader className="hidden md:table-header-group [&_tr]:border-b [&_tr]:border-gray-700/60 bg-primary/10">
+          <TableHeader className="hidden md:table-header-group [&_tr]:border-b [&_tr]:border-gray-700/30 bg-[#1C1C27] backdrop-blur-sm">
             <TableRow className="hover:bg-transparent">
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[130px]">
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[100px]">
                 Status
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[110px]">
-                Event ID
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[80px]">
+                ID
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary min-w-[200px]">
-                Event Name
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 min-w-[180px]">
+                Event Details
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[150px]">
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[100px]">
                 Category
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[160px]">
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[110px]">
                 Start Date
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[130px]">
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[100px]">
                 Volume
               </TableHead>
-              <TableHead className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[160px]">
+              <TableHead className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[110px]">
                 Listed By
               </TableHead>
-              <TableHead className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-dark-secondary whitespace-nowrap w-[180px]">
+              <TableHead className="px-3 py-3 text-right text-xs font-bold uppercase tracking-wider text-indigo-300 whitespace-nowrap w-[120px]">
                 Actions
               </TableHead>
             </TableRow>
@@ -131,30 +133,35 @@ export const EventListTable: React.FC<EventListTableProps> = ({
               <TableRow className="block md:table-row hover:bg-transparent">
                 <TableCell
                   colSpan={8}
-                  className="block md:table-cell px-4 py-10 md:text-center"
+                  className="block md:table-cell px-6 py-12 md:text-center"
                 >
-                  <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
-                    <div className="p-3 rounded-full bg-primary/40 text-dark-secondary">
-                      <AlertCircle className="h-8 w-8" />
+                  <div className="flex flex-col items-center justify-center gap-6 py-12 text-center">
+                    <div className="relative">
+                      <div className="p-6 rounded-2xl bg-[#1C1C27] border border-gray-600/30">
+                        <AlertCircle className="h-12 w-12 text-slate-400 mx-auto" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"></div>
                     </div>
-                    <p className="text-dark-primary font-semibold mt-2">
-                      {searchTerm || Object.keys(activeFilters).length > 0
-                        ? "No events match filters"
-                        : "No events found"}
-                    </p>
-                    <p className="text-dark-secondary/70 text-sm max-w-xs">
-                      {searchTerm || Object.keys(activeFilters).length > 0
-                        ? "Try adjusting your search or filters."
-                        : "Check back later or create a new event."}
-                    </p>
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-bold text-white">
+                        {searchTerm || Object.keys(activeFilters).length > 0
+                          ? "No events match your criteria"
+                          : "No events found"}
+                      </h3>
+                      <p className="text-slate-400 max-w-md leading-relaxed">
+                        {searchTerm || Object.keys(activeFilters).length > 0
+                          ? "Try adjusting your search terms or filters to find what you're looking for."
+                          : "Get started by creating your first betting event. It only takes a few minutes!"}
+                      </p>
+                    </div>
                     {(searchTerm || Object.keys(activeFilters).length > 0) && (
                       <Button
-                        variant="link" // Use link variant for less emphasis
+                        variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setSearchTerm(""); /* clear filters */
+                          setSearchTerm("");
                         }}
-                        className="mt-2 text-secondary hover:text-secondary/80 h-auto p-0" // Link styling
+                        className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 hover:from-indigo-600/30 hover:to-purple-600/30 text-indigo-300 border border-indigo-500/30 rounded-lg px-6 py-2 font-medium transition-all duration-300"
                       >
                         Clear Search & Filters
                       </Button>
@@ -182,33 +189,41 @@ export const EventListTable: React.FC<EventListTableProps> = ({
       </div>
 
       {/* Pagination Controls (Optional - keep if needed) */}
-      {filteredEvents.length > 10 && ( // Example: show pagination if more than 10 items
-        <div className="flex flex-col sm:flex-row justify-between items-center px-4 py-3 md:px-6 md:py-4 border-t border-gray-700/60 text-xs md:text-sm text-dark-secondary gap-2">
-          <div>
-            Showing <span className="font-medium text-dark-primary">1</span>-
-            <span className="font-medium text-dark-primary">
+      {filteredEvents.length > 10 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-5 border-t border-gray-700/30 bg-[#1C1C27] text-sm gap-4 backdrop-blur-sm">
+          <div className="text-slate-300">
+            Showing{" "}
+            <span className="font-semibold text-white bg-gray-700/30 px-2 py-1 rounded-lg">
+              1
+            </span>{" "}
+            -{" "}
+            <span className="font-semibold text-white bg-gray-700/30 px-2 py-1 rounded-lg">
               {Math.min(filteredEvents.length, 10)}
             </span>{" "}
             of{" "}
-            <span className="font-medium text-dark-primary">
+            <span className="font-semibold text-emerald-300">
               {filteredEvents.length}
             </span>{" "}
-            results
+            events
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
               disabled
-              className="bg-primary/30 border-gray-700/40 text-dark-secondary h-8"
+              className="h-10 bg-gray-700/30 border-gray-600/30 text-gray-400 cursor-not-allowed rounded-lg px-4"
             >
               Previous
             </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+              <span className="text-white font-medium">Page 1</span>
+            </div>
             <Button
               variant="outline"
               size="sm"
               disabled
-              className="bg-primary/30 border-gray-700/40 text-dark-secondary h-8"
+              className="h-10 bg-gray-700/30 border-gray-600/30 text-gray-400 cursor-not-allowed rounded-lg px-4"
             >
               Next
             </Button>
