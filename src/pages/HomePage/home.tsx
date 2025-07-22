@@ -63,32 +63,39 @@ const Home = () => {
       options: string[]
     ): Promise<OptionOdds[] | null> => {
       try {
-        const oddsArray: OptionOdds[] = [];
-        const totalBets = await betContract.methods
-          .getTotalBetsForEvent(eventId)
+        console.log(`Fetching odds for event ${eventId}...`);
+
+        // Use the contract's getEventOdds method directly
+        const contractOdds = await betContract.methods
+          .getEventOdds(eventId)
           .call();
-        if (parseInt(totalBets) === 0) {
+        console.log(`Contract odds for event ${eventId}:`, contractOdds);
+
+        if (!contractOdds || contractOdds.length === 0) {
+          // If no odds data from contract, return equal odds for all options
+          console.log(
+            `No odds data from contract for event ${eventId}, using equal distribution`
+          );
           return options.map((option) => ({
             optionName: option,
             oddsPercentage: parseFloat((100 / options.length).toFixed(2)),
           }));
         }
-        for (const option of options) {
-          const optionBets = await betContract.methods
-            .getBetsForOption(eventId, option)
-            .call();
-          const percentage = (parseInt(optionBets) / parseInt(totalBets)) * 100;
-          oddsArray.push({
-            optionName: option,
-            oddsPercentage: parseFloat(percentage.toFixed(2)),
-          });
-        }
+
+        // Convert contract odds to our format
+        const oddsArray: OptionOdds[] = contractOdds.map((odd: any) => ({
+          optionName: odd.optionName,
+          oddsPercentage: parseFloat(Number(odd.oddsPercentage).toFixed(2)),
+        }));
+
+        console.log(`Processed odds for event ${eventId}:`, oddsArray);
         return oddsArray;
       } catch (error) {
-        console.error(`Error calculating odds for event ${eventId}:`, error);
+        console.error(`Error fetching odds for event ${eventId}:`, error);
+        // Return equal odds as fallback
         return options.map((option) => ({
           optionName: option,
-          oddsPercentage: 0,
+          oddsPercentage: parseFloat((100 / options.length).toFixed(2)),
         }));
       }
     },
@@ -98,20 +105,119 @@ const Home = () => {
   // Effect for initializing Web3 and loading events from blockchain
   useEffect(() => {
     const init = async () => {
-      if ((window as any).ethereum) {
-        try {
-          setIsBlockchainLoading(true);
-          const web3Instance = new Web3((window as any).ethereum);
-          setWeb3(web3Instance);
-          const betContract = new web3Instance.eth.Contract(
-            contractABI,
-            contractAddress
-          );
+      console.log("🚀 STARTING BLOCKCHAIN INITIALIZATION");
+      console.log("Environment variables:", {
+        VITE_RPC_URL: import.meta.env.VITE_RPC_URL,
+        VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+      });
 
+      try {
+        setIsBlockchainLoading(true);
+        console.log("Starting blockchain initialization...");
+
+        // Initialize Web3 with or without MetaMask
+        let web3Instance: Web3 | null = null;
+
+        if ((window as any).ethereum) {
+          // If MetaMask is available, use it
+          web3Instance = new Web3((window as any).ethereum);
+          console.log("Using MetaMask provider");
+        } else {
+          // If no MetaMask, use a public RPC endpoint for reading data
+          const rpcUrl =
+            import.meta.env.VITE_RPC_URL || "http://localhost:7545";
+
+          // Try alternative RPC endpoints if the primary one fails
+          const fallbackRpcUrls = [
+            rpcUrl,
+            "https://sepolia.infura.io/v3/",
+            "https://rpc.sepolia.org",
+            "https://eth-sepolia.public.blastapi.io",
+            "https://sepolia.gateway.tenderly.co",
+          ];
+
+          let web3InstanceCreated = false;
+          for (const testRpcUrl of fallbackRpcUrls) {
+            try {
+              console.log(`Trying RPC endpoint: ${testRpcUrl}`);
+              web3Instance = new Web3(testRpcUrl);
+
+              // Test the connection immediately
+              const testNetworkId = await web3Instance.eth.net.getId();
+              console.log(
+                `Successfully connected to ${testRpcUrl}, network ID: ${testNetworkId}`
+              );
+              web3InstanceCreated = true;
+              break;
+            } catch (rpcError) {
+              console.warn(`Failed to connect to ${testRpcUrl}:`, rpcError);
+              continue;
+            }
+          }
+
+          if (!web3InstanceCreated) {
+            throw new Error("Failed to connect to any RPC endpoint");
+          }
+
+          console.log("Using public RPC provider for reading blockchain data");
+        }
+
+        if (!web3Instance) {
+          throw new Error("Failed to initialize Web3 instance");
+        }
+
+        setWeb3(web3Instance);
+
+        // Test Web3 connection
+        try {
+          const networkId = await web3Instance.eth.net.getId();
+          console.log("Connected to network ID:", networkId);
+
+          // Also test getting the latest block to verify RPC is working
+          const latestBlock = await web3Instance.eth.getBlockNumber();
+          console.log("Latest block number:", latestBlock);
+
+          // Verify we're on Sepolia testnet (network ID should be 11155111)
+          if (networkId.toString() !== "11155111") {
+            console.warn(
+              `Warning: Connected to network ${networkId}, but contract is deployed on Sepolia (11155111)`
+            );
+          }
+        } catch (networkError) {
+          console.error("Network connection error:", networkError);
+          console.error("RPC URL being used:", import.meta.env.VITE_RPC_URL);
+          throw new Error("Failed to connect to blockchain network");
+        }
+
+        const betContract = new web3Instance.eth.Contract(
+          contractABI,
+          contractAddress
+        );
+        console.log("Contract initialized with address:", contractAddress);
+
+        // Check if contract exists at the address
+        try {
+          const contractCode = await web3Instance.eth.getCode(contractAddress);
+          if (contractCode === "0x") {
+            console.error("No contract found at address:", contractAddress);
+            throw new Error(
+              "Smart contract not deployed at the specified address"
+            );
+          } else {
+            console.log("Contract code found, length:", contractCode.length);
+          }
+        } catch (codeError) {
+          console.error("Error checking contract code:", codeError);
+          throw new Error("Failed to verify contract deployment");
+        }
+
+        try {
           const eventCountBigInt = await betContract.methods
             .nextEventId()
             .call();
           const eventCount = Number(eventCountBigInt);
+          console.log("Successfully retrieved event count:", eventCount);
+
           const fetchedEvents: EventData[] = [];
           const fetchedOddsMap: EventOddsMap = {};
           const currentTime = Math.floor(Date.now() / 1000);
@@ -153,15 +259,35 @@ const Home = () => {
           );
           setEvents(fetchedEvents);
           setEventOdds(fetchedOddsMap);
-        } catch (error) {
-          console.error("Error initializing blockchain/loading events:", error);
-          toast.error("Failed to load event data from blockchain.");
-        } finally {
-          setIsBlockchainLoading(false);
+          console.log(
+            `Successfully loaded ${fetchedEvents.length} events from blockchain`
+          );
+        } catch (contractError) {
+          console.error("Contract call error:", contractError);
+          throw new Error(
+            "Failed to call contract method. Contract may not be deployed or ABI mismatch."
+          );
         }
-      } else {
-        console.error("Ethereum provider not found. Please install MetaMask.");
-        toast.warn("MetaMask not found. Event loading may be affected.");
+      } catch (error) {
+        console.error("Error initializing blockchain/loading events:", error);
+
+        // Provide more specific error messages based on the error type
+        if (error instanceof Error) {
+          if (error.message.includes("network")) {
+            toast.error(
+              "Failed to connect to blockchain network. Please check your internet connection."
+            );
+          } else if (error.message.includes("contract")) {
+            toast.error(
+              "Smart contract not found or incompatible. Please contact support."
+            );
+          } else {
+            toast.error(`Blockchain error: ${error.message}`);
+          }
+        } else {
+          toast.error("Failed to load event data from blockchain.");
+        }
+      } finally {
         setIsBlockchainLoading(false);
       }
     };

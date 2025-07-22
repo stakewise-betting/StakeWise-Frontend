@@ -69,26 +69,35 @@ export default function Page() {
   // Load blockchain events
   useEffect(() => {
     const init = async () => {
-      if ((window as any).ethereum) {
-        try {
-          setIsLoading(true);
-          const web3Instance = new Web3((window as any).ethereum);
-          setWeb3(web3Instance);
-          const betContract = new web3Instance.eth.Contract(
-            contractABI,
-            contractAddress
+      try {
+        setIsLoading(true);
+        let web3Instance;
+
+        if ((window as any).ethereum) {
+          // If MetaMask is available, use it
+          web3Instance = new Web3((window as any).ethereum);
+          console.log("Using MetaMask provider");
+        } else {
+          // If no MetaMask, use a public RPC endpoint for reading data
+          const rpcUrl =
+            import.meta.env.VITE_RPC_URL || "http://localhost:7545";
+          web3Instance = new Web3(rpcUrl);
+          console.log(
+            "Using public RPC provider for reading blockchain data:",
+            rpcUrl
           );
-          await loadEvents(betContract);
-        } catch (error) {
-          console.error("Error initializing blockchain:", error);
-        } finally {
-          setIsLoading(false);
         }
-      } else {
-        setIsLoading(false);
-        console.error(
-          "Ethereum provider not found. Please install MetaMask or another provider."
+
+        setWeb3(web3Instance);
+        const betContract = new web3Instance.eth.Contract(
+          contractABI,
+          contractAddress
         );
+        await loadEvents(betContract);
+      } catch (error) {
+        console.error("Error initializing blockchain:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     init();
