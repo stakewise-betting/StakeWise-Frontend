@@ -67,7 +67,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setError(null);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/comments/${betId}`
+        `${import.meta.env.VITE_BACKEND_URL}/api/comments/${betId}`
       );
       // Sort comments by creation date, newest first
       const sortedComments = (res.data as Comment[]).sort(
@@ -92,12 +92,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setError(null);
     setIsPostingComment(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/comments", {
-        betId,
-        userId: currentUserId,
-        text: newComment,
-        parentId: null,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/comments`,
+        {
+          betId,
+          userId: currentUserId,
+          text: newComment,
+          parentId: null,
+        }
+      );
       const newRootComment: Comment = { ...res.data, replies: [] };
       setComments((prev) =>
         [newRootComment, ...prev].sort(
@@ -123,12 +126,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       }
       setError(null);
       try {
-        const res = await axios.post("http://localhost:5000/api/comments", {
-          betId,
-          userId: currentUserId,
-          text,
-          parentId,
-        });
+        const res = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/comments`,
+          {
+            betId,
+            userId: currentUserId,
+            text,
+            parentId,
+          }
+        );
         const newReply: Comment = { ...res.data, replies: [] };
         setComments((prevComments) =>
           addReplyToTree(prevComments, parentId, newReply)
@@ -168,7 +174,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/comments/${endpoint}/${commentId}`,
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/api/comments/${endpoint}/${commentId}`,
         { userId: currentUserId }
       );
       setComments((prevComments) =>
@@ -201,7 +209,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsDeleting(true);
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/comments/${commentToDelete}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/comments/${commentToDelete}`,
         { data: { userId: currentUserId } }
       );
       const deletedInfo = response.data.comment;
