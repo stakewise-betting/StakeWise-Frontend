@@ -5,6 +5,11 @@ import { toast } from 'sonner';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
+// Log the API URL for debugging
+console.log('AdminService API_URL:', API_URL);
+console.log('AdminService VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+console.log('AdminService admin baseURL:', `${API_URL}/admin`);
+
 const getAuthToken = (): string | undefined => {
     const token = Cookies.get('authToken');
     return token;
