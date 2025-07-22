@@ -8,7 +8,6 @@ import { EventsPage } from "@/Admin/events/EventsPage"; // Updated path to match
 import UserManagementPage from "@/Admin/users/UserManagementPage"; // Updated to use the correct alias path
 import RafflesPage from "@/Admin/raffles/RafflesPage"; // Import the new RafflesPage component
 import SliderPage from "./slider/slider";
-// import setupWeb3AndContract from "@/services/blockchainService";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -76,18 +75,55 @@ const AdminPanel: React.FC = () => {
     import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"; // Use VITE_API_BASE_URL and append /api
   console.log("Using Backend API URL:", backendBaseUrl);
 
+  // Configure axios defaults for admin requests
+  useEffect(() => {
+    // Set global axios defaults for admin panel
+    axios.defaults.withCredentials = true;
+
+    // Add request interceptor to ensure all requests include credentials
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        config.withCredentials = true;
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Add response interceptor to handle auth errors consistently
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.error("Admin authentication failed:", error.response.data);
+          // You might want to redirect to login page here
+          toast.error("Admin authentication failed. Please login as admin.");
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Cleanup interceptors on unmount
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
+
   // --- Fetch User Count ---
   const fetchUserCount = useCallback(async () => {
     setLoadingUsers(true);
     console.log("Fetching user count...");
     try {
-      // Use the adminService function if available, otherwise keep direct axios call
-      // Example using direct axios (ensure cookies/auth are handled):
-      axios.defaults.withCredentials = true; // Or handle token via headers
+      // Use consistent authentication approach with proper headers
       const response = await axios.get<AdminUserCountApiResponse>(
-        `${backendBaseUrl}/admin/user-count` // Ensure this endpoint matches your backend routes
-        // Add Authorization header if using token-based auth
-        // headers: { 'Authorization': `Bearer ${your_token}` }
+        `${backendBaseUrl}/admin/user-count`,
+        {
+          withCredentials: true, // Ensure cookies are sent
+          headers: {
+            "Content-Type": "application/json",
+            // If your backend expects specific headers, add them here
+          },
+        }
       );
 
       // Adjust based on the actual response structure from /api/admin/user-count
