@@ -1,8 +1,10 @@
 import axios from 'axios';
-const API_URL = import.meta.env.VITE_BACKEND_URL + '/api';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://stakewisebackend.onrender.com';
+const API_URL = `${BACKEND_URL}/api`;
 
 // For safety you can supply a fallback:
-const baseURL = API_URL ?? 'http://localhost:4000/api';
+const baseURL = API_URL;
+console.log("ContactService using API URL:", baseURL);
 
 export const api = axios.create({
   baseURL,

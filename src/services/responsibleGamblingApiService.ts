@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL + '/api';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://stakewisebackend.onrender.com';
+const API_URL = `${BACKEND_URL}/api`;
+console.log("ResponsibleGamblingService using API URL:", API_URL);
 
 const responsibleGamblingApi = axios.create({
   baseURL: `${API_URL}/responsible-gambling`,
