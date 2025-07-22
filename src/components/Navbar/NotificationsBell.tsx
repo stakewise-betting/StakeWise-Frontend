@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { Bell } from "lucide-react";
 import { AppContext } from "@/context/AppContext";
 import { Notification as NotificationType } from "./navbar.types";
-import { formatTimestamp } from "./navbar.utils";
+// import { formatTimestamp } from "./navbar.utils";
 import { Button } from "@/components/ui/button";
 
 const NotificationsBell: React.FC = () => {
@@ -240,7 +240,7 @@ const NotificationsBell: React.FC = () => {
       }
     };
 
-    ws.current.onclose = (e) => {
+    ws.current.onclose = () => {
       if (ws.current) {
         ws.current = null;
       } else {
