@@ -163,6 +163,16 @@ const UserProfileDropdown: React.FC = () => {
         <DropdownMenuItem
           className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
           onClick={() => {
+            navigate("/admin");
+            setProfileOpen(false);
+          }}
+        >
+          <LayoutDashboard className="h-4 w-4 mr-3 text-secondary" />
+          <span className="font-medium">Admin</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1"
+          onClick={() => {
             navigate("/results");
             setProfileOpen(false);
           }}
