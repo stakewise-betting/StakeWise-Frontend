@@ -8,7 +8,8 @@ import { EventsPage } from "@/Admin/events/EventsPage"; // Updated path to match
 import UserManagementPage from "@/Admin/users/UserManagementPage"; // Updated to use the correct alias path
 import RafflesPage from "@/Admin/raffles/RafflesPage"; // Import the new RafflesPage component
 import SliderPage from "./slider/slider";
-import setupWeb3AndContract from "@/services/blockchainService";
+// import setupWeb3AndContract from "@/services/blockchainService";
+import { contractABI, contractAddress } from "@/config/contractConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { RecentBet } from "@/Admin/dashboard/RecentBetsTable"; // Corrected path, Import the RecentBet type
@@ -317,15 +318,73 @@ const AdminPanel: React.FC = () => {
     setLoadingUsers(true); // Reset loading state for user count
     setLoadingRecentBets(true); // Reset loading state for bets
     setError(null);
-    console.log("Initiating data fetch...");
+    console.log("Initiating admin panel data fetch...");
 
     // Start user count fetch immediately (non-blocking)
     fetchUserCount();
 
-    // Initialize Web3 and Contract
-    console.log("Initializing Web3 and Contract...");
+    // Initialize Web3 and Contract with fallback for admin panel
+    console.log("Initializing Web3 and Contract for admin panel...");
     try {
-      const { web3Instance, betContract } = await setupWeb3AndContract();
+      // Initialize Web3 with or without MetaMask (same pattern as home page)
+      let web3Instance: Web3 | null = null;
+
+      if ((window as any).ethereum) {
+        // If MetaMask is available, use it
+        web3Instance = new Web3((window as any).ethereum);
+        console.log("Admin panel using MetaMask provider");
+      } else {
+        // If no MetaMask, use a public RPC endpoint for reading data
+        const rpcUrl = import.meta.env.VITE_RPC_URL || "http://localhost:7545";
+
+        // Try alternative RPC endpoints if the primary one fails
+        const fallbackRpcUrls = [
+          rpcUrl,
+          // "https://rpc.sepolia.org",
+          "https://eth-sepolia.public.blastapi.io",
+          "https://sepolia.gateway.tenderly.co",
+        ];
+
+        let web3InstanceCreated = false;
+        for (const testRpcUrl of fallbackRpcUrls) {
+          try {
+            console.log(`Admin panel trying RPC endpoint: ${testRpcUrl}`);
+            web3Instance = new Web3(testRpcUrl);
+
+            // Test the connection immediately
+            const testNetworkId = await web3Instance.eth.net.getId();
+            console.log(
+              `Admin panel connected to ${testRpcUrl}, network ID: ${testNetworkId}`
+            );
+            web3InstanceCreated = true;
+            break;
+          } catch (rpcError) {
+            console.warn(
+              `Admin panel failed to connect to ${testRpcUrl}:`,
+              rpcError
+            );
+            continue;
+          }
+        }
+
+        if (!web3InstanceCreated || !web3Instance) {
+          throw new Error("Failed to connect to any RPC endpoint");
+        }
+
+        console.log(
+          "Admin panel using public RPC provider for reading blockchain data"
+        );
+      }
+
+      if (!web3Instance) {
+        throw new Error("Failed to initialize Web3 instance");
+      }
+
+      const betContract = new web3Instance.eth.Contract(
+        contractABI as any,
+        contractAddress
+      );
+
       setWeb3(web3Instance);
       setContract(betContract);
 
@@ -336,10 +395,10 @@ const AdminPanel: React.FC = () => {
 
       setRaffleContract(null); // For now, until you have the actual contract
 
-      console.log("Web3 and Contract setup complete.");
+      console.log("Admin panel Web3 and Contract setup complete.");
 
       if (betContract && web3Instance) {
-        console.log("Fetching blockchain data...");
+        console.log("Fetching blockchain data for admin panel...");
 
         // Fetch core stats, events, and recent bets concurrently
         await Promise.all([
@@ -353,15 +412,15 @@ const AdminPanel: React.FC = () => {
                   betContract.methods.getTotalBetsPlaced().call(),
                 ]);
               const adminProfitEth = web3Instance.utils.fromWei(
-                adminProfitWei,
+                String(adminProfitWei || "0"),
                 "ether"
               );
               const totalBetsEth = web3Instance.utils.fromWei(
-                totalBetsWei,
+                String(totalBetsWei || "0"),
                 "ether"
               );
               setAdminProfit(adminProfitEth);
-              setAdminAddress(adminAddr);
+              setAdminAddress(String(adminAddr || ""));
               setTotalBetsPlacedValue(totalBetsEth);
               console.log("Admin Profit:", adminProfitEth, "ETH");
               console.log("Admin Address:", adminAddr);
@@ -378,16 +437,25 @@ const AdminPanel: React.FC = () => {
           fetchRecentBets(betContract, web3Instance),
         ]);
 
-        console.log("Blockchain data fetch complete.");
+        console.log("Admin panel blockchain data fetch complete.");
       } else {
-        console.error("Failed to initialize contract or web3 instance.");
+        console.error(
+          "Failed to initialize contract or web3 instance for admin panel."
+        );
         setError((prev) => prev || "Failed to connect to blockchain services.");
-        toast.error("Failed to initialize Web3 or Smart Contract connection.");
+        toast.error(
+          "Failed to initialize Web3 or Smart Contract connection for admin panel."
+        );
       }
     } catch (err: any) {
-      console.error("Initialization or Blockchain fetch failed:", err);
-      setError((prev) => prev || `Initialization failed: ${err.message}`);
-      toast.error(`Initialization failed: ${err.message}`);
+      console.error(
+        "Admin panel initialization or blockchain fetch failed:",
+        err
+      );
+      setError(
+        (prev) => prev || `Admin panel initialization failed: ${err.message}`
+      );
+      toast.error(`Admin panel initialization failed: ${err.message}`);
     } finally {
       // Loading states for users and bets are handled in their respective functions
       setLoadingBlockchain(false); // Mark blockchain part as done
