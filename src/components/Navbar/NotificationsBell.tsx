@@ -118,7 +118,7 @@ const NotificationsBell: React.FC = () => {
     };
   }, []);
 
-  // --- Calculate Unread Count (derived state) ---
+  /// --- Calculate Unread Count (derived state) ---
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // --- EFFECT: Mark As Read When Panel Opens ---
