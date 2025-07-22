@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Web3 from "web3";
+import { toast } from "react-toastify";
 import BetInterface from "@/components/BetInterface/BetInterface";
 import BetSlip from "@/components/BetSlip/BetSlip";
 import CountdownTimer from "@/components/CountdownTimer/CountdownTimer";
@@ -55,23 +56,73 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   useEffect(() => {
     const init = async () => {
-      if ((window as any).ethereum) {
-        try {
-          const web3Instance = new Web3((window as any).ethereum);
-          const betContract = new web3Instance.eth.Contract(
-            contractABI,
-            contractAddress
+      try {
+        console.log("Initializing BetDetails page...");
+
+        // Initialize Web3 with or without MetaMask
+        let web3Instance: Web3 | null = null;
+
+        if ((window as any).ethereum) {
+          // If MetaMask is available, use it
+          web3Instance = new Web3((window as any).ethereum);
+          console.log("Using MetaMask provider for BetDetails");
+        } else {
+          // If no MetaMask, use a public RPC endpoint for reading data
+          const rpcUrl =
+            import.meta.env.VITE_RPC_URL || "http://localhost:7545";
+
+          // Try alternative RPC endpoints if the primary one fails
+          const fallbackRpcUrls = [
+            rpcUrl,
+            // "https://rpc.sepolia.org",
+            "https://eth-sepolia.public.blastapi.io",
+            "https://sepolia.gateway.tenderly.co",
+          ];
+
+          let web3InstanceCreated = false;
+          for (const testRpcUrl of fallbackRpcUrls) {
+            try {
+              console.log(`Trying RPC endpoint for BetDetails: ${testRpcUrl}`);
+              web3Instance = new Web3(testRpcUrl);
+
+              // Test the connection immediately
+              const testNetworkId = await web3Instance.eth.net.getId();
+              console.log(
+                `BetDetails connected to ${testRpcUrl}, network ID: ${testNetworkId}`
+              );
+              web3InstanceCreated = true;
+              break;
+            } catch (rpcError) {
+              console.warn(`Failed to connect to ${testRpcUrl}:`, rpcError);
+              continue;
+            }
+          }
+
+          if (!web3InstanceCreated) {
+            throw new Error("Failed to connect to any RPC endpoint");
+          }
+
+          console.log(
+            "Using public RPC provider for reading event data in BetDetails"
           );
-          setWeb3(web3Instance);
-          setContract(betContract);
-          await loadEventData(betContract, eventIdParam);
-        } catch (initError: any) {
-          console.error("Failed to initialize Web3:", initError);
-          setError("Failed to initialize Web3. Please check console.");
-          setLoading(false);
         }
-      } else {
-        setError("Ethereum wallet not detected. Please install MetaMask.");
+
+        if (!web3Instance) {
+          throw new Error("Failed to initialize Web3 instance");
+        }
+
+        const betContract = new web3Instance.eth.Contract(
+          contractABI,
+          contractAddress
+        );
+        setWeb3(web3Instance);
+        setContract(betContract);
+        await loadEventData(betContract, eventIdParam);
+      } catch (initError: any) {
+        console.error("Failed to initialize Web3 for BetDetails:", initError);
+        setError(
+          "Failed to connect to blockchain. Please check your internet connection."
+        );
         setLoading(false);
       }
     };
@@ -110,7 +161,16 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
   };
 
   const handleBet = async () => {
-    if (!web3 || !contract || !eventData || !selectedOption || !amount) return;
+    if (!web3 || !contract || !eventData || !selectedOption || !amount) {
+      // Check specifically if it's a wallet issue
+      if (!web3 || !(window as any).ethereum) {
+        toast.warn(
+          "Please connect a wallet (MetaMask) to place bets. You can view event details without a wallet, but betting requires a connected wallet."
+        );
+        return;
+      }
+      return;
+    }
 
     // Don't proceed if limit is exceeded
     if (limitExceeded) {
@@ -120,19 +180,28 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
     try {
       const accounts = await web3.eth.getAccounts();
+      if (accounts.length === 0) {
+        toast.warn("Please connect your wallet to place bets.");
+        return;
+      }
+
       await contract.methods.placeBet(eventData.eventId, selectedOption).send({
         from: accounts[0],
         value: web3.utils.toWei(amount, "ether"),
       });
       // Record the bet in your database for deposit limit tracking
       await responsibleGamblingService.recordBet(parseFloat(amount));
-      alert("Bet placed successfully!");
+      toast.success("Bet placed successfully!");
       await loadEventData(contract, eventIdParam);
       // Reset amount after successful bet
       setAmount("");
     } catch (betError: any) {
       console.error("Failed to place bet:", betError);
-      setError("Bet placement failed. Please check console for details.");
+      if (betError.message?.includes("User denied")) {
+        toast.error("Transaction was cancelled by user.");
+      } else {
+        toast.error("Bet placement failed. Please try again.");
+      }
     }
   };
 

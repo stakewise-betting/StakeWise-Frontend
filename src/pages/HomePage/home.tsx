@@ -130,8 +130,8 @@ const Home = () => {
           // Try alternative RPC endpoints if the primary one fails
           const fallbackRpcUrls = [
             rpcUrl,
-            "https://sepolia.infura.io/v3/",
-            "https://rpc.sepolia.org",
+            // "https://sepolia.infura.io/v3/",
+            // "https://rpc.sepolia.org",
             "https://eth-sepolia.public.blastapi.io",
             "https://sepolia.gateway.tenderly.co",
           ];
