@@ -178,6 +178,7 @@ export default function WatchListPage() {
             event.options
           ).then((odds) => ({ eventId: String(event.eventId), odds }))
         // .catch((err) => ({ eventId: String(event.eventId), odds: null }))
+        //test
       );
 
       try {
