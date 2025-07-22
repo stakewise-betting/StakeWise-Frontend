@@ -3,7 +3,11 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+// Use VITE_BACKEND_URL and append /api, fallback to production URL instead of localhost
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://stakewisebackend.onrender.com';
+const API_URL = `${BACKEND_URL}/api`;
+
+console.log('AdminService using API_URL:', API_URL);
 
 // Log the API URL for debugging
 console.log('AdminService API_URL:', API_URL);
