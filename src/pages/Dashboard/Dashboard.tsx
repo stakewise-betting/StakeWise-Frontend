@@ -18,8 +18,8 @@ import { Users, Activity } from "lucide-react";
 
 const Dashboard = () => {
   const { userData } = useContext(AppContext)!;
-  const userId = userData?.id;
-  const wsUrl = `${import.meta.env.VITE_WEBSOCKET_URL}/?userId=${userId}`;
+  // const userId = userData?.id;
+  // const wsUrl = `${import.meta.env.VITE_WEBSOCKET_URL}/?userId=${userId}`;
 
   // Get user statistics
   const {
@@ -93,7 +93,7 @@ const Dashboard = () => {
                         ? "MetaMask User"
                         : "Welcome Back")}
                   </h2>
-                  <OnlineUsersWS wsUrl={wsUrl} />
+                  {/* <OnlineUsersWS wsUrl={wsUrl} /> */}
                 </div>
 
                 <p className="text-lg text-zinc-400 font-medium">
