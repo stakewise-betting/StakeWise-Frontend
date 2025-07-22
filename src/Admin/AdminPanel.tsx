@@ -72,8 +72,9 @@ const AdminPanel: React.FC = () => {
 
   // --- Backend URL ---
   const backendBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"; // Use VITE_API_BASE_URL and append /api
-  console.log("Using Backend API URL:", backendBaseUrl);
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"; // Use VITE_BACKEND_URL
+  const apiUrl = `${backendBaseUrl}/api`;
+  console.log("Using Backend API URL:", apiUrl);
 
   // Configure axios defaults for admin requests
   useEffect(() => {
@@ -116,7 +117,7 @@ const AdminPanel: React.FC = () => {
     try {
       // Use consistent authentication approach with proper headers
       const response = await axios.get<AdminUserCountApiResponse>(
-        `${backendBaseUrl}/admin/user-count`,
+        `${apiUrl}/admin/user-count`,
         {
           withCredentials: true, // Ensure cookies are sent
           headers: {
@@ -156,7 +157,7 @@ const AdminPanel: React.FC = () => {
     } finally {
       setLoadingUsers(false);
     }
-  }, [backendBaseUrl]);
+  }, [apiUrl]);
 
   // --- Load Events List --- (Assumed correct from previous state)
   const loadEvents = useCallback(
@@ -194,7 +195,7 @@ const AdminPanel: React.FC = () => {
                 try {
                   // Fetch associated backend data for the event
                   const response = await axios.get(
-                    `${backendBaseUrl}/events/${eventId}`
+                    `${apiUrl}/events/${eventId}`
                   );
                   if (response.status === 200 && response.data) {
                     backendData = response.data; // Assuming response.data is the event object
@@ -260,7 +261,7 @@ const AdminPanel: React.FC = () => {
         toast.error("Failed to load events list from contract.");
       }
     },
-    [backendBaseUrl] // Dependency on backendBaseUrl for fetching associated data
+    [apiUrl] // Dependency on apiUrl for fetching associated data
   );
 
   // --- Fetch Recent Bets --- (Assumed correct from previous state)
