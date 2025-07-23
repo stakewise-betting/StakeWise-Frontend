@@ -130,32 +130,20 @@ export default function WatchListPage() {
   useEffect(() => {
     const initWeb3 = async () => {
       try {
-        let web3Instance;
-
         if (window.ethereum) {
-          // If MetaMask is available, use it
-          web3Instance = new Web3(window.ethereum);
-          console.log("Using MetaMask provider");
+          const web3Instance = new Web3(window.ethereum);
+          setWeb3(web3Instance);
+          try {
+            const contract = new web3Instance.eth.Contract(
+              contractABI,
+              contractAddress
+            );
+            setBetContract(contract);
+          } catch (contractError) {
+            console.error("Error creating contract instance:", contractError);
+          }
         } else {
-          // If no MetaMask, use a public RPC endpoint for reading data
-          const rpcUrl =
-            import.meta.env.VITE_RPC_URL || "http://localhost:7545";
-          web3Instance = new Web3(rpcUrl);
-          console.log(
-            "Using public RPC provider for reading blockchain data:",
-            rpcUrl
-          );
-        }
-
-        setWeb3(web3Instance);
-        try {
-          const contract = new web3Instance.eth.Contract(
-            contractABI,
-            contractAddress
-          );
-          setBetContract(contract);
-        } catch (contractError) {
-          console.error("Error creating contract instance:", contractError);
+          console.log("No Ethereum browser extension detected");
         }
       } catch (error) {
         console.error("Web3 initialization error:", error);
@@ -190,7 +178,6 @@ export default function WatchListPage() {
             event.options
           ).then((odds) => ({ eventId: String(event.eventId), odds }))
         // .catch((err) => ({ eventId: String(event.eventId), odds: null }))
-        //test
       );
 
       try {
