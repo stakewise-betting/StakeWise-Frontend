@@ -1,4 +1,4 @@
-// StakeWise-Frontend/src/Admin/users/UserTable.tsx (Create this new file and folder)
+// StakeWise-Frontend/src/Admin/users/UserTable.tsx
 import React from "react";
 import {
   Table,
@@ -7,24 +7,26 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table"; // Assuming you have these shadcn table components
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trash2 } from "lucide-react";
-import { format } from "date-fns"; // For date formatting
-import { IUser } from "@/types/user.types"; // Adjust path if needed
-import { toast } from "sonner"; // Or react-toastify
+import { Trash2, UserCog } from "lucide-react";
+import { format } from "date-fns";
+import { IUser } from "@/types/user.types";
+import { toast } from "sonner";
 
 interface UserTableProps {
   users: IUser[];
-  onDeleteUser: (userId: string) => Promise<void>; // Function to handle deletion
-  deletingUserId: string | null; // Track which user is being deleted
+  onDeleteUser: (userId: string) => Promise<void>;
+  onChangeRole: (user: IUser) => void;
+  deletingUserId: string | null;
 }
 
 const UserTable: React.FC<UserTableProps> = ({
   users,
   onDeleteUser,
+  onChangeRole,
   deletingUserId,
 }) => {
   const getUserInitials = (user: IUser): string => {
@@ -39,11 +41,10 @@ const UserTable: React.FC<UserTableProps> = ({
     if (user.email) {
       return user.email[0].toUpperCase();
     }
-    return "?"; // Fallback
+    return "?";
   };
 
   const handleDeleteClick = (userId: string, userIdentifier: string) => {
-    // Basic confirmation
     if (
       window.confirm(
         `Are you sure you want to delete user: ${userIdentifier}? This action cannot be undone.`
@@ -60,11 +61,11 @@ const UserTable: React.FC<UserTableProps> = ({
   ): "secondary" | "outline" | "default" | "destructive" => {
     switch (provider) {
       case "google":
-        return "destructive"; // Example color
+        return "destructive";
       case "metamask":
-        return "secondary"; // Example color
+        return "secondary";
       case "credentials":
-        return "outline"; // Example color
+        return "outline";
       default:
         return "default";
     }
@@ -76,8 +77,6 @@ const UserTable: React.FC<UserTableProps> = ({
     switch (role) {
       case "admin":
         return "destructive";
-      case "moderator":
-        return "secondary";
       case "user":
       default:
         return "outline";
@@ -160,8 +159,6 @@ const UserTable: React.FC<UserTableProps> = ({
                 variant={user.isAccountVerified ? "default" : "secondary"}
                 className="capitalize"
               >
-                {" "}
-                {/* Assuming you have these variants */}
                 {user.isAccountVerified ? "Yes" : "No"}
               </Badge>
             </TableCell>
@@ -169,27 +166,42 @@ const UserTable: React.FC<UserTableProps> = ({
               {format(new Date(user.createdAt), "MMM d, yyyy")}
             </TableCell>
             <TableCell className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() =>
-                  handleDeleteClick(
-                    user._id,
-                    user.username ||
-                      user.email ||
-                      user.walletAddress ||
-                      user._id
-                  )
-                }
-                disabled={deletingUserId === user._id} // Disable button while deleting this specific user
-                className="px-2 py-1 h-auto" // Adjust padding for smaller size
-              >
-                {deletingUserId === user._id ? (
-                  <span className="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4 mr-1"></span> // Simple spinner
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </Button>
+              <div className="flex items-center gap-2 justify-end">
+                {/* Role Change Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onChangeRole(user)}
+                  className="px-2 py-1 h-auto border-gray-600 text-dark-secondary hover:bg-gray-800"
+                  title="Change Role"
+                >
+                  <UserCog className="h-4 w-4" />
+                </Button>
+                
+                {/* Delete Button */}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() =>
+                    handleDeleteClick(
+                      user._id,
+                      user.username ||
+                        user.email ||
+                        user.walletAddress ||
+                        user._id
+                    )
+                  }
+                  disabled={deletingUserId === user._id}
+                  className="px-2 py-1 h-auto"
+                  title="Delete User"
+                >
+                  {deletingUserId === user._id ? (
+                    <span className="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-4 w-4"></span>
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}

@@ -188,9 +188,11 @@ export const getUserTransactions = async (): Promise<Transaction[]> => {
     toBlock: "latest",
   });
 
+  // Process each bet placed by the user
   for (const event of betPlacedEvents) {
     const eventId = event.returnValues.eventId;
     const amount = event.returnValues.amount;
+    const option = event.returnValues.option;
     const txHash = event.transactionHash;
     const block = await web3Instance.eth.getBlock(event.blockNumber);
     const date = new Date(Number(block.timestamp) * 1000);
@@ -210,47 +212,49 @@ export const getUserTransactions = async (): Promise<Transaction[]> => {
     });
 
     // Check if event is completed and user won
-    if (eventDetails.isCompleted) {
-      const userBet = await betContract.methods
-        .getUserBet(eventId, userAddress)
-        .call();
-      if (userBet.option === eventDetails.winningOption) {
-        // Fetch all bets for this event to calculate totalWinnersBetAmount
-        const allBets = await betContract.getPastEvents("BetPlaced", {
+    if (eventDetails.isCompleted && eventDetails.winningOption === option) {
+      // Look for WinnerDeclared event for this specific event
+      const winnerEvents = await betContract.getPastEvents("WinnerDeclared", {
+        filter: { eventId },
+        fromBlock: 0,
+        toBlock: "latest",
+      });
+
+      if (winnerEvents.length > 0) {
+        const winnerEvent = winnerEvents[0];
+        const winnerTxHash = winnerEvent.transactionHash;
+        const winnerBlock = await web3Instance.eth.getBlock(
+          winnerEvent.blockNumber
+        );
+        const winnerDate = new Date(Number(winnerBlock.timestamp) * 1000);
+
+        // Calculate the user's winnings
+        // Get all bets for this event to calculate total winners bet amount
+        const allEventBets = await betContract.getPastEvents("BetPlaced", {
           filter: { eventId },
           fromBlock: 0,
           toBlock: "latest",
         });
-        let totalWinnersBetAmount = 0;
-        for (const bet of allBets) {
+
+        let totalWinnersBetAmount = BigInt(0);
+        for (const bet of allEventBets) {
           if (bet.returnValues.option === eventDetails.winningOption) {
-            totalWinnersBetAmount += Number(bet.returnValues.amount);
+            totalWinnersBetAmount += BigInt(bet.returnValues.amount);
           }
         }
 
-        // Calculate winnings
-        const adminFee = (Number(eventDetails.prizePool) * 5) / 100;
-        const remainingPrizePool = Number(eventDetails.prizePool) - adminFee;
-        const winnerReward =
-          (Number(amount) * remainingPrizePool) / totalWinnersBetAmount;
-        const winnerRewardEth = web3Instance.utils.fromWei(
-          winnerReward.toString(),
-          "ether"
-        );
-
-        // Get WinnerDeclared event
-        const winnerEvents = await betContract.getPastEvents("WinnerDeclared", {
-          filter: { eventId },
-          fromBlock: 0,
-          toBlock: "latest",
-        });
-        if (winnerEvents.length > 0) {
-          const winnerEvent = winnerEvents[0];
-          const winnerTxHash = winnerEvent.transactionHash;
-          const winnerBlock = await web3Instance.eth.getBlock(
-            winnerEvent.blockNumber
+        if (totalWinnersBetAmount > 0) {
+          // Calculate winnings (same logic as in smart contract)
+          const prizePool = BigInt(eventDetails.prizePool);
+          const adminFee = (prizePool * BigInt(5)) / BigInt(100);
+          const remainingPrizePool = prizePool - adminFee;
+          const userBetAmount = BigInt(amount);
+          const winnerReward = (userBetAmount * remainingPrizePool) / totalWinnersBetAmount;
+          
+          const winnerRewardEth = web3Instance.utils.fromWei(
+            winnerReward.toString(),
+            "ether"
           );
-          const winnerDate = new Date(Number(winnerBlock.timestamp) * 1000);
 
           transactions.push({
             date: winnerDate,
@@ -264,8 +268,8 @@ export const getUserTransactions = async (): Promise<Transaction[]> => {
     }
   }
 
-  // Sort by date
-  transactions.sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Sort by date (newest first)
+  transactions.sort((a, b) => b.date.getTime() - a.date.getTime());
   return transactions;
 };
 

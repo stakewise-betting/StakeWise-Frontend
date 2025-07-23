@@ -223,7 +223,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
       if (!newOpen) resetForm();
       onOpenChange(newOpen);
     }}>
-      <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-[#333447] border-gray-700/60 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Create New Raffle Draw</DialogTitle>
           <DialogDescription>
@@ -244,7 +244,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   placeholder="Summer Crypto Giveaway"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border border-gray-600/70 text-white"
                   required
                 />
                 <p className="text-sm text-gray-400">A catchy name for your raffle draw</p>
@@ -259,7 +259,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   placeholder="Enter a detailed description of the raffle..."
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full min-h-[120px] px-3 py-2 rounded-md bg-gray-800 border border-gray-700 text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full min-h-[120px] px-3 py-2 rounded-md bg-card border border-gray-700 text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   required
                 />
                 <p className="text-sm text-gray-400">Describe the raffle and its prize in detail</p>
@@ -273,7 +273,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   name="category"
                   value={formData.category}
                   onChange={handleInputChange}
-                  className="w-full rounded-md bg-gray-800 border border-gray-700 text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full rounded-md bg-card border border-gray-700 text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 >
                   <option value="General">General</option>
                   <option value="Crypto">Crypto</option>
@@ -293,14 +293,14 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e, 'main')}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                 />
                 <p className="text-sm text-gray-400">Upload an image to represent the raffle (max 5MB)</p>
                 
                 {imagePreview && (
                   <div className="mt-4">
                     <p className="text-sm mb-2">Preview:</p>
-                    <div className="w-full h-32 rounded-md overflow-hidden bg-gray-800 border border-gray-700">
+                    <div className="w-full h-32 rounded-md overflow-hidden bg-card border border-gray-700">
                       <img
                         src={imagePreview}
                         alt="Raffle Preview"
@@ -323,7 +323,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   type="datetime-local"
                   value={formData.startTime}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                   min={formatDateForInput(new Date())}
                   required
                 />
@@ -339,7 +339,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   type="datetime-local"
                   value={formData.endTime}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                   min={formatDateForInput(new Date())}
                   required
                 />
@@ -358,7 +358,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   placeholder="0.01"
                   value={formData.ticketPrice}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                   required
                 />
                 <p className="text-sm text-gray-400">Cost per ticket in ETH</p>
@@ -376,7 +376,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   placeholder="0.5"
                   value={formData.prizeAmount}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                   required
                 />
                 <p className="text-sm text-gray-400">Total prize amount in ETH</p>
@@ -391,7 +391,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   placeholder="A new exciting raffle is here!"
                   value={formData.notificationMessage}
                   onChange={handleInputChange}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                 />
                 <p className="text-sm text-gray-400">Message to display in notifications</p>
               </div>
@@ -404,7 +404,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e, 'notification')}
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-card border-gray-700"
                 />
                 <p className="text-sm text-gray-400">Image to display in notifications (max 5MB)</p>
                 

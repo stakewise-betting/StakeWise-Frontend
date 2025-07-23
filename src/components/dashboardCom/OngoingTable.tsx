@@ -24,7 +24,7 @@ export default function OngoingTable(): JSX.Element {
   };
 
   return (
-    <div className="rounded-[20px] lg:mx-24 md:mx-16 mx-8 bg-[#333447]">
+    <div className="rounded-[20px] lg:mx-24 md:mx-16 mx-8 bg-[#333447] min-h-[500px]">
       <div className="p-8 flex justify-between items-start">
         <div>
           <h2 className="text-[20px] font-bold">In-Progress Bets</h2>

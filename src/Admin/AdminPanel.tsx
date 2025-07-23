@@ -328,14 +328,14 @@ const AdminPanel: React.FC = () => {
       const { web3Instance, betContract } = await setupWeb3AndContract();
       setWeb3(web3Instance);
       setContract(betContract);
-      
+
       // Initialize Raffle Contract - This would need to be adapted based on how you setup your raffle contract
       // For now, we'll just set it to null but in a real implementation you'd initialize it here
       // const raffleContractInstance = new web3Instance.eth.Contract(raffleContractABI, raffleContractAddress);
       // setRaffleContract(raffleContractInstance);
-      
+
       setRaffleContract(null); // For now, until you have the actual contract
-      
+
       console.log("Web3 and Contract setup complete.");
 
       if (betContract && web3Instance) {
@@ -417,14 +417,14 @@ const AdminPanel: React.FC = () => {
     toast.info("Event winner declared, refreshing data...");
     refreshAllData();
   }, [refreshAllData]);
-  
+
   // --- Raffle Event Handlers ---
   const handleRaffleCreated = useCallback(() => {
     console.log("Raffle created handler triggered. Refreshing data.");
     toast.info("New raffle created, refreshing data...");
     refreshAllData();
   }, [refreshAllData]);
-  
+
   const handleRaffleWinnerSelected = useCallback(() => {
     console.log("Raffle winner selected handler triggered. Refreshing data.");
     toast.info("Raffle winner selected, refreshing data...");
@@ -538,7 +538,7 @@ const AdminPanel: React.FC = () => {
         ) : (
           <div className="p-6">Loading Events Data...</div>
         );
-        
+
       case "raffles":
         // RafflesPage needs web3 for contract interaction
         return web3 ? (

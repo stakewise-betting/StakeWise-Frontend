@@ -24,6 +24,8 @@ import ResetPassword from "./pages/userAuth/ResetPassword";
 import EmailVerify from "./pages/userAuth/EmailVerify";
 import News from "./pages/News/News";
 import Reward from "./pages/Reward/Reward";
+//import Reward from "./pages/New_RaffleMain/Raffle";
+
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse/TermsOfUse";
 import WatchList from "./pages/WatchList/WatchList";
@@ -31,6 +33,7 @@ import SelfAssessmentPage from "./pages/SelfAssessment/SelfAssessmentPage";
 import Unauthorized from "./pages/Unauthorized/Unauthorized";
 import RoleRoute from "./components/RouteGuard/RoleRoute";
 import NotFound from "./pages/NotFound/NotFound";
+import LeaderboardPage from "./pages/Leaderboard/LeaderboardPage";
 
 function Layout() {
   const location = useLocation();
@@ -64,6 +67,7 @@ function Layout() {
     "/self-assessment",
     "/watchlist",
     "/admin",
+    "/leaderboard",
   ];
 
   // Check if current path matches any valid route (ignoring dynamic routes)
@@ -88,6 +92,7 @@ function Layout() {
         <Route path="/news" element={<News />} />
         <Route path="/contactus" element={<ContactUs />} />
         <Route path="/reward" element={<Reward />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-use" element={<TermsOfUse />} />
 
