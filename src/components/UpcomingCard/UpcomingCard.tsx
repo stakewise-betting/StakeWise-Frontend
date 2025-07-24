@@ -1,4 +1,6 @@
-import { FC } from "react";
+//components/UpcomingCard/UpcomingCard.tsx
+import { FC, useState, useEffect } from "react";
+import axios from "axios";
 import { Share2, Calendar, Clock, MapPin, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
@@ -15,7 +17,6 @@ interface BlockchainEvent {
   interestedCount: number;
   isUserInterested: boolean;
   tags: string[];
-  category: string;
   onInterestedClick: (eventId: string) => void;
 }
 
@@ -37,10 +38,27 @@ export const UpcomingCard: FC<EventCardProps> = ({ event, currentUserId }) => {
   const eventStartTime = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const venue = "Venue not specified"; // Replace with event.venue when available
   const description = event.description;
-  const category = event.category || "Event";
+  const [category, setCategory] = useState("Event");
   const interested = event.interestedCount || 0;
   const isInterested = event.isUserInterested || false;
   
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const response = await axios.get(`/api/events/${event.eventId}`);
+        if (response.data && response.data.category) {
+          setCategory(response.data.category);
+        }
+      } catch (error) {
+        console.error("Error fetching event category:", error);
+      }
+    };
+
+    if (event.eventId) {
+      fetchCategory();
+    }
+  }, [event.eventId]);
+
   // --- Time Remaining Calculation ---
   const formatTimeRemaining = () => {
     const currentTime = Date.now();
@@ -84,9 +102,9 @@ export const UpcomingCard: FC<EventCardProps> = ({ event, currentUserId }) => {
   };
 
   return (
-    <div className="bg-[#1C1C27] rounded-none border-t border-[#8488AC]">
+    <div className="bg-[#1C1C27] rounded-none border-t border-[#8488AC] transition-all duration-300 hover:bg-[#2A2A3C] hover:shadow-lg ">
       <CardContent className="p-6">
-        <div className="grid gap-6 md:grid-cols-[240px,1fr]">
+        <div className="grid gap-6 md:grid-cols-[240px,1fr] ">
           {/* Image Column */}
           <div className="relative">
             <img
