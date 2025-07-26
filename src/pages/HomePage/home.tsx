@@ -32,12 +32,23 @@ type EventOddsMap = {
   [eventId: string]: OptionOdds[] | null;
 };
 
-const slides = [
-  { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
-  { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
-  { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
-  { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
-];
+// Interface for slider data from database
+interface SliderData {
+  _id: string;
+  heading: string;
+  description: string;
+  status: string;
+  addedDate: string;
+  order: number;
+}
+
+// Interface for slider slides used by AutoSlider component
+interface SliderSlide {
+  src: string;
+  alt: string;
+  heading?: string;
+  description?: string;
+}
 
 const Home = () => {
   const [web3, setWeb3] = useState<Web3 | null>(null);
@@ -50,10 +61,63 @@ const Home = () => {
     EventData[]
   >([]);
 
+  // Slider states
+  const [slides, setSlides] = useState<SliderSlide[]>([]);
+  const [isSliderLoading, setIsSliderLoading] = useState(true);
+
   // Filter states
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isNewFilterActive, setIsNewFilterActive] = useState<boolean>(false);
+
+  // Function to fetch slider data from database
+  const fetchSliderData = useCallback(async () => {
+    try {
+      setIsSliderLoading(true);
+      console.log("Fetching slider data from database...");
+
+      const response = await axios.get("/api/sliders/active-sliders");
+      console.log("Slider API response:", response.data);
+
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        const sliderSlides: SliderSlide[] = response.data.map(
+          (slider: SliderData) => ({
+            src: `/api/sliders/image/${slider._id}`,
+            alt: slider.heading || "Slider Image",
+            heading: slider.heading,
+            description: slider.description,
+          })
+        );
+
+        setSlides(sliderSlides);
+        console.log(
+          `Successfully loaded ${sliderSlides.length} slider images from database`
+        );
+      } else {
+        console.log("No active sliders found, using fallback images");
+        // Fallback to hardcoded images if no database images are available
+        setSlides([
+          { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
+          { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
+          { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
+          { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching slider data:", error);
+      toast.error("Failed to load slider images");
+
+      // Use fallback images on error
+      setSlides([
+        { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
+        { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
+        { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
+        { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
+      ]);
+    } finally {
+      setIsSliderLoading(false);
+    }
+  }, []);
 
   // Function to calculate odds
   const calculateEventOdds = useCallback(
@@ -101,6 +165,11 @@ const Home = () => {
     },
     []
   );
+
+  // Effect for fetching slider data on component mount
+  useEffect(() => {
+    fetchSliderData();
+  }, [fetchSliderData]);
 
   // Effect for initializing Web3 and loading events from blockchain
   useEffect(() => {
@@ -430,7 +499,13 @@ const Home = () => {
   return (
     <div>
       <section className="mb-2">
-        <AutoSlider slides={slides} interval={5000} height={400} />
+        {isSliderLoading ? (
+          <div className="flex justify-center items-center h-[400px] bg-gray-100">
+            <p className="text-gray-500">Loading slider images...</p>
+          </div>
+        ) : (
+          <AutoSlider slides={slides} interval={5000} height={400} />
+        )}
       </section>
       <FilterBar onFilterChange={handleFilterChange} />
       <div className="flex flex-col w-full items-center mt-8">
