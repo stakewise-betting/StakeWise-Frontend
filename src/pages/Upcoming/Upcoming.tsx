@@ -204,21 +204,23 @@ export default function Page() {
   }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1C1C27] via-[#1E1E2E] to-[#1C1C27] px-[100px] py-8">
-      {/* Header Section */}
-      <div className="mb-8">
-        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-[#1C1C27] via-[#1E1E2E] to-[#1C1C27] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[100px] py-6 sm:py-8">
+      {/* Header Section - Mobile Responsive */}
+      <div className="mb-6 sm:mb-8">
+        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+          <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent mb-2 text-center sm:text-left">
             Upcoming Events
           </h1>
-          <p className="text-[#A1A1AA] text-lg">
+          <p className="text-[#A1A1AA] text-sm sm:text-base lg:text-lg text-center sm:text-left leading-relaxed">
             Discover and participate in exciting upcoming betting events
           </p>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[280px,1fr]">
-        <div className="space-y-6">
+      {/* Main Content Grid - Mobile Responsive */}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[280px,1fr]">
+        {/* Sidebar - Hidden on mobile, collapsible on tablet */}
+        <div className="hidden lg:block space-y-6">
           <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
@@ -235,9 +237,28 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="space-y-6">
+
+        {/* Main Content */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Mobile Filters Section */}
+          <div className="lg:hidden bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
+              Filters
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {filterItems.map((filter, index) => (
+                <FilterSidebar
+                  key={index}
+                  title={filter.title}
+                  items={filter.items}
+                />
+              ))}
+            </div>
+          </div>
+
           {/* Search and Filter Section */}
-          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
+          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
             <SearchAndFilterSection
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -245,12 +266,12 @@ export default function Page() {
           </div>
 
           {/* Events Section */}
-          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl shadow-xl border border-[#333447] overflow-hidden">
+          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl shadow-xl border border-[#333447] overflow-hidden">
             {isLoading ? (
-              <div className="text-center py-16">
+              <div className="text-center py-12 sm:py-16 px-4">
                 <div className="inline-flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#E27625] border-t-transparent"></div>
-                  <p className="text-[#A1A1AA] text-lg">
+                  <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-[#E27625] border-t-transparent"></div>
+                  <p className="text-[#A1A1AA] text-sm sm:text-base lg:text-lg">
                     Loading upcoming events from blockchain...
                   </p>
                 </div>
@@ -274,12 +295,14 @@ export default function Page() {
                     );
                   })
                 ) : (
-                  <div className="text-center py-16">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <h3 className="text-xl font-semibold text-white mb-2">
+                  <div className="text-center py-12 sm:py-16 px-4">
+                    <div className="text-4xl sm:text-5xl lg:text-6xl mb-3 sm:mb-4">
+                      🎯
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                       No Upcoming Events
                     </h3>
-                    <p className="text-[#A1A1AA] max-w-md mx-auto">
+                    <p className="text-[#A1A1AA] text-sm sm:text-base max-w-md mx-auto leading-relaxed">
                       No upcoming events found. Check back later or explore
                       current events on the homepage.
                     </p>
@@ -289,8 +312,9 @@ export default function Page() {
             )}
           </div>
 
+          {/* Pagination */}
           {!isLoading && filteredEvents.length > 0 && (
-            <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
+            <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
