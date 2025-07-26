@@ -7,7 +7,6 @@ import {
   TrendingDown,
   Clock,
   Trophy,
-  AlertCircle,
 } from "lucide-react";
 import {
   Table,
@@ -236,6 +235,9 @@ export default function BetHistory() {
     return matchesSearch && matchesDate;
   });
 
+  // If wallet is not connected, bets will be empty and error may be set
+  // Suppress wallet connection errors and show empty state instead
+  const isWalletError = error && error.toLowerCase().includes("wallet");
   const isLoading = loading || calculationLoading;
 
   return (
@@ -316,15 +318,7 @@ export default function BetHistory() {
                   Loading your betting history...
                 </p>
               </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-                <p className="text-red-400 text-lg font-medium">
-                  Error loading bet history
-                </p>
-                <p className="text-zinc-500 text-sm">{error}</p>
-              </div>
-            ) : filteredBets.length === 0 ? (
+            ) : isWalletError || filteredBets.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <History className="h-12 w-12 text-zinc-500 mb-4" />
                 <p className="text-zinc-400 text-lg font-medium">

@@ -7,7 +7,6 @@ import {
   TrendingUp,
   TrendingDown,
   Clock,
-  AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -202,23 +201,8 @@ export default function TransactionTable() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
-        <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl">
-          <CardContent className="p-16">
-            <div className="flex flex-col items-center justify-center">
-              <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-              <p className="text-red-400 text-lg font-medium">
-                Error loading transactions
-              </p>
-              <p className="text-zinc-500 text-sm">{error}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Suppress wallet connection errors and show empty state instead
+  const isWalletError = error && error.toLowerCase().includes("wallet");
 
   return (
     <div className="lg:mx-24 md:mx-16 mx-8 mb-[96px]">
@@ -432,7 +416,7 @@ export default function TransactionTable() {
                   </TableBody>
                 </Table>
               </div>
-            ) : (
+            ) : isWalletError || paginatedTransactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <CreditCard className="h-12 w-12 text-zinc-500 mb-4" />
                 <p className="text-zinc-400 text-lg font-medium">
@@ -442,7 +426,7 @@ export default function TransactionTable() {
                   No transactions match the selected filters
                 </p>
               </div>
-            )}
+            ) : null}
           </div>
 
           {/* Pagination Section */}

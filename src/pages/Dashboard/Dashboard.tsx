@@ -11,17 +11,14 @@ import { AppContext } from "@/context/AppContext";
 import { useContext } from "react";
 import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 import StatCard from "@/components/dashboardCom/StatCard";
-// import OnlineUsersWS from "@/components/OnlineUsersWS/OnlineUsersWS";
 import { useUserStats } from "@/hooks/useUserStats";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Activity } from "lucide-react";
+import { Users, Activity, Wallet } from "lucide-react";
 
 const Dashboard = () => {
   const { userData } = useContext(AppContext)!;
-  // const userId = userData?.id;
-  // const wsUrl = `${import.meta.env.VITE_WEBSOCKET_URL}/?userId=${userId}`;
 
-  // Get user statistics
+  // Get user statistics (now works without wallet connection)
   const {
     totalEarned,
     totalLoss,
@@ -32,6 +29,9 @@ const Dashboard = () => {
     loading: statsLoading,
     error: statsError,
   } = useUserStats();
+
+  // Check if wallet is connected
+  const isWalletConnected = Boolean(userData?.walletAddress);
 
   // Format numbers for display
   const formatNumber = (num: number, decimals: number = 4) => {
@@ -93,7 +93,6 @@ const Dashboard = () => {
                         ? "MetaMask User"
                         : "Welcome Back")}
                   </h2>
-                  {/* <OnlineUsersWS wsUrl={wsUrl} /> */}
                 </div>
 
                 <p className="text-lg text-zinc-400 font-medium">
@@ -116,6 +115,14 @@ const Dashboard = () => {
                       Verified Account
                     </span>
                   </div>
+                  {!isWalletConnected && (
+                    <div className="px-4 py-2 bg-gradient-to-r from-[#F59E0B]/20 to-[#FBBF24]/20 border border-[#F59E0B]/30 rounded-full">
+                      <span className="text-[#F59E0B] font-medium text-sm flex items-center gap-2">
+                        <Wallet className="w-4 h-4" />
+                        Connect Wallet for Full Features
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -138,8 +145,8 @@ const Dashboard = () => {
                 <div className="h-4 bg-zinc-600 rounded w-1/3"></div>
               </div>
             ))
-          ) : statsError ? (
-            // Error state
+          ) : statsError && isWalletConnected ? (
+            // Only show error state if wallet is connected but there's still an error
             <div className="col-span-full">
               <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl">
                 <CardContent className="p-16">
@@ -154,13 +161,17 @@ const Dashboard = () => {
               </Card>
             </div>
           ) : (
-            // Real statistics
+            // Show statistics (default zeros for non-connected wallets)
             <>
               <StatCard
                 title="Total Earned"
                 value={`${formatNumber(totalEarned)} ETH`}
                 percentage={
-                  totalEarned > 0 ? `+${formatNumber(totalEarned)}` : "0%"
+                  !isWalletConnected
+                    ? ""
+                    : totalEarned > 0
+                    ? `+${formatNumber(totalEarned)}`
+                    : "0%"
                 }
                 icon={<GiReceiveMoney className="h-7 w-7" />}
                 iconColor="#10B981"
@@ -170,7 +181,11 @@ const Dashboard = () => {
                 title="Total Loss"
                 value={`${formatNumber(totalLoss)} ETH`}
                 percentage={
-                  totalLoss > 0 ? `-${formatNumber(totalLoss)}` : "0%"
+                  !isWalletConnected
+                    ? ""
+                    : totalLoss > 0
+                    ? `-${formatNumber(totalLoss)}`
+                    : "0%"
                 }
                 icon={<BsGraphDownArrow className="h-7 w-7" />}
                 iconColor="#EF4444"
@@ -178,10 +193,16 @@ const Dashboard = () => {
 
               <StatCard
                 title="Net Profit"
-                value={`${netProfit >= 0 ? "+" : ""}${formatNumber(
-                  netProfit
-                )} ETH`}
-                percentage={`${winRate.toFixed(1)}% Win Rate`}
+                value={
+                  !isWalletConnected
+                    ? "-- ETH"
+                    : `${netProfit >= 0 ? "+" : ""}${formatNumber(
+                        netProfit
+                      )} ETH`
+                }
+                percentage={
+                  !isWalletConnected ? "" : `${winRate.toFixed(1)}% Win Rate`
+                }
                 icon={
                   netProfit >= 0 ? (
                     <BsGraphUpArrow className="h-7 w-7" />
@@ -194,9 +215,11 @@ const Dashboard = () => {
 
               <StatCard
                 title="Total Bets Placed"
-                value={totalBetsPlaced.toString()}
+                value={!isWalletConnected ? "--" : totalBetsPlaced.toString()}
                 percentage={
-                  totalAmountWagered > 0
+                  !isWalletConnected
+                    ? ""
+                    : totalAmountWagered > 0
                     ? `${formatNumber(totalAmountWagered)} ETH Wagered`
                     : "No bets"
                 }
@@ -208,7 +231,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Dashboard Components */}
+      {/* Dashboard Components - These should now work without wallet connection */}
       <OngoingTable />
       <Achievements />
       <BetHistory />

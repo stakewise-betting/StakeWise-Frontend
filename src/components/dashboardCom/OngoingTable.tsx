@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Clock, RefreshCw, Activity, AlertCircle } from "lucide-react";
+import { Clock, RefreshCw, Activity } from "lucide-react";
 import { useUserBets, UserBet } from "@/hooks/useUserBets";
 import {
   Card,
@@ -32,6 +32,8 @@ export default function OngoingTable(): JSX.Element {
     setTimeout(() => setRefreshing(false), 1000); // Visual feedback
   };
 
+  // Suppress wallet connection errors and show empty state instead
+  const isWalletError = error && error.toLowerCase().includes("wallet");
   return (
     <div className="lg:mx-24 md:mx-16 mx-8 mb-16">
       <Card className="bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden">
@@ -69,24 +71,14 @@ export default function OngoingTable(): JSX.Element {
         </CardHeader>
 
         <CardContent className="p-8">
-          {error ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
-              <p className="text-red-400 text-lg font-medium">
-                Error loading active bets
-              </p>
-              <p className="text-zinc-500 text-sm mt-2">
-                {error}. Please make sure your wallet is connected.
-              </p>
-            </div>
-          ) : loading ? (
+          {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="animate-spin h-8 w-8 border-2 border-[#F59E0B] border-t-transparent rounded-full mb-4" />
               <p className="text-zinc-400 text-lg">
                 Loading your active bets...
               </p>
             </div>
-          ) : inProgressBets.length === 0 ? (
+          ) : isWalletError || inProgressBets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Clock className="h-12 w-12 text-zinc-500 mb-4" />
               <p className="text-zinc-400 text-lg font-medium">

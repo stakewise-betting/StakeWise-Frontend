@@ -307,43 +307,45 @@ const NotificationsBell: React.FC = () => {
         onClick={() => setNotificationsOpen(!notificationsOpen)}
         aria-label="Toggle Notifications"
       >
-        <Bell className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
+        <Bell className="!w-4 !h-4 xs:!w-5 xs:!h-5 sm:!w-6 sm:!h-6" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-secondary to-secondary/80 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold shadow-lg shadow-secondary/30 animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-secondary to-secondary/80 text-white text-xs rounded-full w-4 h-4 xs:w-5 xs:h-5 flex items-center justify-center font-semibold shadow-lg shadow-secondary/30 animate-pulse">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </Button>
 
       {notificationsOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-card border border-gray-700/60 rounded-xl shadow-2xl shadow-black/50 mr-2 z-50 overflow-hidden">
-          <div className="p-4 flex justify-between items-center border-b border-gray-700/60 bg-gradient-to-r from-secondary/5 to-transparent">
-            <h3 className="font-bold text-lg text-dark-primary flex items-center gap-2">
-              <Bell className="h-5 w-5 text-secondary" />
-              Notifications
+        <div className="absolute right-0 mt-3 w-[calc(100vw-2rem)] max-w-64 xs:max-w-72 sm:w-80 md:w-96 lg:w-[400px] bg-card border border-gray-700/60 rounded-xl shadow-2xl shadow-black/50 mr-2 xs:mr-4 z-50 overflow-hidden max-h-[85vh] sm:max-h-[80vh]">
+          <div className="p-3 xs:p-4 flex justify-between items-center border-b border-gray-700/60 bg-gradient-to-r from-secondary/5 to-transparent">
+            <h3 className="font-bold text-base xs:text-lg text-dark-primary flex items-center gap-2">
+              <Bell className="h-4 w-4 xs:h-5 xs:w-5 text-secondary" />
+              <span className="hidden xs:inline">Notifications</span>
+              <span className="xs:hidden">Alerts</span>
             </h3>
             {notifications.length > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-sm text-secondary hover:text-secondary/80 font-medium transition-colors duration-200 hover:underline"
+                className="text-xs xs:text-sm text-secondary hover:text-secondary/80 font-medium transition-colors duration-200 hover:underline whitespace-nowrap"
               >
-                Mark all read
+                <span className="hidden xs:inline">Mark all read</span>
+                <span className="xs:hidden">Mark all</span>
               </button>
             )}
           </div>
-          <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
+          <div className="max-h-64 xs:max-h-72 sm:max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-500">
             {notifications.length > 0 ? (
-              <div className="p-2">
+              <div className="p-1 xs:p-2">
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`p-3 flex items-start space-x-3 rounded-lg transition-all duration-200 mb-2 last:mb-0 ${
+                    className={`p-2 xs:p-3 flex items-start space-x-2 xs:space-x-3 rounded-lg transition-all duration-200 mb-1 xs:mb-2 last:mb-0 ${
                       !n.read
                         ? "bg-secondary/10 border border-secondary/20 shadow-sm"
                         : "bg-primary/20 hover:bg-secondary/5"
                     } ${
                       n.eventId
-                        ? "cursor-pointer hover:bg-secondary/10 hover:border-secondary/30 hover:shadow-md"
+                        ? "cursor-pointer hover:bg-secondary/10 hover:border-secondary/30 hover:shadow-md active:bg-secondary/15"
                         : "cursor-default"
                     }`}
                     onClick={() => handleNotificationClick(n)}
@@ -354,13 +356,13 @@ const NotificationsBell: React.FC = () => {
                       <div className="flex-shrink-0">
                         <img
                           src={n.notificationImageURL}
-                          className="w-10 h-10 rounded-full border-2 border-gray-700/60 object-cover"
+                          className="w-8 h-8 xs:w-10 xs:h-10 rounded-full border-2 border-gray-700/60 object-cover"
                           alt="Notification"
                         />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-dark-primary text-sm font-medium leading-relaxed">
+                      <p className="text-dark-primary text-xs xs:text-sm font-medium leading-relaxed break-words">
                         {n.message}
                       </p>
                       {n.timestamp && (
@@ -370,22 +372,22 @@ const NotificationsBell: React.FC = () => {
                       )}
                     </div>
                     {!n.read && (
-                      <div className="flex-shrink-0 mt-2">
-                        <span className="w-2 h-2 bg-secondary rounded-full block shadow-sm"></span>
+                      <div className="flex-shrink-0 mt-1 xs:mt-2">
+                        <span className="w-1.5 h-1.5 xs:w-2 xs:h-2 bg-secondary rounded-full block shadow-sm"></span>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <Bell className="h-8 w-8 text-secondary/50" />
+              <div className="p-6 xs:p-8 text-center">
+                <div className="w-12 h-12 xs:w-16 xs:h-16 mx-auto mb-3 xs:mb-4 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <Bell className="h-6 w-6 xs:h-8 xs:w-8 text-secondary/50" />
                 </div>
-                <p className="text-dark-secondary text-base font-medium mb-2">
+                <p className="text-dark-secondary text-sm xs:text-base font-medium mb-2">
                   No notifications yet
                 </p>
-                <p className="text-dark-secondary/70 text-sm">
+                <p className="text-dark-secondary/70 text-xs xs:text-sm">
                   Stay tuned for updates and important announcements
                 </p>
               </div>
