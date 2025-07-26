@@ -148,6 +148,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <Eye className="h-5 w-5 text-secondary" />
                 <span>Watch List</span>
               </Link>
+              <Link
+                to="/deposit"
+                className="flex items-center space-x-3 p-3 sm:p-4 rounded-xl text-[#8488AC] hover:text-secondary hover:bg-secondary/10 transition-all duration-300 border border-transparent hover:border-secondary/20 hover:shadow-md font-medium"
+                onClick={() => onLinkClick()}
+              >
+                <Wallet className="h-5 w-5 text-secondary" />
+                <span>Deposit</span>
+              </Link>
 
               {!userData.isAccountVerified && (
                 <button

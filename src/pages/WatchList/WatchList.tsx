@@ -207,39 +207,68 @@ export default function WatchListPage() {
   const renderContent = () => {
     if (!isLoggedin) {
       return (
-        <p className="text-gray-400 text-center mt-10">
-          Please log in to view your watchlist
-        </p>
+        <div className="text-center py-12 sm:py-16">
+          <div className="text-4xl sm:text-5xl lg:text-6xl mb-4">🔒</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+            Login Required
+          </h3>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Please log in to view your watchlist
+          </p>
+        </div>
       );
     }
     if (isWatchlistLoading && !watchlistError) {
       return (
-        <p className="text-gray-400 text-center mt-10">Loading watchlist...</p>
+        <div className="text-center py-12 sm:py-16">
+          <div className="inline-flex items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-2 border-orange-500 border-t-transparent"></div>
+            <p className="text-gray-400 text-sm sm:text-base">
+              Loading watchlist...
+            </p>
+          </div>
+        </div>
       );
     }
     if (watchlistError) {
       return (
-        <p className="text-red-500 text-center mt-10">
-          Error: {watchlistError}
-        </p>
+        <div className="text-center py-12 sm:py-16">
+          <div className="text-4xl sm:text-5xl lg:text-6xl mb-4">❌</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+            Error Loading Watchlist
+          </h3>
+          <p className="text-red-500 text-sm sm:text-base">{watchlistError}</p>
+        </div>
       );
     }
     if (filteredEvents.length === 0) {
       if (searchQuery) {
         return (
-          <p className="text-gray-400 text-center mt-10">
-            No watchlist events match your search.
-          </p>
+          <div className="text-center py-12 sm:py-16">
+            <div className="text-4xl sm:text-5xl lg:text-6xl mb-4">🔍</div>
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+              No Results Found
+            </h3>
+            <p className="text-gray-400 text-sm sm:text-base">
+              No watchlist events match your search.
+            </p>
+          </div>
         );
       }
       return (
-        <p className="text-gray-400 text-center mt-10">
-          Your watchlist is empty. Add events using the star icon!
-        </p>
+        <div className="text-center py-12 sm:py-16">
+          <div className="text-4xl sm:text-5xl lg:text-6xl mb-4">⭐</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
+            Empty Watchlist
+          </h3>
+          <p className="text-gray-400 text-sm sm:text-base max-w-md mx-auto">
+            Your watchlist is empty. Add events using the star icon!
+          </p>
+        </div>
       );
     }
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 md:gap-6">
         {filteredEvents.map((event) => (
           <BettingCard
             key={event.eventId}
@@ -261,10 +290,18 @@ export default function WatchListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1C1C27] px-[100px] py-8">
-      <h1 className="text-4xl font-bold text-white mb-8">Watch List</h1>
-      <div className="grid gap-6 md:grid-cols-[240px,1fr]">
-        <div className="space-y-6 text-[#ffffff]">
+    <div className="min-h-screen bg-[#1C1C27] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[100px] py-6 sm:py-8">
+      {/* Header Section - Mobile Responsive */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center sm:text-left">
+          Watch List
+        </h1>
+      </div>
+
+      {/* Main Content Grid - Mobile Responsive */}
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-[240px,1fr]">
+        {/* Sidebar - Hidden on mobile, visible on desktop */}
+        <div className="hidden md:block space-y-6 text-[#ffffff]">
           {filterItems.map((filter, index) => (
             <FilterSidebar
               key={index}
@@ -273,18 +310,48 @@ export default function WatchListPage() {
             />
           ))}
         </div>
-        <div className="space-y-6">
-          {/* Use the new SearchAndFilterSection component */}
-          <SearchAndFilterSection
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
 
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-1 px-0 sm:px-0 md:px-0 lg:px-0 w-full">
+        {/* Main Content */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Mobile Filters Section */}
+          <div className="md:hidden bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg p-4 shadow-xl border border-[#333447]">
+            <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              Filters
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {filterItems.map((filter, index) => (
+                <FilterSidebar
+                  key={index}
+                  title={filter.title}
+                  items={filter.items}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Search and Filter Section */}
+          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg p-4 sm:p-6 shadow-xl border border-[#333447]">
+            <SearchAndFilterSection
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+          </div>
+
+          {/* Content Section */}
+          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-lg shadow-xl border border-[#333447] overflow-hidden">
+            {/* Loading indicator for odds */}
             {isOddsLoading && (
-              <p className="text-gray-400 text-center mt-4">Loading odds...</p>
+              <div className="text-center py-4 border-b border-[#333447]">
+                <div className="inline-flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                  <p className="text-gray-400 text-sm">Loading odds...</p>
+                </div>
+              </div>
             )}
-            {renderContent()}
+
+            {/* Main Content */}
+            <div className="p-4 sm:p-6">{renderContent()}</div>
           </div>
         </div>
       </div>

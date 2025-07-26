@@ -3,17 +3,17 @@ import { SearchIcon, Filter, TrendingUp, Zap } from "lucide-react";
 
 // Define categories outside the component if they are static
 const initialCategories = [
-  "Crypto",
-  "La Liga",
-  "Trump Presidency",
+  "Sports",
+  "Politics",
+  "Entertainment",
   "Breaking News",
   "Europa League",
   "Trump Cabinet",
   "US Election",
   "Games",
   "Donald Trump",
-  "Politics",
-  "Sports",
+  "La Liga",
+  "Crypto",
 ];
 
 interface FilterBarProps {
@@ -142,7 +142,7 @@ export const FilterBar: FC<FilterBarProps> = ({ onFilterChange }) => {
               <input
                 type="text"
                 placeholder="Search events, teams, or categories..."
-                className="w-full pl-12 pr-4 py-2.5 bg-gray-800/20 text-white rounded-xl border border-gray-600/20 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 focus:bg-gray-800/30 transition-all duration-300 backdrop-blur-sm hover:border-gray-500/30 hover:bg-gray-800/25"
+                className="w-full pl-12 pr-4 py-2.5 bg-gray-800/20 text-white rounded-xl border border-gray-600/20 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 focus:bg-gray-800/30 transition-all duration-300 hover:border-gray-500/30 hover:bg-gray-800/25"
                 value={searchTerm}
                 onChange={handleSearchChange}
               />

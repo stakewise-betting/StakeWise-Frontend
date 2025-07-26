@@ -1,25 +1,10 @@
 import React, { useState, useContext, useCallback } from "react";
 import { useNavigate, NavLink, Link } from "react-router-dom";
-import {
-  Menu,
-  Calendar,
-  Gift,
-  MessageSquare,
-  Newspaper,
-  Home,
-  Trophy,
-} from "lucide-react";
+import { Menu, Calendar, Gift, Newspaper, Home, Trophy } from "lucide-react";
 
 import { AppContext } from "@/context/AppContext";
 import TeamLogo from "../../assets/team-logo.svg";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import WalletConnect from "./WalletConnect";
 import NotificationsBell from "./NotificationsBell";
@@ -206,44 +191,21 @@ const Navbar: React.FC = () => {
       <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
         {isLoggedin ? (
           <>
-            <WalletConnect isLoggedin={isLoggedin} />
+            <div className="hidden lg:flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+              <WalletConnect isLoggedin={isLoggedin} />
+            </div>
             <NotificationsBell />
             <UserProfileDropdown />
 
             {/* Mobile Menu Button for logged in users */}
-            <DropdownMenu onOpenChange={setMenuOpen} open={menuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
-                >
-                  <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 sm:w-56 bg-[#252538] text-white border border-gray-700 mr-2 shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
-              >
-                <div className="p-2">
-                  {navItems.map((item) => (
-                    <DropdownMenuItem key={`mobile-${item.name}`} asChild>
-                      <Link
-                        to={item.href}
-                        className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mb-1 font-medium"
-                        onClick={() => {
-                          window.scrollTo(0, 0);
-                          setMenuOpen(false);
-                        }}
-                      >
-                        <span className="text-secondary mr-3">{item.icon}</span>
-                        <span>{item.name}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
+            </Button>
           </>
         ) : (
           <>
@@ -261,83 +223,15 @@ const Navbar: React.FC = () => {
               Sign Up
             </Button>
 
-            <DropdownMenu onOpenChange={setMenuOpen} open={menuOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
-                >
-                  <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 sm:w-56 bg-[#252538] text-white border border-gray-700 mr-2 shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
-              >
-                <div className="p-2">
-                  {navItems.map((item) => (
-                    <DropdownMenuItem
-                      key={`mobile-${item.name}`}
-                      asChild
-                      className="lg:hidden"
-                    >
-                      <Link
-                        to={item.href}
-                        className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mb-1 font-medium"
-                        onClick={() => {
-                          window.scrollTo(0, 0);
-                          setMenuOpen(false);
-                        }}
-                      >
-                        <span className="text-secondary mr-3">{item.icon}</span>
-                        <span>{item.name}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-
-                  <DropdownMenuSeparator className="lg:hidden bg-gray-700/60 mx-2 my-2" />
-                  <DropdownMenuItem asChild className="sm:hidden">
-                    <Button
-                      className="w-full bg-secondary hover:bg-secondary/80 text-white rounded-lg mt-2 justify-center text-sm font-semibold shadow-lg mx-2 mb-1"
-                      onClick={() => {
-                        navigate("/signup");
-                        setMenuOpen(false);
-                      }}
-                    >
-                      Sign Up
-                    </Button>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="sm:hidden">
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-lg mt-2 justify-center text-secondary border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 text-sm font-semibold mx-2 mb-1"
-                      onClick={() => {
-                        navigate("/login");
-                        setMenuOpen(false);
-                      }}
-                    >
-                      Login
-                    </Button>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="bg-gray-700/60 mx-2 my-2" />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/contactus"
-                      className="flex items-center cursor-pointer text-sm hover:bg-secondary/10 hover:text-secondary transition-colors duration-200 py-3 px-4 rounded-lg mx-2 mb-1 font-medium"
-                      onClick={() => {
-                        window.scrollTo(0, 0);
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-3 text-secondary" />
-                      <span>Contact Us</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Mobile Menu Button for non-logged in users */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden text-white !w-8 !h-8 !p-1 sm:!p-2 hover:bg-gray-700 hover:text-secondary transition-all duration-300 rounded-lg"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Menu className="!w-5 !h-5 sm:!w-6 sm:!h-6" />
+            </Button>
           </>
         )}
       </div>
@@ -346,8 +240,8 @@ const Navbar: React.FC = () => {
         isOpen={menuOpen}
         closeMenu={closeMobileMenu}
         navLinks={navItems}
-        walletConnected={false}
-        usdValue="0.00"
+        walletConnected={false} // You'll need to pass the actual wallet connection status
+        usdValue="0.00" // You'll need to pass the actual USD value
         connectWallet={connectWalletForMobile}
         handleLogout={handleLogoutForMobile}
         handleVerification={handleVerificationForMobile}

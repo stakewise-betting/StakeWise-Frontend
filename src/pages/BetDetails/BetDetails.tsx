@@ -207,8 +207,8 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center">
-        <div className="text-center space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center px-4">
+        <div className="text-center space-y-6 max-w-sm w-full">
           <div className="relative">
             <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
             <div
@@ -220,10 +220,10 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
             ></div>
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className="text-lg sm:text-xl font-semibold text-white">
               Loading Event Details
             </h3>
-            <p className="text-slate-400">
+            <p className="text-slate-400 text-sm sm:text-base">
               Fetching the latest betting information...
             </p>
           </div>
@@ -234,8 +234,8 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center space-y-6 p-8 bg-gradient-to-br from-red-900/20 to-red-800/20 rounded-xl border border-red-700/50 backdrop-blur-sm">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center px-4">
+        <div className="max-w-md mx-auto w-full text-center space-y-6 p-6 sm:p-8 bg-gradient-to-br from-red-900/20 to-red-800/20 rounded-xl border border-red-700/50 backdrop-blur-sm">
           <div className="w-16 h-16 mx-auto bg-red-900/50 rounded-full flex items-center justify-center">
             <svg
               className="w-8 h-8 text-red-400"
@@ -252,14 +252,16 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
             </svg>
           </div>
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
               Unable to Load Event
             </h2>
-            <p className="text-red-200 leading-relaxed">{error}</p>
+            <p className="text-red-200 leading-relaxed text-sm sm:text-base">
+              {error}
+            </p>
           </div>
           <button
             onClick={onCancel}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 active:scale-95"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 active:scale-95 text-sm sm:text-base"
           >
             Return to Events
           </button>
@@ -270,8 +272,8 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
   if (!eventData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center">
-        <div className="text-center space-y-6 p-8 bg-gradient-to-br from-gray-900/20 to-gray-800/20 rounded-xl border border-gray-700/50 backdrop-blur-sm">
+      <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15] text-white flex items-center justify-center px-4">
+        <div className="text-center space-y-6 p-6 sm:p-8 bg-gradient-to-br from-gray-900/20 to-gray-800/20 rounded-xl border border-gray-700/50 backdrop-blur-sm max-w-md w-full">
           <div className="w-16 h-16 mx-auto bg-gray-700/50 rounded-full flex items-center justify-center">
             <svg
               className="w-8 h-8 text-gray-400"
@@ -288,8 +290,10 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
             </svg>
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-white">Event Not Found</h2>
-            <p className="text-gray-400">
+            <h2 className="text-lg sm:text-xl font-bold text-white">
+              Event Not Found
+            </h2>
+            <p className="text-gray-400 text-sm sm:text-base">
               The requested event data could not be loaded.
             </p>
           </div>
@@ -303,17 +307,17 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
       {/* Countdown Timer Section */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-indigo-600/5"></div>
-        <div className="relative max-w-7xl mx-auto p-4 lg:p-6 mb-8">
+        <div className="relative max-w-7xl mx-auto p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
           <CountdownTimer endTime={Number(eventData.endTime)} />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-4 lg:p-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-6">
         {/* Betting Section */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-10 lg:mb-12">
           {/* Event Interface */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-1 lg:order-1">
             <BetInterface
               eventData={eventData}
               eventOdds={eventOdds}
@@ -324,7 +328,7 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
           </div>
 
           {/* Bet Controls */}
-          <div className="space-y-6">
+          <div className="order-2 lg:order-2 space-y-4 sm:space-y-6">
             <BetSlip
               eventData={eventData}
               selectedOption={selectedOption}
@@ -345,17 +349,17 @@ export default function BetDetails({ onCancel }: BetDetailsProps) {
 
         {/* Community Section */}
         <div className="bg-gradient-to-br from-[#1C1C27] to-[#262633] rounded-xl border border-gray-700/30 shadow-2xl backdrop-blur-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-6 border-b border-gray-700/30">
+          <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-4 sm:p-6 border-b border-gray-700/30">
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
-                <div className="w-3 h-3 rounded-full bg-white"></div>
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white"></div>
               </div>
-              <h2 className="text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Community Discussion
               </h2>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <CommentSection
               betId={eventId || ""}
               currentUserId={currentUserId}

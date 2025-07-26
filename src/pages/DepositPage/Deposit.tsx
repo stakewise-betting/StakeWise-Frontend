@@ -277,7 +277,7 @@ const DepositPage = () => {
         {/* Enhanced Header Section */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-dark-primary mb-3 flex items-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-dark-primary mb-3 flex items-center">
               <IconWrapper className="bg-secondary/20 mr-4">
                 <Wallet className="h-8 w-8 text-secondary" />
               </IconWrapper>
@@ -431,12 +431,14 @@ const DepositPage = () => {
 
         {/* Enhanced Info Alert */}
         <Alert className="bg-gradient-to-r from-card to-secondary/5 border-secondary/40 border-l-4 mb-8 rounded-xl shadow-lg">
-          <IconWrapper className="bg-secondary/20">
-            <Info className="h-5 w-5 text-secondary" />
-          </IconWrapper>
-          <AlertTitle className="text-dark-primary font-bold text-lg ml-2">
-            Fast & Secure Transactions
-          </AlertTitle>
+          <div className="flex items-center gap-1">
+            <IconWrapper className="bg-secondary/20">
+              <Info className="h-5 w-5 text-secondary" />
+            </IconWrapper>
+            <AlertTitle className="text-dark-primary font-bold text-lg ml-2">
+              Fast & Secure Transactions
+            </AlertTitle>
+          </div>
           <AlertDescription className="text-dark-secondary text-base mt-2 ml-2 leading-relaxed">
             MoonPay enables you to purchase ETH using credit card, debit card,
             or bank transfer. All transactions are encrypted and funds are sent
