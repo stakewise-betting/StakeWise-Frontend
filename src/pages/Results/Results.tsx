@@ -10,6 +10,7 @@ import {
   Tag,
   Trophy,
   Coins,
+  BarChart3,
 } from "lucide-react";
 import "react-datepicker/dist/react-datepicker.css";
 import Web3 from "web3";
@@ -25,7 +26,89 @@ const ResultsPage: React.FC = () => {
   const [savedEvents, setSavedEvents] = useState<{ [key: number]: boolean }>(
     {}
   );
+  const [eventCategories, setEventCategories] = useState<{
+    [key: number]: string;
+  }>({});
   const eventsPerPage = 5;
+
+  // Function to fetch category from API
+  const fetchEventCategory = async (eventId: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/events/search`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const eventsData = await response.json();
+
+      // Find the event with matching eventId
+      const event = eventsData.find((e: any) => e.eventId === eventId);
+
+      if (event && event.category) {
+        return event.category;
+      }
+
+      // If no category found in API, fall back to the original logic
+      return "Unknown";
+    } catch (error) {
+      console.error(`Error fetching category for event ${eventId}:`, error);
+      // Return fallback category on error
+      return "Unknown";
+    }
+  };
+
+  // Function to determine category based on event name (fallback)
+  const determineCategory = (eventName: string): string => {
+    const name = eventName.toLowerCase();
+    if (name.includes("crypto")) return "Crypto";
+    if (name.includes("esports")) return "Esports";
+    if (name.includes("politics")) return "Politics";
+    if (name.includes("entertainment")) return "Entertainment";
+    return "Sports";
+  };
+
+  // Function to get category (with caching)
+  const getEventCategory = async (
+    eventId: number,
+    eventName: string
+  ): Promise<string> => {
+    // Check if category is already cached
+    if (eventCategories[eventId]) {
+      return eventCategories[eventId];
+    }
+
+    try {
+      // Fetch category from API
+      const category = await fetchEventCategory(eventId);
+
+      // If API returns "Unknown", use fallback logic
+      const finalCategory =
+        category === "Unknown" ? determineCategory(eventName) : category;
+
+      // Cache the category
+      setEventCategories((prev) => ({
+        ...prev,
+        [eventId]: finalCategory,
+      }));
+
+      return finalCategory;
+    } catch (error) {
+      console.error(`Error getting category for event ${eventId}:`, error);
+      // Use fallback logic on error
+      const fallbackCategory = determineCategory(eventName);
+
+      // Cache the fallback category
+      setEventCategories((prev) => ({
+        ...prev,
+        [eventId]: fallbackCategory,
+      }));
+
+      return fallbackCategory;
+    }
+  };
 
   // Fetch events from blockchain
   useEffect(() => {
@@ -59,22 +142,27 @@ const ResultsPage: React.FC = () => {
           const eventData = await betContract.methods.getEvent(eventId).call();
           // Only include completed events with a winner declared
           if (eventData.isCompleted && eventData.winningOption) {
-            eventList.push({
+            const eventWithId = {
               ...eventData,
               id: eventId, // Add the eventId to the data
-            });
+            };
+
+            eventList.push(eventWithId);
           }
         } catch (error) {
           console.error(`Error fetching event ${eventId}:`, error);
         }
       }
+
       setEvents(eventList);
       setFilteredEvents(eventList);
 
-      // Save all events to database automatically
-      eventList.forEach((event) => {
-        saveResultToDatabase(event);
-      });
+      // Fetch categories for all events and save to database
+      for (const event of eventList) {
+        const category = await getEventCategory(event.id, event.name);
+        // Save result with fetched category
+        saveResultToDatabase(event, category);
+      }
     } catch (error) {
       console.error("Error loading events:", error);
     }
@@ -109,18 +197,8 @@ const ResultsPage: React.FC = () => {
     setExpandedEvent(expandedEvent === index ? null : index);
   };
 
-  // Function to determine category based on event name
-  const determineCategory = (eventName: string): string => {
-    const name = eventName.toLowerCase();
-    if (name.includes("crypto")) return "Crypto";
-    if (name.includes("esports")) return "Esports";
-    if (name.includes("politics")) return "Politics";
-    if (name.includes("entertainment")) return "Entertainment";
-    return "Sports";
-  };
-
-  // Save result to database
-  const saveResultToDatabase = async (event: any) => {
+  // Save result to database with category
+  const saveResultToDatabase = async (event: any, category?: string) => {
     const eventId = parseInt(event.id);
 
     // Skip if already saved
@@ -129,11 +207,15 @@ const ResultsPage: React.FC = () => {
     }
 
     try {
+      // Get category if not provided
+      const eventCategory =
+        category || (await getEventCategory(eventId, event.name));
+
       // Prepare the data according to your schema
       const resultData = {
         eventId: eventId,
         name: event.name,
-        category: determineCategory(event.name),
+        category: eventCategory,
         winner: event.winningOption,
         prizepool: parseFloat(
           Web3.utils.fromWei(event.prizePool || "0", "ether")
@@ -155,7 +237,9 @@ const ResultsPage: React.FC = () => {
       if (response.ok) {
         // Mark this event as saved
         setSavedEvents((prev) => ({ ...prev, [eventId]: true }));
-        console.log(`Result saved for event ID ${eventId}`);
+        console.log(
+          `Result saved for event ID ${eventId} with category ${eventCategory}`
+        );
       } else {
         const data = await response.json();
         // If it's not a duplicate entry error, log it
@@ -189,19 +273,13 @@ const ResultsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15]">
       {/* Hero Section with Background Image */}
-      <div className="relative h-[300px] w-full overflow-hidden bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#1C1C27]">
-        {/* Animated background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-r from-secondary/20 to-transparent"></div>
-        </div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <div className="mb-4 p-4 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20">
-            <Trophy className="w-12 h-12 text-secondary" />
-          </div>
-          <h1 className="text-5xl font-bold text-white mb-3 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="text-center px-4 bg-card rounded-xl shadow-lg border border-gray-700/60 p-6 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-dark-primary mb-4 flex items-center justify-center gap-3">
+            <BarChart3 className="h-8 w-8 text-secondary" />
             Betting Results
           </h1>
-          <p className="text-lg text-slate-400 max-w-2xl leading-relaxed">
+          <p className="text-dark-secondary text-lg max-w-2xl mx-auto">
             Explore all completed events and their outcomes. Check winners,
             final prize pools, and comprehensive event details.
           </p>
@@ -209,7 +287,7 @@ const ResultsPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="relative w-full max-w-md">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -298,16 +376,32 @@ const ResultsPage: React.FC = () => {
                   <div className="flex items-center gap-4">
                     <span
                       className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors duration-200 ${
-                        event.name.toLowerCase().includes("crypto")
+                        (
+                          eventCategories[event.id] ||
+                          determineCategory(event.name)
+                        )
+                          .toLowerCase()
+                          .includes("crypto")
                           ? "bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30"
-                          : event.name.toLowerCase().includes("sports")
+                          : (
+                              eventCategories[event.id] ||
+                              determineCategory(event.name)
+                            )
+                              .toLowerCase()
+                              .includes("sports")
                           ? "bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
-                          : event.name.toLowerCase().includes("esports")
+                          : (
+                              eventCategories[event.id] ||
+                              determineCategory(event.name)
+                            )
+                              .toLowerCase()
+                              .includes("esports")
                           ? "bg-green-500/20 text-green-300 border-green-500/30 hover:bg-green-500/30"
                           : "bg-secondary/20 text-secondary border-secondary/30 hover:bg-secondary/30"
                       }`}
                     >
-                      {determineCategory(event.name)}
+                      {eventCategories[event.id] ||
+                        determineCategory(event.name)}
                     </span>
                     <button className="p-2 rounded-lg hover:bg-gray-700/50 transition-colors duration-200 text-slate-400 hover:text-white">
                       {expandedEvent === index ? (
@@ -393,7 +487,8 @@ const ResultsPage: React.FC = () => {
                                   Category
                                 </span>
                                 <span className="text-white font-semibold text-base">
-                                  {determineCategory(event.name)}
+                                  {eventCategories[event.id] ||
+                                    determineCategory(event.name)}
                                 </span>
                               </div>
                             </div>
