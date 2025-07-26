@@ -28,8 +28,27 @@ interface NewsListTableProps {
 }
 
 export const NewsListTable: React.FC<NewsListTableProps> = ({
-  backendBaseUrl = "http://localhost:5000",
+  backendBaseUrl = "https://stakewisebackend.onrender.com",
 }) => {
+  // Fallback to localhost if backendBaseUrl is not reachable
+  const [baseUrl, setBaseUrl] = useState<string>(backendBaseUrl);
+
+  useEffect(() => {
+    // Try to fetch from the main backend, fallback to localhost if it fails
+    const testBackend = async () => {
+      try {
+        const response = await fetch(`${backendBaseUrl}/api/news/all`, {
+          method: "HEAD",
+        });
+        if (!response.ok) throw new Error();
+        setBaseUrl(backendBaseUrl);
+      } catch {
+        setBaseUrl("http://localhost:5000");
+      }
+    };
+    testBackend();
+  }, [backendBaseUrl]);
+
   // State for news data
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -59,7 +78,7 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
       setError(null);
 
       try {
-        const response = await fetch(`${backendBaseUrl}/api/news/all`, {
+        const response = await fetch(`${baseUrl}/api/news/all`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -82,7 +101,7 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
     };
 
     fetchNews();
-  }, [backendBaseUrl]);
+  }, [baseUrl]);
 
   // Open edit modal
   const handleEdit = (item: NewsItem) => {
@@ -137,7 +156,7 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
       }
 
       const response = await fetch(
-        `${backendBaseUrl}/api/news/${editingItem.newsId}`,
+        `${baseUrl}/api/news/${editingItem.newsId}`,
         {
           method: "PUT",
           body: formData,
@@ -188,7 +207,7 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
     setDeletingIds((prev) => new Set(prev).add(newsId));
 
     try {
-      const response = await fetch(`${backendBaseUrl}/api/news/${newsId}`, {
+      const response = await fetch(`${baseUrl}/api/news/${newsId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -272,12 +291,12 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all
-                ${
-                  selectedCategory === category
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }
-              `}
+                                ${
+                                  selectedCategory === category
+                                    ? "bg-blue-600 text-white shadow-md"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                }
+                            `}
             >
               {category}
             </button>
@@ -350,8 +369,12 @@ export const NewsListTable: React.FC<NewsListTableProps> = ({
                   <tr
                     key={item._id}
                     className={`block md:table-row hover:bg-gray-800/30 transition-colors border-b border-gray-700/30
-                      ${index % 2 === 0 ? "bg-gray-900/50" : "bg-transparent"}
-                    `}
+                                            ${
+                                              index % 2 === 0
+                                                ? "bg-gray-900/50"
+                                                : "bg-transparent"
+                                            }
+                                        `}
                   >
                     {/* Mobile Card Layout */}
                     <td className="block md:hidden p-4">

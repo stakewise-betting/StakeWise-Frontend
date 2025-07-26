@@ -36,7 +36,7 @@ interface FormDataType {
   status: "active" | "inactive";
 }
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SliderManagement = () => {
   const [currentView, setCurrentView] = useState<"list" | "form">("list");
