@@ -1,3 +1,236 @@
+// //Admin/raffles/RafflesPage.tsx
+// import React, { useState, useEffect } from "react";
+// import { toast } from "react-toastify";
+// import axios from "axios";
+// import Web3 from "web3";
+// import AddRaffleModal from "@/Admin/raffles/AddRaffleModal";
+// import RaffleListTable from "./RaffleListTable";
+// import { Button } from "@/components/ui/button";
+// import { PlusIcon, RefreshCw } from "lucide-react";
+// import { Skeleton } from "@/components/ui/skeleton";
+
+// interface RaffleData {
+//   raffleId: number;
+//   name: string;
+//   description: string;
+//   imageURL: string;
+//   startTime: number;
+//   endTime: number;
+//   ticketPrice: number;
+//   prizeAmount: number;
+//   isCompleted: boolean;
+//   winner: string;
+//   totalTicketsSold: number;
+//   notificationImageURL: string;
+//   notificationMessage: string;
+//   category?: string;
+// }
+
+// interface RafflesPageProps {
+//   contract: any;
+//   web3: Web3;
+//   onRaffleCreated?: () => void;
+//   onWinnerSelected?: () => void;
+//   isLoading?: boolean;
+// }
+
+// export const RafflesPage: React.FC<RafflesPageProps> = ({
+//   contract,
+//   web3,
+//   onRaffleCreated,
+//   onWinnerSelected,
+//   isLoading = false,
+// }) => {
+//   const [raffles, setRaffles] = useState<RaffleData[]>([]);
+//   const [showAddModal, setShowAddModal] = useState(false);
+//   const [refreshing, setRefreshing] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   const backendBaseUrl =
+//     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+//   // Load raffles from backend and blockchain
+//   // Load raffles from backend - SIMPLIFIED AND FIXED
+//   const loadRaffles = async () => {
+//     setLoading(true);
+//     setError(null);
+//     try {
+//       // The backend API now returns fully synced data, including the ticket count.
+//       // We no longer need to re-fetch from the blockchain on the frontend.
+//       const response = await axios.get(`${backendBaseUrl}/api/raffles`);
+
+//       if (response.data.success) {
+//         setRaffles(response.data.data); // Use the data directly from the API
+//       } else {
+//         throw new Error(response.data.message || "Failed to fetch raffles");
+//       }
+//     } catch (err: any) {
+//       console.error("Error loading raffles:", err);
+//       const errorMessage = err.response?.data?.message || err.message;
+//       setError(`Failed to load raffles: ${errorMessage}`);
+//       toast.error(`Failed to load raffles. Please try again.`);
+//       setRaffles([]);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Initial load
+//   useEffect(() => {
+//     loadRaffles();
+//   }, [contract, web3]);
+
+//   // Handle refresh
+//   const handleRefresh = async () => {
+//     setRefreshing(true);
+//     await loadRaffles();
+//     setRefreshing(false);
+//   };
+
+//   // Handle raffle created
+//   const handleRaffleCreated = async () => {
+//     await loadRaffles();
+//     if (onRaffleCreated) onRaffleCreated();
+//   };
+
+//   // Handle winner selected
+//   const handleWinnerSelected = async () => {
+//     await loadRaffles();
+//     if (onWinnerSelected) onWinnerSelected();
+//   };
+
+//   // Delete raffle
+//   const handleDeleteRaffle = async (raffleId: number) => {
+//     try {
+//       const response = await axios.delete(
+//         `${backendBaseUrl}/api/raffles/${raffleId}`
+//       );
+
+//       if (response.data.success) {
+//         toast.success("Raffle deleted successfully");
+//         await loadRaffles();
+//       } else {
+//         throw new Error(response.data.message || "Failed to delete raffle");
+//       }
+//     } catch (err: any) {
+//       console.error("Error deleting raffle:", err);
+//       toast.error(`Failed to delete raffle: ${err.message}`);
+//     }
+//   };
+
+//   // Select winner - FINAL VERSION WITH CORRECT ERROR HANDLING
+//   const handleSelectWinner = async (raffleId: number) => {
+//     const toastId = toast.loading("Processing 'Select Winner' request...");
+
+//     try {
+//       const response = await axios.post(
+//         `${backendBaseUrl}/api/raffles/${raffleId}/select-winner`
+//       );
+
+//       if (response.data.success) {
+//         toast.update(toastId, {
+//           render: `Successfully selected a winner for Raffle #${raffleId}!`,
+//           type: "success",
+//           isLoading: false,
+//           autoClose: 5000,
+//         });
+//         await handleWinnerSelected();
+//       } else {
+//         // This is a fallback, but the catch block is more likely to run for errors.
+//         throw new Error(response.data.message || "An unknown error occurred.");
+//       }
+//     } catch (err: any) {
+//       // Extract the real, human-readable error message from the server's response.
+//       const errorMessage =
+//         err.response?.data?.message || // Our backend's custom message is here!
+//         "An unexpected error occurred. Please try again.";
+
+//       // *** UNMISSABLE DEBUGGING STEP ***
+//       // This will force a browser pop-up box with the exact error.
+//       window.alert("CAUGHT ERROR: " + errorMessage);
+
+//       // Now, update the toast with the same message.
+//       toast.update(toastId, {
+//         render: errorMessage,
+//         type: "error",
+//         isLoading: false,
+//         autoClose: 8000, // Show the error longer
+//       });
+
+//       // We still log the full error object to the console for detailed inspection.
+//       console.error("Full error object:", err);
+//     }
+//   };
+
+//   return (
+//     <div className="animate-admin-fade-in space-y-8">
+//       {/* Page Header */}
+//       <div className="admin-section-header">
+//         <h1 className="admin-section-title text-[#ffffff]">
+//           <span className="mr-2">🎟️</span> Raffle Draws Management
+//         </h1>
+
+//         <div className="flex space-x-2">
+//           <Button
+//             variant="outline"
+//             size="sm"
+//             onClick={handleRefresh}
+//             disabled={refreshing || loading}
+//           >
+//             <RefreshCw
+//               className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+//             />
+//             Refresh
+//           </Button>
+//           <Button
+//             onClick={() => setShowAddModal(true)}
+//             className="bg-orange-500 hover:bg-orange-600"
+//           >
+//             <PlusIcon className="h-4 w-4 mr-2" />
+//             Create Raffle
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* Error Message */}
+//       {error && (
+//         <div className="bg-red-500/20 border border-red-500 text-red-500 px-4 py-3 rounded-md">
+//           {error}
+//         </div>
+//       )}
+
+//       {/* Loading State */}
+//       {loading && !raffles.length ? (
+//         <div className="space-y-4">
+//           <Skeleton className="h-12 w-full bg-gray-700/50" />
+//           <Skeleton className="h-64 w-full bg-gray-700/50" />
+//         </div>
+//       ) : (
+//         <RaffleListTable
+//           raffles={raffles}
+//           onDeleteRaffle={handleDeleteRaffle}
+//           onSelectWinner={handleSelectWinner}
+//           web3={web3}
+//         />
+//       )}
+
+//       {/* Add Raffle Modal */}
+//       <AddRaffleModal
+//         open={showAddModal}
+//         onOpenChange={setShowAddModal}
+//         onRaffleCreated={handleRaffleCreated}
+//         contract={contract}
+//         web3={web3}
+//       />
+//     </div>
+//   );
+// };
+
+// export default RafflesPage;
+
+
+//StakeWise-Frontend/src/Admin/raffles/RafflesPage.tsx
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";

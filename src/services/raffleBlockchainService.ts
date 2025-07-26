@@ -1,3 +1,4 @@
+//service/raffleBlockchainService.ts
 import Web3 from "web3";
 import { ethers } from "ethers";
 import { toast } from "react-toastify";
@@ -249,3 +250,183 @@ class RaffleBlockchainService {
 }
 
 export default new RaffleBlockchainService();
+
+
+// // services/raffleBlockchainService.ts
+
+// import Web3 from "web3";
+// import { ethers } from "ethers";
+// import { toast } from "react-toastify";
+// import { raffleContractAddress, raffleContractABI } from "@/config/raffleContractConfig";
+
+// // Define raffle type (still useful for type safety)
+// export interface RaffleData {
+//   raffleId: number;
+//   name: string;
+//   description: string;
+//   imageURL: string;
+//   startTime: number;
+//   endTime: number;
+//   ticketPrice: string;
+//   prizeAmount: string;
+//   isCompleted: boolean;
+//   winner: string;
+//   totalTicketsSold: number;
+//   notificationImageURL: string;
+//   notificationMessage: string;
+//   participants?: number; // For UI display
+// }
+
+// // Service class
+// class RaffleBlockchainService {
+//   private web3: Web3 | null = null;
+//   private contract: any = null;
+//   private provider: any = null;
+//   private ethersContract: any = null;
+
+//   // Initialize Web3 and contract
+//   async init() {
+//     // No need to re-initialize if it's already done
+//     if (this.ethersContract) return true;
+
+//     try {
+//       if (typeof window.ethereum !== 'undefined') {
+//         this.provider = new ethers.BrowserProvider(window.ethereum);
+//         await window.ethereum.request({ method: 'eth_requestAccounts' });
+//         this.web3 = new Web3(window.ethereum);
+//         const signer = await this.provider.getSigner();
+//         this.ethersContract = new ethers.Contract(raffleContractAddress, raffleContractABI, signer);
+//         // Keep the web3.js contract instance if you use it for read-only calls
+//         this.contract = new this.web3.eth.Contract(raffleContractABI, raffleContractAddress);
+//         return true;
+//       } else {
+//         toast.error("MetaMask not installed. Please install MetaMask.");
+//         return false;
+//       }
+//     } catch (error) {
+//       console.error("Error initializing blockchain service:", error);
+//       toast.error("Failed to connect to blockchain.");
+//       return false;
+//     }
+//   }
+
+//   // Get current account
+//   async getCurrentAccount() {
+//     if (!this.web3) await this.init();
+//     const accounts = await this.web3!.eth.getAccounts();
+//     return accounts[0];
+//   }
+
+//   // Buy raffle tickets - This is a direct user action
+//   // async buyTickets(raffleId: number, quantity: number, ticketPrice: string): Promise<boolean> {
+//   //   if (!this.ethersContract) await this.init();
+    
+//   //   try {
+//   //     const totalPriceWei = ethers.parseEther((parseFloat(ticketPrice) * quantity).toString());
+      
+//   //     // Use the ethersContract with the signer to send a transaction
+//   //     const tx = await this.ethersContract.buyTickets(raffleId, {
+//   //       value: totalPriceWei
+//   //     });
+      
+//   //     toast.info("Processing your purchase...");
+//   //     await tx.wait(); // Wait for transaction confirmation
+      
+//   //     toast.success(`Successfully purchased ${quantity} ticket${quantity > 1 ? 's' : ''}`);
+//   //     return true;
+//   //   } catch (error: any) {
+//   //     console.error(`Error buying tickets for raffle ${raffleId}:`, error);
+//   //     if (error.code === 4001) {
+//   //       toast.error("Transaction cancelled by user");
+//   //     } else {
+//   //       toast.error(`Failed to purchase tickets: ${error.reason || error.message}`);
+//   //     }
+//   //     return false;
+//   //   }
+//   // }
+
+
+//   // Buy raffle tickets - This is a direct user action
+//   async buyTickets(raffleId: number, quantity: number, ticketPrice: string): Promise<boolean> {
+//     if (!this.ethersContract) {
+//         const initialized = await this.init();
+//         if (!initialized) return false;
+//     }
+    
+//     try {
+//       // --- THIS IS THE FIX ---
+//       // 1. Convert the single ticket price string to a BigInt in Wei.
+//       const ticketPriceInWei = ethers.parseEther(ticketPrice);
+
+//       // 2. Convert the quantity to a BigInt.
+//       const quantityAsBigInt = BigInt(quantity);
+
+//       // 3. Perform the multiplication using precise BigInt arithmetic.
+//       const totalPriceInWei = ticketPriceInWei * quantityAsBigInt;
+      
+//       console.log(`Attempting to purchase ${quantity} tickets for a total of ${totalPriceInWei.toString()} Wei.`);
+
+//       // 4. Use the ethersContract with the signer to send the transaction.
+//       // The `buyTickets` function in the contract only needs the raffleId.
+//       // The quantity is derived on-chain from the `value` sent.
+//       const tx = await this.ethersContract.buyTickets(raffleId, {
+//         value: totalPriceInWei, // Send the precisely calculated total price.
+//         gasLimit: 200000 + (50000 * quantity) // Dynamic gas limit
+//       });
+      
+//       toast.info("Processing your purchase... Please wait for confirmation.");
+      
+//       // Wait for transaction to be mined
+//       await tx.wait(); 
+      
+//       toast.success(`Successfully purchased ${quantity} ticket${quantity > 1 ? 's' : ''}!`);
+//       return true;
+
+//     } catch (error: any) {
+//       console.error(`Error buying tickets for raffle ${raffleId}:`, error);
+      
+//       // Provide a more helpful error to the user
+//       if (error.code === 4001) { // User rejected transaction in MetaMask
+//         toast.error("Transaction cancelled by user.");
+//       } else if (error.reason) { // Ethers often provides a reason
+//         toast.error(`Transaction failed: ${error.reason}`);
+//       } else {
+//         toast.error(`Failed to purchase tickets. Please check the console for details.`);
+//       }
+//       return false;
+//     }
+//   }
+
+//   // Get user's tickets for a raffle - This is a user-specific read action
+//   async getUserTickets(raffleId: number): Promise<string[]> {
+//     if (!this.contract) await this.init();
+    
+//     try {
+//       const account = await this.getCurrentAccount();
+//       if (!account) return [];
+      
+//       const ticketIds = await this.contract.methods.getUserTickets(raffleId, account).call();
+//       return ticketIds.map((id: BigInt) => id.toString());
+//     } catch (error) {
+//       console.error(`Error fetching user tickets for raffle ${raffleId}:`, error);
+//       return [];
+//     }
+//   }
+
+//   // Format countdown time (utility function)
+//   formatTimeLeft(endTime: number): string {
+//     const now = Math.floor(Date.now() / 1000);
+//     const timeLeft = endTime - now;
+//     if (timeLeft <= 0) return "Ended";
+//     const hours = Math.floor(timeLeft / 3600);
+//     const minutes = Math.floor((timeLeft % 3600) / 60);
+//     const seconds = timeLeft % 60;
+//     if (hours > 72) {
+//       const days = Math.floor(hours / 24);
+//       return `${days}d ${hours % 24}h`;
+//     }
+//     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+//   }
+// }
+
+// export default new RaffleBlockchainService();

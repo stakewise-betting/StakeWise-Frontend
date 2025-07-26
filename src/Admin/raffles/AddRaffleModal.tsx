@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/Admin/raffles/AddRaffleModal.tsx
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -65,7 +66,7 @@ const AddRaffleModal: React.FC<AddRaffleModalProps> = ({
       const file = files[0];
       
       // Check file type
-      if (!file.type.match(/image\/(jpeg|jpg|png|gif)/)) {
+      if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp|avif)/)) {
         toast.error("File must be an image (JPEG, PNG, or GIF)");
         return;
       }
