@@ -13,6 +13,8 @@ import {
 interface SidebarProps {
   activeSection: string;
   onSelectSection: (section: string) => void;
+  isMobile?: boolean;
+  isOpen?: boolean;
 }
 
 // Check the navItems array to ensure the slider item is correctly defined
@@ -30,8 +32,12 @@ const navItems = [
 ];
 
 // Animated gradient logo text
-const Logo = () => (
-  <div className="flex items-center gap-3 px-3 py-2">
+const Logo = ({ isMobile = false }: { isMobile?: boolean }) => (
+  <div
+    className={`flex items-center gap-3 px-3 py-2 ${
+      isMobile ? "justify-center sm:justify-start" : ""
+    }`}
+  >
     <div className="relative">
       <div className="p-2 rounded-xl bg-secondary/20 border border-gray-700/60 shadow-lg">
         <svg width="28" height="28" viewBox="0 0 34 34" fill="none">
@@ -57,7 +63,7 @@ const Logo = () => (
       </div>
       <div className="absolute -top-1 -right-1 w-3 h-3 bg-admin-success rounded-full animate-pulse"></div>
     </div>
-    <div className="space-y-1">
+    <div className={`space-y-1 ${isMobile ? "hidden sm:block" : ""}`}>
       <h2 className="text-xl font-bold text-dark-primary">StakeWise</h2>
       <p className="text-xs text-dark-secondary font-medium">Admin Panel</p>
     </div>
@@ -67,12 +73,19 @@ const Logo = () => (
 export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSelectSection,
+  isMobile = false,
 }) => {
   return (
-    <aside className="w-64 h-screen flex flex-col bg-[#1C1C27] text-dark-primary border-r border-gray-700/60 relative shadow-lg transition-all duration-300 ease-in-out">
+    <aside
+      className={`
+        ${isMobile ? "w-64 sm:w-64" : "w-64"} 
+        h-screen flex flex-col bg-[#1C1C27] text-dark-primary border-r border-gray-700/60 relative shadow-lg transition-all duration-300 ease-in-out
+        ${isMobile ? "min-h-screen" : ""}
+      `}
+    >
       {/* Logo/Header */}
       <div className="p-4 border-b border-gray-700/60 bg-black/20 flex-shrink-0">
-        <Logo />
+        <Logo isMobile={isMobile} />
       </div>
 
       {/* Navigation Section */}
@@ -93,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 {/* Icon container */}
                 <div
-                  className={`flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 ${
+                  className={`flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 flex-shrink-0 ${
                     isActive
                       ? "bg-secondary/20 text-secondary shadow-lg"
                       : "bg-black/20 text-dark-secondary group-hover:bg-secondary/10 group-hover:text-secondary"
@@ -108,15 +121,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     isActive
                       ? "text-dark-primary"
                       : "text-dark-secondary group-hover:text-dark-primary"
-                  }`}
+                  } ${isMobile ? "hidden sm:inline" : ""}`}
                 >
                   {item.label}
                 </span>
+
+                {/* Mobile-only label that shows on very small screens */}
+                {isMobile && (
+                  <span className="sm:hidden text-xs font-medium ml-1">
+                    {item.label}
+                  </span>
+                )}
               </button>
             );
           })}
         </nav>
       </div>
+
+      {/* Mobile Footer - Optional */}
+      {isMobile && (
+        <div className="p-4 border-t border-gray-700/60 bg-black/20 flex-shrink-0">
+          <div className="text-center">
+            <p className="text-xs text-dark-secondary">Tap outside to close</p>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

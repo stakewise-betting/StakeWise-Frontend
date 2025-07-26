@@ -77,7 +77,7 @@ export const EventListTable: React.FC<EventListTableProps> = ({
               placeholder="Search events by name, ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-12 h-12 w-full bg-gray-800/20 border-gray-600/20 text-white placeholder:text-gray-300 focus:border-indigo-500/50 focus:ring-indigo-500/30 focus:bg-gray-800/30 rounded-xl font-medium shadow-lg backdrop-blur-sm hover:border-gray-500/30 hover:bg-gray-800/25 transition-all duration-300"
+              className="pl-12 h-12 w-full bg-gray-800/20 border-gray-600/20 text-white placeholder:text-gray-300 focus:border-indigo-500/50 focus:ring-indigo-500/30 focus:bg-gray-800/30 rounded-xl font-medium shadow-lg hover:border-gray-500/30 hover:bg-gray-800/25 transition-all duration-300"
             />
           </div>
 

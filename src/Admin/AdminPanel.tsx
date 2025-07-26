@@ -561,43 +561,57 @@ const AdminPanel: React.FC = () => {
 
   // --- Render Logic ---
 
-  // Initial Loading Skeleton
+  // Initial Loading Skeleton - Updated for mobile responsiveness
   if (showInitialLoadingSkeleton) {
     return (
       <div className="flex h-screen bg-muted/40 dark:bg-primary">
-        {" "}
-        {/* Added dark mode bg */}
-        {/* Sidebar Skeleton */}
-        <Skeleton className="w-64 bg-card border-r border-gray-700/60 h-full" />
+        {/* Sidebar Skeleton - Hidden on mobile, shown on desktop */}
+        <div className="hidden md:block">
+          <Skeleton className="w-64 bg-card border-r border-gray-700/60 h-full" />
+        </div>
+
+        {/* Mobile Menu Button Skeleton */}
+        <div className="md:hidden fixed top-4 left-4 z-50">
+          <Skeleton className="h-10 w-10 rounded-lg bg-gray-700/50" />
+        </div>
+
         {/* Main Content Skeleton */}
-        <main className="flex-1 p-6 md:p-8 space-y-6 overflow-auto">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 overflow-auto pt-16 md:pt-6">
           {/* Header Skeleton */}
-          <Skeleton className="h-8 w-1/3 mb-6 bg-gray-700/50" />
-          {/* Dashboard Cards Skeleton */}
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            <Skeleton className="h-32 rounded-lg bg-gray-700/50" />
-            <Skeleton className="h-32 rounded-lg bg-gray-700/50" />
-            <Skeleton className="h-32 rounded-lg bg-gray-700/50" />
-            <Skeleton className="h-32 rounded-lg bg-gray-700/50" />
+          <Skeleton className="h-6 md:h-8 w-1/2 md:w-1/3 mb-6 bg-gray-700/50" />
+
+          {/* Dashboard Cards Skeleton - Responsive grid */}
+          <div className="grid gap-3 md:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-24 md:h-32 rounded-lg bg-gray-700/50" />
+            <Skeleton className="h-24 md:h-32 rounded-lg bg-gray-700/50" />
+            <Skeleton className="h-24 md:h-32 rounded-lg bg-gray-700/50" />
+            <Skeleton className="h-24 md:h-32 rounded-lg bg-gray-700/50" />
           </div>
+
           {/* Recent Bets Table Skeleton */}
-          <Skeleton className="h-8 w-1/4 mt-8 mb-4 bg-gray-700/50" />
-          <Skeleton className="h-64 w-full rounded-lg bg-gray-700/50" />
+          <Skeleton className="h-6 md:h-8 w-1/3 md:w-1/4 mt-8 mb-4 bg-gray-700/50" />
+          <Skeleton className="h-48 md:h-64 w-full rounded-lg bg-gray-700/50" />
         </main>
       </div>
     );
   }
 
-  // Error State UI
+  // Error State UI - Updated for mobile responsiveness
   if (error && !contract) {
     // Show full page error only if core loading failed
     return (
       <div className="flex items-center justify-center h-screen flex-col bg-primary text-red-400 p-4">
-        <h2 className="text-2xl font-semibold mb-4">
+        <h2 className="text-xl md:text-2xl font-semibold mb-4 text-center">
           Error Loading Admin Panel
         </h2>
-        <p className="text-center mb-6">{error}</p>
-        <Button variant="destructive" onClick={refreshAllData}>
+        <p className="text-center mb-6 text-sm md:text-base max-w-md">
+          {error}
+        </p>
+        <Button
+          variant="destructive"
+          onClick={refreshAllData}
+          className="w-full max-w-xs"
+        >
           Retry Fetching Data
         </Button>
       </div>
@@ -625,7 +639,10 @@ const AdminPanel: React.FC = () => {
           />
         ) : (
           // Show skeleton or loading specific to dashboard area if web3 not ready
-          <div className="p-6">Loading Dashboard Data...</div>
+          <div className="p-4 md:p-6 text-center">
+            <Skeleton className="h-6 w-48 mx-auto mb-4 bg-gray-700/50" />
+            <p className="text-dark-secondary">Loading Dashboard Data...</p>
+          </div>
         );
 
       case "events":
@@ -641,7 +658,10 @@ const AdminPanel: React.FC = () => {
             isLoading={loadingBlockchain && events.length === 0} // Example loading prop
           />
         ) : (
-          <div className="p-6">Loading Events Data...</div>
+          <div className="p-4 md:p-6 text-center">
+            <Skeleton className="h-6 w-48 mx-auto mb-4 bg-gray-700/50" />
+            <p className="text-dark-secondary">Loading Events Data...</p>
+          </div>
         );
 
       case "raffles":
@@ -655,11 +675,15 @@ const AdminPanel: React.FC = () => {
             isLoading={loadingBlockchain} // Example loading prop
           />
         ) : (
-          <div className="p-6">Loading Raffles Data...</div>
+          <div className="p-4 md:p-6 text-center">
+            <Skeleton className="h-6 w-48 mx-auto mb-4 bg-gray-700/50" />
+            <p className="text-dark-secondary">Loading Raffles Data...</p>
+          </div>
         );
 
       case "slider":
         return <SliderPage />;
+
       case "users":
         // UserManagementPage fetches its own data, needs no props from here
         return <UserManagementPage />;
@@ -687,7 +711,10 @@ const AdminPanel: React.FC = () => {
             web3Instance={web3}
           />
         ) : (
-          <div className="p-6">Loading Dashboard...</div>
+          <div className="p-4 md:p-6 text-center">
+            <Skeleton className="h-6 w-48 mx-auto mb-4 bg-gray-700/50" />
+            <p className="text-dark-secondary">Loading Dashboard...</p>
+          </div>
         );
     }
   };
