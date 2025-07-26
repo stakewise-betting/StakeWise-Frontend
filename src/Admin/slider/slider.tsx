@@ -36,7 +36,10 @@ interface FormDataType {
   status: "active" | "inactive";
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000/api"
+    : "https://stakewisebackend.onrender.com/api";
 
 const SliderManagement = () => {
   const [currentView, setCurrentView] = useState<"list" | "form">("list");
