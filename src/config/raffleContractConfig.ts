@@ -1,7 +1,7 @@
-export const raffleContractAddress = "0xcD7cBDcA70A9782396847854487C2a8032669998"; // Use your actual address
+// StakeWise-Frontend/src/config/raffleContractConfig.ts
+export const raffleContractAddress = "0x56d5439d7d9409BF6f419148E734E7306Fe0Fc78"; // Use your actual address
 export const raffleContractABI = [
-  // Same ABI as in the backend service, but shortened here for readability
-  {
+    {
       "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -120,6 +120,20 @@ export const raffleContractABI = [
       "constant": true
     },
     {
+      "inputs": [],
+      "name": "nextRaffleId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -140,13 +154,93 @@ export const raffleContractABI = [
       "constant": true
     },
     {
-      "inputs": [],
-      "name": "nextRaffleId",
-      "outputs": [
+      "inputs": [
         {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "name": "raffles",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "raffleId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "imageURL",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "startTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endTime",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ticketPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "prizeAmount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct RaffleDraw.RaffleCore",
+          "name": "core",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "isCompleted",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "winner",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "totalTicketsSold",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "notificationImageURL",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "notificationMessage",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct RaffleDraw.RaffleExtra",
+          "name": "extra",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -483,4 +577,4 @@ export const raffleContractABI = [
       "type": "function",
       "constant": true
     }
-];
+  ];
