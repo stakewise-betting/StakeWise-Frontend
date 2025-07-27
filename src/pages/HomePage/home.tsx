@@ -106,12 +106,7 @@ const Home = () => {
       toast.error("Failed to load slider images");
 
       // Use fallback images on error
-      setSlides([
-        { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
-        { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
-        { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
-        { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
-      ]);
+      setSlides([]);
     } finally {
       setIsSliderLoading(false);
     }
