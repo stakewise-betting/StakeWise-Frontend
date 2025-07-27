@@ -15,18 +15,18 @@ import { toast } from "react-toastify";
 import { useWatchlist } from "@/context/WatchlistContext";
 import { AppContext } from "@/context/AppContext";
 
-// Define an array of different colors for the chart bars
+// Define an array of different colors for the chart bars - updated with orange theme
 const CHART_COLORS = [
-  "#3b82f6", // blue
-  "#ef4444", // red
-  "#f59e0b", // amber
-  "#8b5cf6", // purple
-  "#ec4899", // pink
-  "#10b981", // emerald
-  "#6366f1", // indigo
-  "#f97316", // orange
-  "#14b8a6", // teal
-  "#d946ef", // fuchsia
+  "#f97316", // orange (primary)
+  "#ea580c", // orange-600
+  "#fb923c", // orange-400
+  "#fdba74", // orange-300
+  "#fed7aa", // orange-200
+  "#dc2626", // red-600
+  "#fbbf24", // amber-400
+  "#f59e0b", // amber-500
+  "#d97706", // amber-600
+  "#92400e", // amber-700
 ];
 
 interface OptionOdds {
@@ -189,11 +189,11 @@ export default function BetInterface({
   return (
     <div className="lg:col-span-2">
       {/* Main Event Card */}
-      <div className="rounded-xl overflow-hidden bg-gradient-to-br from-[#1C1C27] to-[#262633] border border-gray-700/30 shadow-2xl transition-all duration-300 hover:shadow-3xl hover:border-indigo-500/30 backdrop-blur-sm">
+      <div className="rounded-xl overflow-hidden bg-gradient-to-br from-[#1C1C27] to-[#262633] border border-gray-700/30 shadow-2xl transition-all duration-300 hover:shadow-3xl hover:border-orange-500/30 backdrop-blur-sm">
         <div className="p-4 sm:p-6 lg:p-8">
           {/* Event Header */}
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 border-indigo-500/30 shadow-xl flex-shrink-0 sm:mx-0">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 border-orange-500/30 shadow-xl flex-shrink-0 sm:mx-0">
               <img
                 src={eventData.imageURL}
                 alt={`${eventData.name} - Event ID ${eventData.eventId}`}
@@ -202,7 +202,7 @@ export default function BetInterface({
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
             <div className="flex-1 space-y-2 sm:space-y-3 text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-white via-indigo-100 to-white bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-white via-orange-100 to-white bg-clip-text text-transparent">
                 {eventData.name}
               </h1>
               <p className="text-slate-300 leading-relaxed line-clamp-3 text-sm sm:text-base">
@@ -227,12 +227,12 @@ export default function BetInterface({
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-900/20 to-indigo-800/20 border border-indigo-700/30 rounded-lg px-3 sm:px-4 py-2 w-full sm:w-auto justify-center sm:justify-start">
-                <div className="p-1.5 sm:p-2 rounded-full bg-indigo-500/20 text-indigo-400 flex-shrink-0">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-orange-900/20 to-orange-800/20 border border-orange-700/30 rounded-lg px-3 sm:px-4 py-2 w-full sm:w-auto justify-center sm:justify-start">
+                <div className="p-1.5 sm:p-2 rounded-full bg-orange-500/20 text-orange-400 flex-shrink-0">
                   <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-xs text-indigo-300 uppercase tracking-wide font-medium">
+                  <span className="text-xs text-orange-300 uppercase tracking-wide font-medium">
                     Ends On
                   </span>
                   <div className="text-white font-semibold text-sm sm:text-base">
@@ -259,7 +259,7 @@ export default function BetInterface({
                 />
               </button>
               <button
-                className="group rounded-xl p-2 sm:p-3 bg-gray-800/50 border border-gray-600/30 text-gray-400 hover:bg-indigo-500/10 hover:border-indigo-400/30 hover:text-indigo-400 transition-all duration-300"
+                className="group rounded-xl p-2 sm:p-3 bg-gray-800/50 border border-gray-600/30 text-gray-400 hover:bg-orange-500/10 hover:border-orange-400/30 hover:text-orange-400 transition-all duration-300"
                 onClick={handleCopyLink}
               >
                 <Link2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" />
@@ -320,7 +320,7 @@ export default function BetInterface({
                     formatter={(value: number) => [`${value}%`, "Probability"]}
                     contentStyle={{
                       backgroundColor: "rgba(30, 30, 40, 0.95)",
-                      border: "1px solid rgba(99, 102, 241, 0.3)",
+                      border: "1px solid rgba(249, 115, 22, 0.3)",
                       borderRadius: "8px",
                       color: "#fff",
                       fontSize: "12px",
@@ -364,7 +364,7 @@ export default function BetInterface({
                 className={`group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 bg-gradient-to-r from-gray-800/30 to-gray-700/30 rounded-xl border transition-all duration-300 hover:shadow-lg gap-3 sm:gap-0 ${
                   selectedOption === option
                     ? "border-emerald-500/50 bg-gradient-to-r from-emerald-900/20 to-emerald-800/20 shadow-emerald-500/10"
-                    : "border-gray-600/30 hover:border-indigo-500/30 hover:from-gray-700/40 hover:to-gray-600/40"
+                    : "border-gray-600/30 hover:border-orange-500/30 hover:from-gray-700/40 hover:to-gray-600/40"
                 }`}
               >
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 w-full sm:w-auto">
@@ -372,14 +372,14 @@ export default function BetInterface({
                     className={`w-3 h-3 rounded-full transition-all duration-300 flex-shrink-0 ${
                       selectedOption === option
                         ? "bg-emerald-500 animate-pulse"
-                        : "bg-gray-500 group-hover:bg-indigo-500"
+                        : "bg-gray-500 group-hover:bg-orange-500"
                     }`}
                   ></div>
                   <span
                     className={`font-semibold text-base sm:text-lg transition-colors duration-300 ${
                       selectedOption === option
                         ? "text-emerald-300"
-                        : "text-white group-hover:text-indigo-300"
+                        : "text-white group-hover:text-orange-300"
                     }`}
                   >
                     {option}
@@ -408,7 +408,7 @@ export default function BetInterface({
                         ${
                           selectedOption === option
                             ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25"
-                            : "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-indigo-500/25"
+                            : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-orange-500/25"
                         }
                       `}
                     >
@@ -425,7 +425,7 @@ export default function BetInterface({
             <div className="flex justify-center mt-6">
               <Button
                 variant="ghost"
-                className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 text-indigo-300 hover:bg-gradient-to-r hover:from-indigo-600/30 hover:to-purple-600/30 hover:text-white hover:border-indigo-400/50 transition-all duration-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base"
+                className="bg-gradient-to-r from-orange-600/20 to-amber-600/20 border border-orange-500/30 text-orange-300 hover:bg-gradient-to-r hover:from-orange-600/30 hover:to-amber-600/30 hover:text-white hover:border-orange-400/50 transition-all duration-300 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base"
                 onClick={() => setShowMore(true)}
               >
                 View All {eventData.options.length} Options
@@ -442,7 +442,7 @@ export default function BetInterface({
           <button
             className={`flex-1 py-3 sm:py-4 px-4 sm:px-6 font-semibold text-center transition-all duration-300 text-sm sm:text-base ${
               activeTab === "rules"
-                ? "bg-gradient-to-r from-emerald-600/20 to-emerald-500/20 text-emerald-300 border-b-2 border-emerald-500"
+                ? "bg-gradient-to-r from-orange-600/20 to-orange-500/20 text-orange-300 border-b-2 border-orange-500"
                 : "text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/50"
             }`}
             onClick={() => setActiveTab("rules")}
@@ -452,7 +452,7 @@ export default function BetInterface({
           <button
             className={`flex-1 py-3 sm:py-4 px-4 sm:px-6 font-semibold text-center transition-all duration-300 text-sm sm:text-base ${
               activeTab === "description"
-                ? "bg-gradient-to-r from-emerald-600/20 to-emerald-500/20 text-emerald-300 border-b-2 border-emerald-500"
+                ? "bg-gradient-to-r from-orange-600/20 to-orange-500/20 text-orange-300 border-b-2 border-orange-500"
                 : "text-slate-400 hover:text-white hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/50"
             }`}
             onClick={() => setActiveTab("description")}
@@ -466,8 +466,8 @@ export default function BetInterface({
           {activeTab === "rules" && (
             <div className="animate-admin-fade-in space-y-4">
               <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 border border-emerald-500/30 flex-shrink-0">
-                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />
+                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-400/20 border border-orange-500/30 flex-shrink-0">
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />
                 </div>
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Event Rules & Guidelines
@@ -484,8 +484,8 @@ export default function BetInterface({
           {activeTab === "description" && (
             <div className="animate-admin-fade-in space-y-4">
               <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-indigo-500/20 to-indigo-400/20 border border-indigo-500/30 flex-shrink-0">
-                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-400" />
+                <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-400/20 border border-orange-500/30 flex-shrink-0">
+                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />
                 </div>
                 <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Event Description
