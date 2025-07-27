@@ -1,15 +1,7 @@
-// StakeWise-Frontend/src/Admin/profile/AdminProfilePage.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-//   CardDescription,
-// } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -231,7 +223,7 @@ const AdminProfilePage: React.FC = () => {
         {!isEditing && (
           <Button
             onClick={() => setIsEditing(true)}
-            className="group flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-secondary/20 text-dark-primary border border-secondary/50 shadow-lg hover:bg-secondary/30 hover:shadow-xl hover:scale-105 active:scale-95"
+            className="group flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-secondary/20 text-white border border-secondary/50 shadow-lg hover:bg-secondary/30 hover:shadow-xl hover:scale-105 active:scale-95"
           >
             <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-secondary/20 text-secondary shadow-lg">
               <Pencil
@@ -239,7 +231,7 @@ const AdminProfilePage: React.FC = () => {
                 aria-hidden="true"
               />
             </div>
-            <span className="text-sm font-semibold transition-colors duration-300 text-dark-primary">
+            <span className="text-sm font-semibold transition-colors duration-300">
               Edit Profile
             </span>
           </Button>
@@ -498,43 +490,25 @@ const AdminProfilePage: React.FC = () => {
           type="button"
           onClick={handleCancelEdit}
           disabled={isSaving}
-          className="group flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-[#1C1C27] text-white border border-gray-700/50 shadow-lg hover:bg-[#262633] hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+          className="border-2 border-gray-700 hover:bg-gray-700 transition-colors text-white"
         >
-          <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-[#EF4444]/20 text-[#EF4444] shadow-lg">
-            <XCircle
-              className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300"
-              aria-hidden="true"
-            />
-          </div>
-          <span className="text-sm font-semibold transition-colors duration-300 text-white">
-            Cancel
-          </span>
+          <XCircle className="mr-2 h-4 w-4" />
+          Cancel
         </Button>
         <Button
           type="submit"
           disabled={isSaving}
-          className="group flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-green-500/20 text-white border border-green-500/50 shadow-lg hover:bg-green-500/30 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+          className="bg-secondary hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
         >
           {isSaving ? (
             <>
-              <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-green-500/20 text-green-500 shadow-lg">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              </div>
-              <span className="text-sm font-semibold transition-colors duration-300 text-white">
-                Saving...
-              </span>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              Saving...
             </>
           ) : (
             <>
-              <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-green-500/20 text-green-500 shadow-lg">
-                <Save
-                  className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300"
-                  aria-hidden="true"
-                />
-              </div>
-              <span className="text-sm font-semibold transition-colors duration-300 text-white">
-                Save Changes
-              </span>
+              <Save className="mr-2 h-4 w-4" />
+              Save Changes
             </>
           )}
         </Button>
@@ -548,7 +522,7 @@ const AdminProfilePage: React.FC = () => {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
+            <h2 className="text-3xl font-bold text-white flex items-center gap-3">
               <div className="p-2 rounded-full flex items-center justify-center bg-secondary/20">
                 <CircleUserRound className="w-6 h-6 text-secondary" />
               </div>
