@@ -7,8 +7,6 @@ import {
   Eye,
   Calendar,
   Tag,
-  TrendingUp,
-  Users,
   ChevronDown,
   ChevronUp,
   Clock,
