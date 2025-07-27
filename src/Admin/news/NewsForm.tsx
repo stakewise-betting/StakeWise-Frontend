@@ -127,12 +127,10 @@ export const NewsForm: React.FC<NewsPageProps> = ({
       return;
     }
 
-    // Set status to saving
     setSavingStatus("saving");
     setSaveMessage("");
 
     try {
-      // Create a FormData object to handle file uploads
       const formData = new FormData();
       formData.append("newsId", newsId.toString());
       formData.append("title", title);
@@ -140,16 +138,14 @@ export const NewsForm: React.FC<NewsPageProps> = ({
       formData.append("category", category);
       formData.append("author", author);
 
-      // Add image if selected
       if (selectedImage) {
         formData.append("image", selectedImage);
       }
 
-      // Make API call to save news with FormData
       const response = await fetch(`${backendBaseUrl}/api/news/save-news`, {
         method: "POST",
-        credentials: "include", // Include cookies for authentication
-        body: formData, // Using FormData instead of JSON
+        credentials: "include",
+        body: formData,
       });
 
       const data = await response.json();
@@ -158,32 +154,24 @@ export const NewsForm: React.FC<NewsPageProps> = ({
         throw new Error(data.error || "Failed to save news article");
       }
 
-      // Set status to success
       setSavingStatus("success");
       setSaveMessage("News article saved successfully!");
-
-      // Clear form on success
       clearForm();
 
-      // Reset status after 3 seconds
       setTimeout(() => {
         setSavingStatus("idle");
         setSaveMessage("");
       }, 3000);
     } catch (error: any) {
       console.error("Error saving news article:", error);
-
-      // Set status to error
       setSavingStatus("error");
 
-      // Handle duplicate entry error or other specific errors
       if (error.message.includes("already exists")) {
         setSaveMessage("A news article with this ID already exists");
       } else {
         setSaveMessage(`Error: ${error.message}`);
       }
 
-      // Reset error status after 5 seconds
       setTimeout(() => {
         setSavingStatus("idle");
         setSaveMessage("");

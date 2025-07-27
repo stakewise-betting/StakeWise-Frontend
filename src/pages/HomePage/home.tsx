@@ -76,37 +76,70 @@ const Home = () => {
       setIsSliderLoading(true);
       console.log("Fetching slider data from database...");
 
-      const response = await axios.get("/api/sliders/active-sliders");
-      console.log("Slider API response:", response.data);
+      // Use absolute URL for hosted environment
+      const baseURL =
+        import.meta.env.VITE_BACKEND_URL ||
+        "https://stakewisebackend.onrender.com";
+      const apiUrl = `${baseURL.replace(/\/$/, "")}/api/sliders/active-sliders`;
 
-      // Get backend base URL from env (remove trailing slash if present)
-      const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL || "").replace(
-        /\/$/,
-        ""
-      );
+      console.log("Full API URL:", apiUrl);
 
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        const sliderSlides: SliderSlide[] = response.data.map(
-          (slider: SliderData) => ({
-            // Use absolute URL for image src
-            src: `${backendBaseUrl}/api/sliders/image/${slider._id}`,
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Add any additional headers if needed
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Slider API response:", data);
+
+      // Get backend base URL (remove trailing slash if present)
+      const backendBaseUrl = baseURL.replace(/\/$/, "");
+
+      if (Array.isArray(data) && data.length > 0) {
+        const sliderSlides: SliderSlide[] = data.map((slider: SliderData) => {
+          const imageUrl = `${backendBaseUrl}/api/sliders/image/${slider._id}`;
+          console.log(`Generated image URL: ${imageUrl}`);
+
+          return {
+            src: imageUrl,
             alt: slider.heading || "Slider Image",
             heading: slider.heading,
             description: slider.description,
-          })
-        );
+          };
+        });
 
         setSlides(sliderSlides);
         console.log(
           `Successfully loaded ${sliderSlides.length} slider images from database`
         );
-      } // <-- Uncommented closing brace to fix syntax
+      } else {
+        console.log("No slider data received, using fallback images");
+        // Use fallback images when no data is received
+        setSlides([
+          { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
+          { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
+          { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
+          { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
+        ]);
+      }
     } catch (error) {
       console.error("Error fetching slider data:", error);
       toast.error("Failed to load slider images");
 
       // Use fallback images on error
-      setSlides([]);
+      setSlides([
+        { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
+        { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
+        { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
+        { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
+      ]);
     } finally {
       setIsSliderLoading(false);
     }
