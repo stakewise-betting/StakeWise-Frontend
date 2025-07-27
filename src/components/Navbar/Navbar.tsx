@@ -218,7 +218,7 @@ const Navbar: React.FC = () => {
             </Button>
             <Button
               className="hidden sm:flex bg-secondary hover:bg-secondary/80 text-white rounded-lg text-sm px-3 py-1 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate("/signup")}
+              onClick={() => navigate("/login")}
             >
               Sign Up
             </Button>
