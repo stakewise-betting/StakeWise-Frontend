@@ -198,7 +198,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               <Button
                 variant="outline"
                 className="rounded-xl text-secondary border-secondary/30 hover:bg-secondary/10 hover:border-secondary/50 w-full font-semibold py-3 transition-all duration-300 shadow-sm hover:shadow-md"
-                onClick={() => onLinkClick(() => navigate("/signup"))}
+                onClick={() => onLinkClick(() => navigate("/login"))}
               >
                 Sign Up
               </Button>
