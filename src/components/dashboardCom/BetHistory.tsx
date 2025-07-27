@@ -235,8 +235,6 @@ export default function BetHistory() {
     return matchesSearch && matchesDate;
   });
 
-  // If wallet is not connected, bets will be empty and error may be set
-  // Suppress wallet connection errors and show empty state instead
   const isWalletError = error && error.toLowerCase().includes("wallet");
   const isLoading = loading || calculationLoading;
 

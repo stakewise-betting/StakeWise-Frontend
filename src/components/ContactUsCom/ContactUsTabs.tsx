@@ -29,19 +29,13 @@ const ContactUsTabs = () => {
         </TabsList>
 
         <div className="flex-1 min-h-0 w-full">
-          <TabsContent
-            value="support"
-            className="mt-0 w-full h-full data-[state=active]:flex data-[state=active]:flex-col"
-          >
+          <TabsContent value="support" className="mt-0 w-full h-full data-[state=active]:flex data-[state=active]:flex-col">
             <div className="w-full flex-1">
               <SupportTab isLoggedin={isLoggedin} />
             </div>
           </TabsContent>
 
-          <TabsContent
-            value="responsible"
-            className="mt-0 w-full h-full data-[state=active]:flex data-[state=active]:flex-col"
-          >
+          <TabsContent value="responsible" className="mt-0 w-full h-full data-[state=active]:flex data-[state=active]:flex-col">
             <div className="w-full flex-1">
               <ResponsibleGamblingTab isLoggedin={isLoggedin} />
             </div>

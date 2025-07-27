@@ -13,7 +13,7 @@ import MetamaskLogo from "@/assets/images/MetaMask-icon-fox.svg";
 import StatCard from "@/components/dashboardCom/StatCard";
 import { useUserStats } from "@/hooks/useUserStats";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Activity, Wallet } from "lucide-react";
+import { Users, Activity } from "lucide-react";
 
 const Dashboard = () => {
   const { userData } = useContext(AppContext)!;
@@ -54,17 +54,14 @@ const Dashboard = () => {
               {/* Profile Avatar */}
               <div className="relative">
                 <Avatar className="h-32 w-32 border-4 border-[#333447] shadow-xl">
-                  <AvatarImage alt="Profile" />
+                  <AvatarImage
+                    src={userData?.picture}
+                    alt="User profile"
+                    className="object-cover"
+                  />
+
                   <AvatarFallback className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] text-zinc-100 text-4xl font-bold">
-                    {userData?.picture ? (
-                      <img
-                        src={userData.picture}
-                        alt="User profile"
-                        width={128}
-                        height={128}
-                        className="object-cover rounded-full"
-                      />
-                    ) : userData?.fname ? (
+                    {userData?.fname ? (
                       userData.fname[0].toUpperCase()
                     ) : userData?.walletAddress ? (
                       <img
@@ -103,27 +100,6 @@ const Dashboard = () => {
                         userData.walletAddress.slice(-6)
                       : "Betting Dashboard")}
                 </p>
-
-                <div className="flex flex-col md:flex-row gap-4 mt-4">
-                  <div className="px-4 py-2 bg-gradient-to-r from-[#3B82F6]/20 to-[#60A5FA]/20 border border-[#3B82F6]/30 rounded-full">
-                    <span className="text-[#3B82F6] font-medium text-sm">
-                      Premium Member
-                    </span>
-                  </div>
-                  <div className="px-4 py-2 bg-gradient-to-r from-[#10B981]/20 to-[#34D399]/20 border border-[#10B981]/30 rounded-full">
-                    <span className="text-emerald-400 font-medium text-sm">
-                      Verified Account
-                    </span>
-                  </div>
-                  {!isWalletConnected && (
-                    <div className="px-4 py-2 bg-gradient-to-r from-[#F59E0B]/20 to-[#FBBF24]/20 border border-[#F59E0B]/30 rounded-full">
-                      <span className="text-[#F59E0B] font-medium text-sm flex items-center gap-2">
-                        <Wallet className="w-4 h-4" />
-                        Connect Wallet for Full Features
-                      </span>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           </CardContent>
@@ -193,13 +169,9 @@ const Dashboard = () => {
 
               <StatCard
                 title="Net Profit"
-                value={
-                  !isWalletConnected
-                    ? "-- ETH"
-                    : `${netProfit >= 0 ? "+" : ""}${formatNumber(
-                        netProfit
-                      )} ETH`
-                }
+                value={`${netProfit >= 0 ? "+" : ""}${formatNumber(
+                  netProfit
+                )} ETH`}
                 percentage={
                   !isWalletConnected ? "" : `${winRate.toFixed(1)}% Win Rate`
                 }
@@ -215,7 +187,7 @@ const Dashboard = () => {
 
               <StatCard
                 title="Total Bets Placed"
-                value={!isWalletConnected ? "--" : totalBetsPlaced.toString()}
+                value={totalBetsPlaced.toString()}
                 percentage={
                   !isWalletConnected
                     ? ""
@@ -231,7 +203,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Dashboard Components - These should now work without wallet connection */}
       <OngoingTable />
       <Achievements />
       <BetHistory />

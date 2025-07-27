@@ -109,7 +109,7 @@ export const GoogleLoginButton = () => {
           </div>
 
           {/* Actual Google button with custom styling */}
-          <div className="relative z-0 opacity-0 hover:opacity-100">
+          <div className="relative flex justify-center items-center z-0 opacity-0 hover:opacity-5">
             <GoogleLogin
               onSuccess={handleGoogleLogin}
               onError={() => toast.error("Google login failed")}

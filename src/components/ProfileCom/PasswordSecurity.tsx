@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Lock, Shield, Bell, Save, Eye, EyeOff, KeyRound } from "lucide-react";
+import { Lock, Shield, Save, Eye, EyeOff, KeyRound } from "lucide-react";
 import SettingsCard from "./SettingsCard";
 import axios from "axios";
 import { useContext } from "react";
@@ -247,45 +245,6 @@ export default function PasswordSecurity() {
             </p>
           </div>
         )}
-
-        <Separator className="bg-gradient-to-r from-transparent via-[#333447] to-transparent" />
-
-        {/* Security Preferences */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] rounded-lg">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-100">
-              Security Preferences
-            </h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="bg-gradient-to-br from-[#1C1C27] to-[#252538] p-6 rounded-xl border border-[#333447] hover:border-[#8B5CF6]/30 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Bell className="h-4 w-4 text-[#8B5CF6]" />
-                    <h4 className="text-lg font-medium text-zinc-100">
-                      Login Notifications
-                    </h4>
-                  </div>
-                  <p className="text-sm text-zinc-400">
-                    Receive email notifications when someone logs into your
-                    account from a new device
-                  </p>
-                </div>
-                <div className="ml-6">
-                  <Switch
-                    defaultChecked
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-[#8B5CF6] data-[state=checked]:to-[#A78BFA]"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </SettingsCard>
   );
