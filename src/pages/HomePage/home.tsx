@@ -79,10 +79,17 @@ const Home = () => {
       const response = await axios.get("/api/sliders/active-sliders");
       console.log("Slider API response:", response.data);
 
+      // Get backend base URL from env (remove trailing slash if present)
+      const backendBaseUrl = (import.meta.env.VITE_BACKEND_URL || "").replace(
+        /\/$/,
+        ""
+      );
+
       if (Array.isArray(response.data) && response.data.length > 0) {
         const sliderSlides: SliderSlide[] = response.data.map(
           (slider: SliderData) => ({
-            src: `/api/sliders/image/${slider._id}`,
+            // Use absolute URL for image src
+            src: `${backendBaseUrl}/api/sliders/image/${slider._id}`,
             alt: slider.heading || "Slider Image",
             heading: slider.heading,
             description: slider.description,
