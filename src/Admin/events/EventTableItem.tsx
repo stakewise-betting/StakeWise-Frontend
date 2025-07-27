@@ -14,7 +14,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
-  Info, // Added for details section consistency
+  Info,
 } from "lucide-react";
 import { DeclareWinnerSection } from "../shared/DeclareWinnerSection";
 import Web3 from "web3";
@@ -73,18 +73,17 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     (timeUntilEnd % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
   );
 
-  // --- Enhanced Status Badge Logic ---
   const getStatusBadge = () => {
     const baseClasses =
-      "flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold border backdrop-blur-sm whitespace-nowrap transition-all duration-300 shadow-lg";
+      "flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium";
 
     if (isCompleted) {
       return (
         <Badge
           variant="default"
-          className={`${baseClasses} bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/10`}
+          className={`${baseClasses} bg-emerald-500/20 text-emerald-300`}
         >
-          <CheckCircle2 className="h-3 w-3 flex-shrink-0" />
+          <CheckCircle2 className="h-3 w-3" />
           <span>Complete</span>
         </Badge>
       );
@@ -92,9 +91,9 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
       return (
         <Badge
           variant="default"
-          className={`${baseClasses} bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 border-amber-500/40 animate-pulse shadow-amber-500/10`}
+          className={`${baseClasses} bg-amber-500/20 text-amber-300`}
         >
-          <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+          <AlertTriangle className="h-3 w-3" />
           <span>Pending</span>
         </Badge>
       );
@@ -102,9 +101,9 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
       return (
         <Badge
           variant="default"
-          className={`${baseClasses} bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 text-indigo-300 border-indigo-500/40 shadow-indigo-500/10`}
+          className={`${baseClasses} bg-indigo-500/20 text-indigo-300`}
         >
-          <Clock className="h-3 w-3 flex-shrink-0 animate-pulse" />
+          <Clock className="h-3 w-3" />
           <span>Live</span>
         </Badge>
       );
@@ -112,15 +111,14 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
       return (
         <Badge
           variant="outline"
-          className={`${baseClasses} bg-gradient-to-r from-gray-600/10 to-gray-700/10 text-gray-300 border-gray-500/40 shadow-gray-500/5`}
+          className={`${baseClasses} bg-gray-600/10 text-gray-300`}
         >
-          <Calendar className="h-3 w-3 flex-shrink-0" />
+          <Calendar className="h-3 w-3" />
           <span>Scheduled</span>
         </Badge>
       );
     }
   };
-  // --- End Enhanced Status Badge Logic ---
 
   const handleDeclareWinnerClick = () => setIsDeclaringWinner(true);
   const handleCancelDeclareWinner = () => setIsDeclaringWinner(false);
@@ -152,7 +150,6 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     try {
       if (isNaN(timestamp) || timestamp <= 0) return "Invalid Date";
       return new Date(timestamp).toLocaleDateString(undefined, {
-        year: "numeric",
         month: "short",
         day: "numeric",
       });
@@ -174,135 +171,79 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
     }
   };
 
-  // Helper for responsive cell labels
-  const DataLabel: React.FC<{ label: string }> = ({ label }) => (
-    <span className="md:hidden font-medium text-dark-secondary mr-2">
-      {label}:
-    </span>
-  );
-
   return (
     <>
-      {/* Main Data Row / Card */}
+      {/* Main Data Row */}
       <TableRow
-        className={`border-b border-gray-700/30 transition-all duration-300 block md:table-row group ${
-          showDetails
-            ? "bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border-indigo-500/30 shadow-lg"
-            : "hover:bg-gradient-to-r hover:from-gray-800/30 hover:to-gray-700/30 hover:border-gray-600/50"
-        } ${
-          isDeclaringWinner
-            ? "border-l-4 border-l-emerald-500 bg-gradient-to-r from-emerald-900/10 to-emerald-800/10 shadow-emerald-500/10"
-            : ""
-        } relative backdrop-blur-sm`}
+        className={`border-b border-gray-700/30 transition-all duration-300 ${
+          showDetails ? "bg-indigo-900/10" : "hover:bg-gray-800/10"
+        } ${isDeclaringWinner ? "border-l-4 border-l-emerald-500" : ""}`}
       >
         {/* Status Cell */}
-        <TableCell className="p-2 md:px-3 md:py-3 align-middle block md:table-cell md:w-[100px] whitespace-nowrap">
-          <DataLabel label="Status" />
+        <TableCell className="px-2 py-3 w-[100px]">
           {getStatusBadge()}
         </TableCell>
 
         {/* Event ID Cell */}
-        <TableCell className="p-2 md:px-3 md:py-3 align-middle block md:table-cell md:w-[80px]">
-          <DataLabel label="ID" />
-          <div className="flex items-center space-x-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-            <span className="font-mono text-xs text-white bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-1.5 py-0.5 rounded-lg border border-gray-600/30">
-              #{eventId}
-            </span>
-          </div>
+        <TableCell className="px-2 py-3 w-[60px]">
+          <span className="font-mono text-xs text-white">#{eventId}</span>
         </TableCell>
 
-        {/* Event Name & Desc Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:min-w-[200px] md:max-w-[280px]">
-          <DataLabel label="Event" />
-          <div className="space-y-1">
-            <h3
-              className="font-semibold text-white text-base truncate group-hover:text-indigo-300 transition-colors duration-300"
-              title={name}
-            >
+        {/* Event Name Cell */}
+        <TableCell className="px-2 py-3 min-w-[150px] max-w-[200px]">
+          <div>
+            <h3 className="font-medium text-white truncate" title={name}>
               {name}
             </h3>
-            {description && (
-              <p
-                className="text-xs text-slate-300 line-clamp-1 leading-relaxed"
-                title={description}
-              >
-                {description}
-              </p>
-            )}
           </div>
         </TableCell>
 
         {/* Category Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:w-[130px]">
-          <DataLabel label="Category" />
+        <TableCell className="px-2 py-3 w-[100px]">
           <Badge
             variant="outline"
-            className="bg-gradient-to-r from-purple-500/20 to-purple-600/20 text-purple-300 border-purple-500/40 flex items-center gap-1 w-fit px-2 py-1 rounded-lg font-medium shadow-purple-500/10 text-xs"
+            className="bg-purple-500/20 text-purple-300 flex items-center gap-1 w-fit px-2 py-0.5 text-xs"
           >
-            <Tag className="w-3 h-3 flex-shrink-0" />
+            <Tag className="w-3 h-3" />
             <span className="truncate">{category}</span>
           </Badge>
         </TableCell>
 
         {/* Start Time Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:w-[140px]">
-          <DataLabel label="Start Date" />
-          <div className="flex items-center gap-2 bg-gradient-to-r from-indigo-900/20 to-indigo-800/20 border border-indigo-700/30 rounded-lg px-2 py-1.5">
-            <div className="p-0.5 rounded-full bg-indigo-500/20">
-              <Calendar className="w-3 h-3 text-indigo-400" />
-            </div>
-            <span className="text-white font-medium text-xs whitespace-nowrap">
-              {formatDate(startTime)}
-            </span>
-          </div>
+        <TableCell className="px-2 py-3 w-[100px]">
+          <div className="text-white text-sm">{formatDate(startTime)}</div>
         </TableCell>
 
         {/* Prize Pool Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:w-[120px]">
-          <DataLabel label="Volume" />
-          <div className="flex items-center gap-2 bg-gradient-to-r from-emerald-900/20 to-emerald-800/20 border border-emerald-700/30 rounded-lg px-2 py-1.5">
-            <div className="p-0.5 rounded-full bg-emerald-500/20">
-              <TrendingUp className="w-3 h-3 text-emerald-400" />
-            </div>
-            <span className="font-mono font-semibold text-emerald-300 text-xs whitespace-nowrap">
-              {formatPrizePool(prizePool, web3)}
-            </span>
-          </div>
+        <TableCell className="px-2 py-3 w-[100px]">
+          <span className="font-mono text-emerald-300 text-sm">
+            {formatPrizePool(prizePool, web3)}
+          </span>
         </TableCell>
 
         {/* Listed By Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:w-[140px]">
-          <DataLabel label="Listed By" />
-          <div className="flex items-center gap-2 bg-gradient-to-r from-gray-800/30 to-gray-700/30 border border-gray-600/30 rounded-lg px-2 py-1.5">
-            <div className="p-0.5 rounded-full bg-gray-600/30">
-              <Users className="w-3 h-3 text-gray-400" />
-            </div>
-            <span className="text-slate-300 truncate font-medium text-xs">
-              {listedBy.length > 6 ? `${listedBy.slice(0, 6)}...` : listedBy}
-            </span>
-          </div>
+        <TableCell className="px-2 py-3 w-[100px]">
+          <span className="text-slate-300 truncate text-sm">
+            {listedBy.length > 6 ? `${listedBy.slice(0, 6)}...` : listedBy}
+          </span>
         </TableCell>
 
         {/* Actions Cell */}
-        <TableCell className="p-3 md:px-4 md:py-4 align-middle block md:table-cell md:w-[160px] text-left md:text-right">
-          <div className="flex items-center md:justify-end gap-2 flex-wrap">
+        <TableCell className="px-2 py-3 w-[160px] text-right">
+          <div className="flex justify-end gap-1">
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="icon"
+                    size="sm"
                     onClick={toggleDetails}
-                    className={`transition-all duration-300 h-8 w-8 rounded-lg border ${
+                    className={`h-7 w-7 p-0 ${
                       showDetails
-                        ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-indigo-500/40 text-indigo-300"
-                        : "bg-gray-800/50 border-gray-600/30 text-gray-400 hover:bg-indigo-500/10 hover:border-indigo-400/30 hover:text-indigo-400"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "text-gray-400"
                     }`}
                   >
-                    <span className="sr-only">
-                      {showDetails ? "Hide" : "Show"} details
-                    </span>
                     {showDetails ? (
                       <ChevronUp className="w-4 h-4" />
                     ) : (
@@ -319,10 +260,9 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="bg-gradient-to-r from-gray-700/50 to-gray-600/50 border border-gray-600/30 text-gray-300 hover:from-indigo-600/20 hover:to-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all duration-300 rounded-lg px-3 py-1.5 font-medium text-xs"
+              className="h-7 text-gray-300 hover:text-indigo-300"
             >
-              <Eye className="w-3 h-3 mr-1" />
-              View
+              <Eye className="w-4 h-4" />
             </Button>
 
             {!isCompleted && isAwaitingResult && !isDeclaringWinner && (
@@ -330,164 +270,101 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleDeclareWinnerClick}
-                className="bg-gradient-to-r from-amber-500/20 to-amber-600/20 border-amber-500/40 text-amber-300 hover:from-amber-600/30 hover:to-amber-500/30 hover:border-amber-400/60 transition-all duration-300 rounded-lg px-3 py-1.5 font-semibold shadow-amber-500/10 text-xs"
+                className="h-7 text-amber-300 border-amber-500/40 bg-amber-500/20"
               >
-                <Award className="h-3 w-3 mr-1" />
-                Declare
+                <Award className="h-4 w-4" />
               </Button>
             )}
           </div>
           {isCompleted && winningOption && (
-            <div className="mt-3 text-left md:text-right">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-900/30 to-emerald-800/30 border border-emerald-700/40 rounded-lg px-2 py-1">
-                <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                <span className="text-xs text-emerald-300 font-medium">
-                  Winner: {winningOption}
-                </span>
+            <div className="mt-1 text-right">
+              <div className="inline-flex items-center gap-1 text-xs text-emerald-300">
+                <CheckCircle2 className="h-3 w-3" />
+                <span>Winner: {winningOption}</span>
               </div>
             </div>
           )}
         </TableCell>
       </TableRow>
 
-      {/* Details Row / Section (conditional) */}
+      {/* Details Row */}
       {showDetails && (
-        <TableRow className="bg-gradient-to-r from-indigo-900/10 via-purple-900/10 to-indigo-900/10 backdrop-blur-sm border-t border-indigo-500/20 block md:table-row">
-          <TableCell colSpan={8} className="p-0 block md:table-cell">
-            <div className="p-6 m-3 md:m-0 md:p-8 space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <TableRow className="bg-indigo-900/10">
+          <TableCell colSpan={8} className="p-0">
+            <div className="p-4 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Event Details */}
-                <div className="space-y-4 p-6 bg-gradient-to-br from-[#1C1C27] to-[#262633] rounded-xl border border-gray-700/30 shadow-xl backdrop-blur-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-indigo-500/20 to-indigo-400/20 border border-indigo-500/30">
-                      <Info className="w-5 h-5 text-indigo-400" />
-                    </div>
-                    <h4 className="text-lg font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                      Event Details
-                    </h4>
+                <div className="space-y-2 p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-4 h-4 text-indigo-400" />
+                    <h4 className="text-sm font-bold text-white">Details</h4>
                   </div>
-                  <p className="text-slate-300 leading-relaxed">
+                  <p className="text-slate-300 text-sm">
                     {description || "No description provided."}
                   </p>
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-700/30">
-                    <span className="text-slate-400 font-medium">
-                      Event ID:
-                    </span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                      <span className="font-mono text-white bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-3 py-1 rounded-lg border border-gray-600/30">
-                        #{eventId}
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Timeline */}
-                <div className="space-y-4 p-6 bg-gradient-to-br from-[#1C1C27] to-[#262633] rounded-xl border border-gray-700/30 shadow-xl backdrop-blur-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500/20 to-purple-400/20 border border-purple-500/30">
-                      <Calendar className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <h4 className="text-lg font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                      Timeline
-                    </h4>
+                <div className="space-y-2 p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-purple-400" />
+                    <h4 className="text-sm font-bold text-white">Timeline</h4>
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-800/40 to-gray-700/40 rounded-lg border border-gray-600/30">
-                      <span className="text-slate-400 font-medium">Start:</span>
-                      <div className="text-right">
-                        <div className="text-white font-semibold">
-                          {formatDate(startTime)}
-                        </div>
-                        <div className="text-slate-400 text-sm">
-                          {formatTime(startTime)}
-                        </div>
-                      </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">Start:</span>
+                      <span className="text-white">
+                        {formatDate(startTime)} {formatTime(startTime)}
+                      </span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-800/40 to-gray-700/40 rounded-lg border border-gray-600/30">
-                      <span className="text-slate-400 font-medium">End:</span>
-                      <div className="text-right">
-                        <div className="text-white font-semibold">
-                          {formatDate(endTime)}
-                        </div>
-                        <div className="text-slate-400 text-sm">
-                          {formatTime(endTime)}
-                        </div>
-                      </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-400">End:</span>
+                      <span className="text-white">
+                        {formatDate(endTime)} {formatTime(endTime)}
+                      </span>
                     </div>
                     {isOngoing && timeUntilEnd > 0 && (
-                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-900/20 to-indigo-800/20 rounded-lg border border-indigo-700/30">
-                        <span className="text-indigo-300 font-medium">
-                          Time Left:
-                        </span>
-                        <span className="text-indigo-300 font-semibold">
+                      <div className="flex justify-between text-sm text-indigo-300">
+                        <span>Time Left:</span>
+                        <span>
                           {daysUntilEnd > 0 ? `${daysUntilEnd}d ` : ""}
                           {hoursUntilEnd > 0 || daysUntilEnd === 0
                             ? `${hoursUntilEnd}h `
                             : ""}
-                          remaining
                         </span>
-                      </div>
-                    )}
-                    {isCompleted && (
-                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-900/20 to-emerald-800/20 rounded-lg border border-emerald-700/30">
-                        <span className="text-emerald-300 font-medium">
-                          Status:
-                        </span>
-                        <div className="flex items-center gap-2 text-emerald-300">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span className="font-semibold">Completed</span>
-                        </div>
-                      </div>
-                    )}
-                    {isAwaitingResult && (
-                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-lg border border-amber-700/30">
-                        <span className="text-amber-300 font-medium">
-                          Status:
-                        </span>
-                        <div className="flex items-center gap-2 text-amber-300">
-                          <AlertTriangle className="w-4 h-4 animate-pulse" />
-                          <span className="font-semibold">Awaiting Result</span>
-                        </div>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Options */}
-                <div className="space-y-4 p-6 bg-gradient-to-br from-[#1C1C27] to-[#262633] rounded-xl border border-gray-700/30 shadow-xl backdrop-blur-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 border border-emerald-500/30">
-                      <Tag className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <h4 className="text-lg font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                      Options
-                    </h4>
+                <div className="space-y-2 p-4 bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-emerald-400" />
+                    <h4 className="text-sm font-bold text-white">Options</h4>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {options.length > 0 ? (
                       options.map((option: string, idx: number) => (
                         <div
                           key={idx}
-                          className={`flex items-center p-3 rounded-lg border transition-all duration-300 ${
+                          className={`flex items-center p-2 text-sm rounded ${
                             winningOption === option
-                              ? "bg-gradient-to-r from-emerald-900/30 to-emerald-800/30 border-emerald-700/40 text-emerald-300 shadow-emerald-500/10"
-                              : "bg-gradient-to-r from-gray-800/40 to-gray-700/40 border-gray-600/30 text-slate-300"
+                              ? "bg-emerald-900/30 text-emerald-300"
+                              : "bg-gray-700/40 text-slate-300"
                           }`}
                         >
                           {winningOption === option ? (
-                            <CheckCircle2 className="h-5 w-5 mr-3 flex-shrink-0 text-emerald-400" />
+                            <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-400" />
                           ) : (
-                            <div className="w-3 h-3 mr-3 rounded-full bg-gray-500 flex-shrink-0"></div>
+                            <div className="w-2 h-2 mr-2 rounded-full bg-gray-500"></div>
                           )}
-                          <span className="font-medium">{option}</span>
+                          <span>{option}</span>
                         </div>
                       ))
                     ) : (
-                      <div className="text-center p-6 bg-gradient-to-r from-gray-800/40 to-gray-700/40 rounded-lg border border-gray-600/30">
-                        <p className="text-slate-400 italic">
-                          No options listed.
-                        </p>
+                      <div className="text-center p-3 text-slate-400 italic text-sm">
+                        No options listed.
                       </div>
                     )}
                   </div>
@@ -498,23 +375,14 @@ export const EventTableItem: React.FC<EventTableItemProps> = ({
         </TableRow>
       )}
 
-      {/* Declare Winner Row / Section (conditional) */}
+      {/* Declare Winner Row */}
       {isDeclaringWinner && (
-        <TableRow className="bg-gradient-to-r from-emerald-900/10 via-emerald-800/10 to-emerald-900/10 backdrop-blur-sm border-t border-emerald-500/30 block md:table-row">
-          <TableCell colSpan={8} className="p-0 block md:table-cell">
-            <div className="bg-gradient-to-br from-[#1C1C27] to-[#262633] p-6 rounded-xl m-3 border border-emerald-500/30 shadow-2xl backdrop-blur-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-emerald-400/20 border border-emerald-500/30">
-                  <Award className="w-6 h-6 text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                    Declare Winner
-                  </h3>
-                  <p className="text-slate-400">
-                    Select the winning option for this event
-                  </p>
-                </div>
+        <TableRow className="bg-emerald-900/10">
+          <TableCell colSpan={8} className="p-0">
+            <div className="bg-gray-800 p-4 m-2 rounded-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <Award className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-sm font-bold text-white">Declare Winner</h3>
               </div>
               <DeclareWinnerSection
                 event={event}
