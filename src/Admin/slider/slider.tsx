@@ -23,8 +23,8 @@ interface SliderType {
   description: string;
   addedDate: string;
   image: {
-    filename: string;
-    contentType: string;
+    public_id: string;
+    url: string;
   };
   status: string;
   order?: number;
@@ -69,7 +69,8 @@ const SliderManagement = () => {
         description: editingSlider.description || "",
         status: editingSlider.status as "active" | "inactive",
       });
-      setPreviewUrl(`${API_BASE_URL}/sliders/image/${editingSlider._id}`);
+      // Set preview URL to the Cloudinary URL when editing
+      setPreviewUrl(editingSlider.image.url);
     } else {
       resetForm();
     }
@@ -145,7 +146,8 @@ const SliderManagement = () => {
     if (!editingSlider) {
       setPreviewUrl(null);
     } else {
-      setPreviewUrl(`${API_BASE_URL}/sliders/image/${editingSlider._id}`);
+      // When editing, revert to the original Cloudinary URL
+      setPreviewUrl(editingSlider.image.url);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -263,12 +265,12 @@ const SliderManagement = () => {
 
   const getStatusBadge = (status: string) => {
     return status === "active" ? (
-      <Badge className="bg-green-500 text-white shadow-lg">
+      <Badge className="capitalize text-xs px-1.5 py-0.5 bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 text-emerald-300 border-emerald-500/40">
         <CheckCircle className="w-3 h-3 mr-1" />
         Active
       </Badge>
     ) : (
-      <Badge className="bg-red-500 text-white shadow-lg">
+      <Badge className="capitalize text-xs px-1.5 py-0.5 bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border-red-500/40 hover:text-red-200 hover:border-red-500/60 hover:bg-red-500/10 transition-all duration-300">
         <AlertCircle className="w-3 h-3 mr-1" />
         Inactive
       </Badge>
@@ -633,19 +635,19 @@ const SliderManagement = () => {
                     <table className="w-full">
                       <thead className="bg-[#262633] border-b border-gray-700">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-300">
                             Added Date
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-300">
                             Slider Details
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                            Image
+                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-300">
+                            Image Preview
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-300">
                             Status
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+                          <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-indigo-300">
                             Actions
                           </th>
                         </tr>
@@ -674,10 +676,16 @@ const SliderManagement = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <FileImage className="w-4 h-4 mr-2 text-secondary" />
-                                <span className="text-sm text-white font-medium">
-                                  {slider.image.filename}
-                                </span>
+                                <img
+                                  src={slider.image.url}
+                                  alt={slider.heading}
+                                  className="w-16 h-10 object-cover rounded-md border border-gray-600"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src =
+                                      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzFDMjcyNyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgZmlsbD0iI2RkZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlPC90ZXh0Pjwvc3ZnPg==";
+                                  }}
+                                />
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -689,7 +697,7 @@ const SliderManagement = () => {
                                   onClick={() => handleEdit(slider)}
                                   variant="outline"
                                   size="sm"
-                                  className="border-gray-700 hover:bg-gray-700 hover:border-secondary text-secondary"
+                                  className="h-8 w-8 bg-gradient-to-r from-blue-600/20 to-blue-700/20 hover:from-blue-600/30 hover:to-blue-700/30 border border-blue-500/30 text-blue-300 rounded-lg flex items-center justify-center transition-all duration-300 shadow-md"
                                 >
                                   <Edit className="w-4 h-4" />
                                 </Button>
@@ -697,7 +705,7 @@ const SliderManagement = () => {
                                   onClick={() => handleDelete(slider._id)}
                                   variant="outline"
                                   size="sm"
-                                  className="border-gray-700 hover:bg-red-900/20 hover:border-red-500 text-red-400"
+                                  className="h-8 w-8 bg-gradient-to-r from-red-600/20 to-red-700/20 hover:from-red-600/30 hover:to-red-700/30 border border-red-500/30 text-red-300 rounded-lg flex items-center justify-center transition-all duration-300 shadow-md"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>

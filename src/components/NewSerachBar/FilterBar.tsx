@@ -114,7 +114,7 @@ export const FilterBar: FC<FilterBarProps> = ({ onFilterChange }) => {
           <div className="flex gap-3 items-center">
             {/* New/Hot Button */}
             <button
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 focus:outline-none relative overflow-hidden group
+              className={`hidden lg:flex items-center space-x-2 sm:space-x-3 md:space-x-4 gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 focus:outline-none relative overflow-hidden group
                           ${
                             isNewFilterActive
                               ? "bg-gradient-to-r from-secondary to-secondary/80 text-white shadow-lg shadow-secondary/25 border border-secondary/30"

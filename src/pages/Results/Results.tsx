@@ -29,7 +29,7 @@ const ResultsPage: React.FC = () => {
   const [eventCategories, setEventCategories] = useState<{
     [key: number]: string;
   }>({});
-  const eventsPerPage = 5;
+  const eventsPerPage = 1;
 
   // Function to fetch category from API
   const fetchEventCategory = async (eventId: number): Promise<string> => {
@@ -273,13 +273,13 @@ const ResultsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F0F15] via-[#1C1C27] to-[#0F0F15]">
       {/* Hero Section with Background Image */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="text-center px-4 bg-card rounded-xl shadow-lg border border-gray-700/60 p-6 mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-dark-primary mb-4 flex items-center justify-center gap-3">
-            <BarChart3 className="h-8 w-8 text-secondary" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 sm:py-6 lg:pt-8">
+        <div className="text-center px-4 bg-card rounded-xl shadow-lg border border-gray-700/60 p-4 sm:p-6 mb-6 sm:mb-1">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-dark-primary mb-3 sm:mb-4 flex items-center justify-center gap-2 sm:gap-3">
+            <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-secondary" />
             Betting Results
           </h1>
-          <p className="text-dark-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-dark-secondary text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
             Explore all completed events and their outcomes. Check winners,
             final prize pools, and comprehensive event details.
           </p>
@@ -287,14 +287,14 @@ const ResultsPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 sm:py-6 lg:pb-8">
+        <div className="flex items-center justify-between mb-6 sm:mb-4">
           <div className="relative w-full max-w-md">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search events..."
-              className="w-full rounded-xl bg-gray-800/40 border border-gray-600/50 hover:border-gray-500/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 px-4 py-3 pl-12 text-white placeholder:text-slate-400 focus:outline-none transition-all duration-300"
+              className="w-full rounded-xl bg-gray-800/40 border border-gray-600/50 hover:border-gray-500/60 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 px-3 sm:px-4 py-2 sm:py-3 pl-10 sm:pl-12 text-sm sm:text-base text-white placeholder:text-slate-400 focus:outline-none transition-all duration-300"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -302,25 +302,25 @@ const ResultsPage: React.FC = () => {
         </div>
 
         {/* Results List */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-flex items-center px-6 py-3 rounded-xl bg-gray-800/40 border border-gray-600/50">
-                <div className="w-5 h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin mr-3"></div>
-                <span className="text-white font-medium">
+              <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-secondary border-t-transparent rounded-full animate-spin mr-2 sm:mr-3"></div>
+                <span className="text-white font-medium text-sm sm:text-base">
                   Loading results...
                 </span>
               </div>
             </div>
           ) : currentEvents.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="mb-4 p-4 rounded-full bg-gray-800/40 border border-gray-600/50 inline-flex">
-                <Search className="w-8 h-8 text-slate-400" />
+            <div className="text-center py-12 sm:py-16">
+              <div className="mb-4 p-3 sm:p-4 rounded-full bg-gray-800/40 border border-gray-600/50 inline-flex">
+                <Search className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                 No Results Found
               </h3>
-              <p className="text-slate-400">
+              <p className="text-slate-400 text-sm sm:text-base">
                 Try adjusting your search terms or check back later for new
                 results.
               </p>
@@ -329,14 +329,14 @@ const ResultsPage: React.FC = () => {
             currentEvents.map((event, index) => (
               <div
                 key={index}
-                className="rounded-2xl bg-gradient-to-br from-[#1C1C27] to-[#252538] overflow-hidden border border-gray-700/60 shadow-xl hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-300 hover:border-gray-600/70"
+                className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#1C1C27] to-[#252538] overflow-hidden border border-gray-700/60 shadow-xl hover:shadow-2xl hover:shadow-secondary/10 transition-all duration-300 hover:border-gray-600/70"
               >
                 <div
-                  className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-800/20 transition-colors duration-200"
+                  className="flex items-center justify-between p-3 sm:p-2 lg:p-4 cursor-pointer hover:bg-gray-800/20 transition-colors duration-200"
                   onClick={() => toggleEventExpansion(index)}
                 >
-                  <div className="flex items-center">
-                    <div className="h-14 w-14 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-800 border border-gray-600/50 flex items-center justify-center shadow-lg">
+                  <div className="flex items-center min-w-0 flex-1">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-700 to-gray-800 border border-gray-600/50 flex items-center justify-center shadow-lg">
                       <img
                         src={
                           event.imageURL ||
@@ -346,36 +346,49 @@ const ResultsPage: React.FC = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="ml-6">
-                      <h3 className="font-bold text-white text-xl mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                    <div className="ml-3 sm:ml-4 lg:ml-6 min-w-0 flex-1">
+                      <h3 className="font-bold text-white text-sm sm:text-lg lg:text-xl mb-1 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent truncate">
                         {event.name}
                       </h3>
-                      <div className="flex items-center text-sm text-slate-400">
-                        <CalendarDays className="w-4 h-4 mr-2" />
-                        <span className="mr-4">
-                          {new Date(
-                            parseInt(event.startTime) * 1000
-                          ).toLocaleDateString()}{" "}
-                          -{" "}
-                          {new Date(
-                            parseInt(event.endTime) * 1000
-                          ).toLocaleDateString()}
-                        </span>
-                        <Coins className="w-4 h-4 mr-2 text-secondary" />
-                        <span className="text-secondary font-medium">
-                          {event.prizePool
-                            ? `${Web3.utils.fromWei(
-                                event.prizePool,
-                                "ether"
-                              )} ETH`
-                            : "0 ETH"}
+                      {/* Desktop view - show all details */}
+                      <div className="hidden sm:flex items-center text-xs sm:text-sm text-slate-400 flex-wrap gap-2 sm:gap-4">
+                        <div className="flex items-center">
+                          <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                          <span>
+                            {new Date(
+                              parseInt(event.startTime) * 1000
+                            ).toLocaleDateString()}{" "}
+                            -{" "}
+                            {new Date(
+                              parseInt(event.endTime) * 1000
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <Coins className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-secondary" />
+                          <span className="text-secondary font-medium">
+                            {event.prizePool
+                              ? `${Web3.utils.fromWei(
+                                  event.prizePool,
+                                  "ether"
+                                )} ETH`
+                              : "0 ETH"}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Mobile view - show only winner */}
+                      <div className="sm:hidden flex items-center text-xs text-slate-400">
+                        <Trophy className="w-3 h-3 mr-1 text-green-400" />
+                        <span className="text-green-400 font-medium truncate">
+                          Winner: {event.winningOption || "N/A"}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                    {/* Desktop category badge */}
                     <span
-                      className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors duration-200 ${
+                      className={`hidden sm:inline-block px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold border transition-colors duration-200 ${
                         (
                           eventCategories[event.id] ||
                           determineCategory(event.name)
@@ -403,11 +416,11 @@ const ResultsPage: React.FC = () => {
                       {eventCategories[event.id] ||
                         determineCategory(event.name)}
                     </span>
-                    <button className="p-2 rounded-lg hover:bg-gray-700/50 transition-colors duration-200 text-slate-400 hover:text-white">
+                    <button className="p-1 sm:p-2 rounded-lg hover:bg-gray-700/50 transition-colors duration-200 text-slate-400 hover:text-white">
                       {expandedEvent === index ? (
-                        <ChevronUp className="h-6 w-6" />
+                        <ChevronUp className="h-4 w-4 sm:h-6 sm:w-6" />
                       ) : (
-                        <ChevronDown className="h-6 w-6" />
+                        <ChevronDown className="h-4 w-4 sm:h-6 sm:w-6" />
                       )}
                     </button>
                   </div>
@@ -415,26 +428,26 @@ const ResultsPage: React.FC = () => {
 
                 {/* Expanded Content */}
                 {expandedEvent === index && (
-                  <div className="px-6 pb-6 border-t border-gray-700/50 bg-gradient-to-br from-[#0F0F15] to-[#1C1C27]">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
-                      <div className="space-y-6">
+                  <div className="px-3 sm:px-4 lg:px-6 pb-3 sm:pb-4 lg:pb-6 border-t border-gray-700/50 bg-gradient-to-br from-[#0F0F15] to-[#1C1C27]">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 pt-4 sm:pt-6">
+                      <div className="space-y-4 sm:space-y-6">
                         <div>
-                          <div className="flex items-center mb-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-3">
-                              <CalendarDays className="w-5 h-5 text-secondary" />
+                          <div className="flex items-center mb-3 sm:mb-4">
+                            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-2 sm:mr-3">
+                              <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
                             </div>
-                            <h4 className="font-bold text-xl text-white">
+                            <h4 className="font-bold text-lg sm:text-xl text-white">
                               Event Details
                             </h4>
                           </div>
-                          <div className="space-y-4">
-                            <div className="flex items-start p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
-                              <CalendarDays className="w-5 h-5 mr-3 text-secondary mt-1 flex-shrink-0" />
+                          <div className="space-y-3 sm:space-y-4">
+                            <div className="flex items-start p-2 sm:p-2 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-secondary mt-1 flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                <span className="text-slate-400 text-xs sm:text-sm font-medium block mb-1">
                                   Start Date
                                 </span>
-                                <span className="text-white font-semibold text-base break-words">
+                                <span className="text-white font-semibold text-sm sm:text-base break-words">
                                   {new Date(
                                     parseInt(event.startTime) * 1000
                                   ).toLocaleDateString("en-US", {
@@ -454,13 +467,13 @@ const ResultsPage: React.FC = () => {
                               </div>
                             </div>
 
-                            <div className="flex items-start p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
-                              <Clock className="w-5 h-5 mr-3 text-secondary mt-1 flex-shrink-0" />
+                            <div className="flex items-start p-2 sm:p-2 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-secondary mt-1 flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                <span className="text-slate-400 text-xs sm:text-sm font-medium block mb-1">
                                   End Date
                                 </span>
-                                <span className="text-white font-semibold text-base break-words">
+                                <span className="text-white font-semibold text-sm sm:text-base break-words">
                                   {new Date(
                                     parseInt(event.endTime) * 1000
                                   ).toLocaleDateString("en-US", {
@@ -480,13 +493,13 @@ const ResultsPage: React.FC = () => {
                               </div>
                             </div>
 
-                            <div className="flex items-center p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
-                              <Tag className="w-5 h-5 mr-3 text-secondary flex-shrink-0" />
+                            <div className="flex items-center p-2 sm:p-2 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                              <Tag className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-secondary flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                <span className="text-slate-400 text-xs sm:text-sm font-medium block mb-1">
                                   Category
                                 </span>
-                                <span className="text-white font-semibold text-base">
+                                <span className="text-white font-semibold text-sm sm:text-base">
                                   {eventCategories[event.id] ||
                                     determineCategory(event.name)}
                                 </span>
@@ -496,36 +509,36 @@ const ResultsPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-6">
+                      <div className="space-y-4 sm:space-y-6">
                         <div>
-                          <div className="flex items-center mb-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-3">
-                              <Trophy className="w-5 h-5 text-secondary" />
+                          <div className="flex items-center mb-3 sm:mb-4">
+                            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-secondary/20 to-secondary/10 border border-secondary/20 mr-2 sm:mr-3">
+                              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
                             </div>
-                            <h4 className="font-bold text-xl text-white">
+                            <h4 className="font-bold text-lg sm:text-xl text-white">
                               Results
                             </h4>
                           </div>
-                          <div className="space-y-4">
-                            <div className="flex items-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30">
-                              <Trophy className="w-5 h-5 mr-3 text-green-400 flex-shrink-0" />
+                          <div className="space-y-3 sm:space-y-4">
+                            <div className="flex items-center p-2 sm:p-2 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30">
+                              <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-green-400 flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                <span className="text-slate-400 text-xs sm:text-sm font-medium block mb-1">
                                   Winner
                                 </span>
-                                <span className="text-green-400 font-bold text-lg">
+                                <span className="text-green-400 font-bold text-base sm:text-lg">
                                   {event.winningOption || "N/A"}
                                 </span>
                               </div>
                             </div>
 
-                            <div className="flex items-center p-4 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/30">
-                              <Coins className="w-5 h-5 mr-3 text-secondary flex-shrink-0" />
+                            <div className="flex items-center p-2 sm:p-2 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/30">
+                              <Coins className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-secondary flex-shrink-0" />
                               <div className="min-w-0 flex-1">
-                                <span className="text-slate-400 text-sm font-medium block mb-1">
+                                <span className="text-slate-400 text-xs sm:text-sm font-medium block mb-1">
                                   Prize Pool
                                 </span>
-                                <span className="text-secondary font-bold text-lg">
+                                <span className="text-secondary font-bold text-base sm:text-lg">
                                   {event.prizePool
                                     ? `${Web3.utils.fromWei(
                                         event.prizePool,
@@ -539,16 +552,16 @@ const ResultsPage: React.FC = () => {
                         </div>
 
                         <div>
-                          <div className="flex items-center mb-4">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 mr-3">
-                              <Tag className="w-5 h-5 text-blue-400" />
+                          <div className="flex items-center mb-3 sm:mb-4">
+                            <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 mr-2 sm:mr-3">
+                              <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                             </div>
-                            <h4 className="font-bold text-xl text-white">
+                            <h4 className="font-bold text-lg sm:text-xl text-white">
                               Description
                             </h4>
                           </div>
-                          <div className="p-4 rounded-xl bg-gray-800/40 border border-gray-600/50">
-                            <p className="text-slate-300 leading-relaxed">
+                          <div className="p-2 sm:p-2 rounded-xl bg-gray-800/40 border border-gray-600/50">
+                            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                               {event.description ||
                                 "No description provided for this event."}
                             </p>
@@ -565,19 +578,19 @@ const ResultsPage: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-12 flex items-center justify-center gap-2">
+          <div className="mt-8 sm:mt-12 flex items-center justify-center gap-1 sm:gap-2">
             <button
-              className="rounded-xl px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="rounded-xl px-3 sm:px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
             >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Previous</span>
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              {/* <span className="hidden sm:inline">Previous</span> */}
             </button>
 
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Logic to show a window of page numbers around current page
+                // Logic to show a window of page numbers around current pageeee
                 let pageNum;
                 if (totalPages <= 5) {
                   pageNum = i + 1;
@@ -592,7 +605,7 @@ const ResultsPage: React.FC = () => {
                 return (
                   <button
                     key={pageNum}
-                    className={`rounded-xl w-10 h-10 flex items-center justify-center font-semibold transition-all duration-300 ${
+                    className={`rounded-xl w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center font-semibold text-sm sm:text-base transition-all duration-300 ${
                       currentPage === pageNum
                         ? "bg-gradient-to-r from-secondary to-secondary/80 text-white shadow-lg hover:shadow-xl hover:shadow-secondary/30 transform hover:scale-105"
                         : "bg-gray-800/40 border border-gray-600/50 text-slate-400 hover:bg-gray-700/50 hover:border-gray-500/60 hover:text-white"
@@ -606,14 +619,14 @@ const ResultsPage: React.FC = () => {
             </div>
 
             <button
-              className="rounded-xl px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="rounded-xl px-3 sm:px-4 py-2 text-white bg-gray-800/40 border border-gray-600/50 hover:bg-gray-700/50 hover:border-gray-500/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
               onClick={() =>
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
             >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="h-4 w-4" />
+              {/* <span className="hidden sm:inline">Next</span> */}
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </button>
           </div>
         )}
