@@ -1,4 +1,5 @@
-import Achievements from "@/components/Achievements/Achievements";
+// import Achievements from "@/components/Achievements/Achievements";
+import DynamicAchievements from "@/components/Achievements/DynamicAchievements";
 import OngoingTable from "@/components/dashboardCom/OngoingTable";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BsGraphDownArrow, BsGraphUpArrow } from "react-icons/bs";
@@ -204,7 +205,8 @@ const Dashboard = () => {
       </div>
 
       <OngoingTable />
-      <Achievements />
+      {/* <Achievements /> */}
+       <DynamicAchievements />
       <BetHistory />
       <TransactionTable />
     </motion.div>
