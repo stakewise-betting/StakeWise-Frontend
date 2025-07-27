@@ -100,16 +100,7 @@ const Home = () => {
         console.log(
           `Successfully loaded ${sliderSlides.length} slider images from database`
         );
-      } else {
-        console.log("No active sliders found, using fallback images");
-        // Fallback to hardcoded images if no database images are available
-        setSlides([
-          { src: "/sliderImages/slider-img (1).jpg", alt: "Slider Image 1" },
-          { src: "/sliderImages/slider-img (2).jpg", alt: "Slider Image 2" },
-          { src: "/sliderImages/slider-img (3).jpg", alt: "Slider Image 3" },
-          { src: "/sliderImages/slider-img (4).jpg", alt: "Slider Image 4" },
-        ]);
-      }
+      } // <-- Uncommented closing brace to fix syntax
     } catch (error) {
       console.error("Error fetching slider data:", error);
       toast.error("Failed to load slider images");
