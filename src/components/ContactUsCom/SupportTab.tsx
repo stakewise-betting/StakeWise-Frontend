@@ -8,6 +8,8 @@ import {
   User,
   MessageSquare,
   AlertCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +62,31 @@ const SupportTab = ({ isLoggedin }: SupportTabProps) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // FAQ data
+  const faqs = [
+    {
+      question: "How do I withdraw my winnings?",
+      answer:
+        "To withdraw your winnings, go to the 'Wallet' section in your account dashboard. Select 'Withdraw', choose your preferred payment method, enter the amount, and follow the verification steps. Withdrawals are typically processed within 24-48 hours.",
+    },
+    {
+      question: "Why was my bet rejected?",
+      answer:
+        "Bets can be rejected for several reasons: insufficient balance, betting limits exceeded, odds changed during placement, or the event has already started. Check your account balance and try placing the bet again with updated odds.",
+    },
+    {
+      question: "How do I verify my account?",
+      answer:
+        "Account verification requires uploading a government-issued ID, proof of address (utility bill or bank statement), and sometimes payment method verification. Go to 'Account Settings' > 'Verification' to upload your documents. Verification usually takes 24-72 hours.",
+    },
+    {
+      question: "Where can I find bonus terms?",
+      answer:
+        "Bonus terms and conditions can be found in the 'Promotions' section of your account, or in the footer under 'Terms & Conditions'. Each bonus has specific wagering requirements, time limits, and eligible games that must be met before withdrawal.",
+    },
+  ];
 
   // Handle form submission
   const onSubmit = async (data: ContactFormInputs) => {
@@ -109,6 +136,11 @@ const SupportTab = ({ isLoggedin }: SupportTabProps) => {
       toast.error("You must be logged in to send a support message");
       return;
     }
+  };
+
+  // Function to toggle FAQ expansion
+  const toggleFaq = (index: number) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
   };
 
   return (
@@ -272,7 +304,7 @@ const SupportTab = ({ isLoggedin }: SupportTabProps) => {
                     id="message"
                     placeholder="Please describe your issue in detail. Include any relevant information that might help us assist you better..."
                     {...register("message")}
-                    className="min-h-[140px] py-3 px-4 text-sm bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[#3B82F6] hover:border-[#3B82F6]/50 transition-all duration-200 text-zinc-100 placeholder-zinc-500"
+                    className="min-h-[140px] w-full py-3 px-4 text-sm bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[#3B82F6] hover:border-[#3B82F6]/50 transition-all duration-200 text-zinc-100 placeholder-zinc-500"
                   />
                   {errors.message && (
                     <p className="text-red-400 text-sm flex items-center gap-2">
@@ -370,35 +402,10 @@ const SupportTab = ({ isLoggedin }: SupportTabProps) => {
                   </div>
                 </div>
               </div>
-
-              <div className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#8B5CF6]/50 rounded-xl p-4 transition-all duration-300 hover:shadow-lg">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] rounded-lg">
-                    <HelpCircle className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-zinc-100 text-sm">
-                      Live Chat
-                    </h4>
-                    <p className="text-zinc-400 text-xs mb-2">
-                      Instant support available
-                    </p>
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] hover:from-[#7C3AED] hover:to-[#8B5CF6] text-white text-xs px-3 py-1"
-                      onClick={() =>
-                        toast.info("Live chat will be available soon")
-                      }
-                    >
-                      Launch Chat
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Common Questions */}
+          {/* Frequently Asked Questions with Dropdown */}
           <Card className="bg-gradient-to-br from-[#1C1C27] to-[#252538] border border-[#333447] shadow-2xl rounded-2xl overflow-hidden">
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-bold text-zinc-100">
@@ -409,23 +416,36 @@ const SupportTab = ({ isLoggedin }: SupportTabProps) => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {[
-                "How do I withdraw my winnings?",
-                "Why was my bet rejected?",
-                "How do I verify my account?",
-                "Where can I find bonus terms?",
-              ].map((question, index) => (
-                <Button
+              {faqs.map((faq, index) => (
+                <div
                   key={index}
-                  variant="ghost"
-                  className="w-full justify-start font-normal text-left h-auto py-3 px-4 bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] hover:border-[#E27625]/50 rounded-lg text-zinc-300 hover:text-white transition-all duration-300"
-                  onClick={() =>
-                    toast.info("This FAQ section will be expanded soon")
-                  }
+                  className="bg-gradient-to-br from-[#2A2A3A] to-[#1C1C27] border border-[#333447] rounded-lg overflow-hidden transition-all duration-300 hover:border-[#E27625]/50"
                 >
-                  <HelpCircle className="w-4 h-4 mr-3 text-[#E27625]" />
-                  <span className="text-sm">{question}</span>
-                </Button>
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-[#E27625]/5 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <HelpCircle className="w-4 h-4 text-[#E27625] flex-shrink-0" />
+                      <span className="text-sm text-zinc-300 font-medium">
+                        {faq.question}
+                      </span>
+                    </div>
+                    {expandedFaq === index ? (
+                      <ChevronUp className="w-4 h-4 text-zinc-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-zinc-400" />
+                    )}
+                  </button>
+
+                  {expandedFaq === index && (
+                    <div className="px-4 pb-4 border-t border-[#333447]/50">
+                      <p className="text-sm text-zinc-400 leading-relaxed mt-3">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  )}
+                </div>
               ))}
             </CardContent>
           </Card>
