@@ -212,13 +212,13 @@ const Navbar: React.FC = () => {
             <Button
               variant="ghost"
               className="hidden sm:flex text-secondary hover:text-secondary/80 hover:bg-secondary/10 text-sm px-3 py-1 font-semibold rounded-lg transition-all duration-300"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/login?mode=login")}
             >
               Login
             </Button>
             <Button
               className="hidden sm:flex bg-secondary hover:bg-secondary/80 text-white rounded-lg text-sm px-3 py-1 font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/login?mode=signup")}
             >
               Sign Up
             </Button>

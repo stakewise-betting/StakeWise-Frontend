@@ -1,6 +1,6 @@
 // login.tsx
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -17,8 +17,17 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [state, setState] = useState<"Sign Up" | "Log In">("Sign Up");
+
+  // Determine initial state based on URL search params
+  const getInitialState = (): "Sign Up" | "Log In" => {
+    const searchParams = new URLSearchParams(location.search);
+    const mode = searchParams.get("mode");
+    return mode === "login" ? "Log In" : "Sign Up";
+  };
+
+  const [state, setState] = useState<"Sign Up" | "Log In">(getInitialState);
 
   const appContext = useContext(AppContext);
   if (!appContext) {
@@ -37,10 +46,29 @@ const Login = () => {
     mode: "onBlur",
   });
 
+  // Update state when URL changes
+  useEffect(() => {
+    const newState = getInitialState();
+    if (newState !== state) {
+      setState(newState);
+      reset();
+    }
+  }, [location.search]);
+
   // Toggle between login and signup
   const toggleAuthState = () => {
-    setState(state === "Sign Up" ? "Log In" : "Sign Up");
+    const newState = state === "Sign Up" ? "Log In" : "Sign Up";
+    setState(newState);
     reset(); // Clear form fields when switching modes
+
+    // Update URL to reflect the current state
+    const searchParams = new URLSearchParams();
+    if (newState === "Log In") {
+      searchParams.set("mode", "login");
+    } else {
+      searchParams.set("mode", "signup");
+    }
+    navigate(`/login?${searchParams.toString()}`, { replace: true });
   };
 
   // Handle form submission
