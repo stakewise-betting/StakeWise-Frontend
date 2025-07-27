@@ -29,7 +29,7 @@ interface NewsListTableProps {
 }
 
 export const NewsListTable: React.FC<NewsListTableProps> = ({
-  backendBaseUrl = "http://localhost:5000",
+  backendBaseUrl = "https://stakewisebackend.onrender.com",
 }) => {
   // State for news data
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
