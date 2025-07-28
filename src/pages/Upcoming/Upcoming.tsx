@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
-// Removed: Search, Button, Input imports as they are now in SearchAndFilterSection
+//StakeWise-Frontend/src/pages/Upcoming/Upcoming.tsx
+import { useState, useEffect , useContext} from "react";
+import axios from 'axios';
 import { UpcomingCard } from "@/components/UpcomingCard/UpcomingCard";
-import FilterSidebar from "@/components/dropdownMenu/DropdownMenu";
+import FilterSidebar from "@/components/FilterSidebarDropDown/FilterSidebarDropDown";
 import Pagination from "@/components/Pagination/Pagination";
 import Web3 from "web3";
 import { contractABI, contractAddress } from "@/config/contractConfig";
-import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection"; // Added import
+import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection";
+import { AppContext, AppContextType } from "@/context/AppContext";
 
 // Define TypeScript interface for event data
 interface BlockchainEvent {
@@ -21,10 +23,18 @@ interface BlockchainEvent {
   tags: string[];
   options: string[];
   category: string;
-  onInterestedClick?: () => void;
+  onInterestedClick?: (eventId: string) => void; // Changed to pass eventId
 }
 
+// Add filter type - removed 'new' as requested
+type FilterType = 'all' | 'trending';
+
 export default function Page() {
+  // 3. Get userData and isLoggedin from the context
+  const { userData, isLoggedin } = useContext(AppContext) as AppContextType;
+  
+  // 4. Use the real user ID from context. It will be undefined if not logged in.
+  const currentUserId = userData?.id;
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [events, setEvents] = useState<BlockchainEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +42,10 @@ export default function Page() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState(""); // This state is now passed to SearchAndFilterSection
+  
+  // NEW: Add filter state
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  
   const eventsPerPage = 4;
 
   // Filter items
@@ -39,29 +53,20 @@ export default function Page() {
     {
       title: "Categories",
       items: [
-        { name: "Politics", count: 21 },
-        { name: "Sports", count: 32 },
-        { name: "Games", count: 12 },
-        { name: "Entertainment", count: 15 },
-        { name: "Other", count: 7 },
-      ],
-    },
-    {
-      title: "Locations",
-      items: [
-        { name: "USA", count: 12 },
-        { name: "Sri Lanka", count: 34 },
-        { name: "India", count: 8 },
-        { name: "Australia", count: 15 },
+        { name: "Politics", count: 4 },
+        { name: "Sports", count: 3 },
+        { name: "Games", count: 1 },
+        { name: "Entertainment", count: 1 },
+        { name: "Other", count: 0 },
       ],
     },
     {
       title: "Date Range",
       items: [
-        { name: "Today", count: 9 },
-        { name: "This Weekend", count: 14 },
-        { name: "Next Week", count: 8 },
-        { name: "Next 3 Months", count: 45 },
+        { name: "Today", count: 1 },
+        { name: "This Weekend", count: 4 },
+        { name: "Next Week", count: 3 },
+        { name: "Next 3 Months", count: 3 },
       ],
     },
   ];
@@ -103,94 +108,133 @@ export default function Page() {
     init();
   }, []);
 
+  // The loadEvents function now depends on currentUserId to fetch correct interest status
+  useEffect(() => {
+      if (!isLoading) { // Re-fetch interest data if user logs in/out
+          const betContract = web3 && new web3.eth.Contract(contractABI, contractAddress);
+          if (betContract) loadEvents(betContract);
+      }
+  }, [currentUserId, isLoading]);
+
   const loadEvents = async (betContract: any) => {
     try {
       const eventCount = await betContract.methods.nextEventId().call();
-      const eventList: BlockchainEvent[] = [];
-      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      const blockchainEvents: Omit<BlockchainEvent, 'onInterestedClick'>[] = [];
+      const currentTime = Math.floor(Date.now() / 1000);
 
       for (let eventId = 1; eventId < eventCount; eventId++) {
         try {
           const eventData = await betContract.methods.getEvent(eventId).call();
-          const startTimeSeconds = Number(eventData.startTime);
-          if (startTimeSeconds > currentTime) {
-            const formattedEvent: BlockchainEvent = {
-              ...eventData,
+          if (Number(eventData.startTime) > currentTime) {
+            blockchainEvents.push({
               eventId: eventId.toString(),
-              name: eventData.name || eventData.title || `Event ${eventId}`,
-              imageURL:
-                eventData.imageURL || eventData.image || "/placeholder.svg",
-              description: eventData.description || "No description available",
-              interestedCount: Number(eventData.interestedCount) || 0,
-              isUserInterested: eventData.isUserInterested || false,
-              tags: eventData.tags || eventData.categories || ["Event"],
-              startTime: eventData.startTime || "0",
-              endTime: eventData.endTime || "0",
-              createdAt: eventData.createdAt || (Date.now() / 1000).toString(),
+              name: eventData.name || `Event ${eventId}`,
+              imageURL: eventData.imageURL || "/placeholder.svg",
+              description: eventData.description || "No description",
+              createdAt: eventData.createdAt,
+              startTime: eventData.startTime,
+              endTime: eventData.endTime,
+              tags: eventData.tags || ["Event"],
               options: eventData.options || [],
               category: eventData.category || "Event",
-            };
-            eventList.push(formattedEvent);
+              interestedCount: 0,
+              isUserInterested: false,
+            });
           }
-        } catch (error) {
-          console.error(`Error fetching event ${eventId}:`, error);
-        }
+        } catch (err) { console.error(`Error fetching event ${eventId}:`, err); }
       }
-      eventList.sort((a, b) => Number(a.startTime) - Number(b.startTime));
-      setEvents(eventList);
+
+      if (blockchainEvents.length > 0) {
+        const eventIds = blockchainEvents.map(e => e.eventId);
+        const response = await axios.post('http://localhost:5000/api/interests/status', {
+            eventIds,
+            userId: currentUserId, // Pass the dynamic user ID
+        });
+        const interestMap = response.data;
+
+        const eventsWithInterest = blockchainEvents.map(event => ({
+            ...event,
+            interestedCount: interestMap[event.eventId]?.interestedCount || 0,
+            isUserInterested: interestMap[event.eventId]?.isUserInterested || false,
+        }));
+
+        eventsWithInterest.sort((a, b) => Number(a.startTime) - Number(b.startTime));
+        setEvents(eventsWithInterest);
+      } else {
+        setEvents([]);
+      }
     } catch (error) {
       console.error("Error loading events:", error);
       setEvents([]);
     }
   };
 
-  const filteredEvents = events.filter((event) =>
-    event.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // NEW: Updated filtering logic that includes search and trending filter
+  const filteredEvents = events.filter((event) => {
+    // Apply search filter
+    const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
 
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   const getCurrentEvents = () => {
+    let eventsToShow = [...filteredEvents];
+    
+    // NEW: Sort by interest count only when trending filter is active
+    if (activeFilter === 'trending') {
+      eventsToShow.sort((a, b) => b.interestedCount - a.interestedCount);
+    } else {
+      // Default sort by start time when no filter is active
+      eventsToShow.sort((a, b) => Number(a.startTime) - Number(b.startTime));
+    }
+    
     const indexOfLastEvent = currentPage * eventsPerPage;
     const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-    return filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+    return eventsToShow.slice(indexOfFirstEvent, indexOfLastEvent);
+  };
+
+  // NEW: Toggle trending filter handler
+  const handleTrendingFilter = () => {
+    if (activeFilter === 'trending') {
+      // If trending is already active, toggle it off
+      setActiveFilter('all');
+    } else {
+      // If trending is not active, turn it on
+      setActiveFilter('trending');
+    }
+    setCurrentPage(1); // Reset to first page when filter changes
   };
 
   const handleInterestedClick = async (eventId: string) => {
-    if (!web3) {
-      console.error("Web3 not initialized");
+    // Check login status from context first
+    if (!isLoggedin || !currentUserId) {
+      alert("Please log in to register your interest.");
       return;
     }
+
+    setEvents(prevEvents => prevEvents.map(event =>
+      event.eventId === eventId ? {
+          ...event,
+          isUserInterested: !event.isUserInterested,
+          interestedCount: event.isUserInterested ? event.interestedCount - 1 : event.interestedCount + 1,
+        } : event
+    ));
+    
     try {
-      const accounts = await (window as any).ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const account = accounts[0];
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.eventId === eventId
-            ? {
+        await axios.post(`http://localhost:5000/api/interests/${eventId}/toggle`, {
+            userId: currentUserId,
+        });
+    } catch (error) {
+        console.error("Error toggling interest:", error);
+        // Revert on error
+        setEvents(prevEvents => prevEvents.map(event =>
+            event.eventId === eventId ? {
                 ...event,
                 isUserInterested: !event.isUserInterested,
-                interestedCount: event.isUserInterested
-                  ? Math.max(0, event.interestedCount - 1)
-                  : event.interestedCount + 1,
-              }
-            : event
-        )
-      );
-      // const contract = new web3.eth.Contract(contractABI, contractAddress);
-      // await contract.methods.toggleInterest(eventId).send({from: account});
-      console.log(
-        `Toggled interest for event ${eventId} by account ${account}`
-      );
-    } catch (error) {
-      console.error("Error toggling interest:", error);
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
-          event.eventId === eventId ? { ...event } : event
-        )
-      );
+                interestedCount: event.isUserInterested ? event.interestedCount + 1 : event.interestedCount - 1,
+              } : event
+        ));
     }
   };
 
@@ -201,7 +245,7 @@ export default function Page() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, activeFilter]); // Reset page when search or filter changes
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1C1C27] via-[#1E1E2E] to-[#1C1C27] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[100px] py-6 sm:py-8">
@@ -262,6 +306,8 @@ export default function Page() {
             <SearchAndFilterSection
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+              activeFilter={activeFilter}
+              onTrendingClick={handleTrendingFilter}
             />
           </div>
 
@@ -281,16 +327,17 @@ export default function Page() {
                 {getCurrentEvents().length > 0 ? (
                   getCurrentEvents().map((event, index) => {
                     const eventWithHandler = {
+                      
                       ...event,
-                      onInterestedClick: () =>
-                        handleInterestedClick(event.eventId),
+                      onInterestedClick: handleInterestedClick,
                     };
                     return (
                       <div
                         key={event.eventId}
+                        
                         className={index > 0 ? "border-t border-[#333447]" : ""}
                       >
-                        <UpcomingCard event={eventWithHandler} />
+                        <UpcomingCard event={eventWithHandler} currentUserId={currentUserId} />
                       </div>
                     );
                   })
@@ -300,11 +347,12 @@ export default function Page() {
                       🎯
                     </div>
                     <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
-                      No Upcoming Events
+                      {activeFilter === 'trending' && "No Trending Events"}
+                      {activeFilter === 'all' && "No Upcoming Events"}
                     </h3>
                     <p className="text-[#A1A1AA] text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-                      No upcoming events found. Check back later or explore
-                      current events on the homepage.
+                      {activeFilter === 'trending' && "No trending events at the moment. Be the first to show interest in upcoming events!"}
+                      {activeFilter === 'all' && "No upcoming events found. Check back later or explore current events on the homepage."}
                     </p>
                   </div>
                 )}

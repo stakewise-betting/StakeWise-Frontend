@@ -1,425 +1,840 @@
+// //components/RewardCom/RaffleSection.tsx
+// import React, { useState, useEffect, useCallback } from "react";
+// import { raffleService, Raffle } from "@/services/raffleBlockchainService";
+// import { toast } from "react-toastify";
+// import { Loader2, Ticket, Clock, Users, CheckCircle, Coins, Plus, Minus, X } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+// import { ConfirmationModal } from "./Confirmation-model";
+
+// // Helper function to format time left
+// const formatTimeLeft = (endTime: number) => {
+//     const now = Math.floor(Date.now() / 1000);
+//     const timeLeft = endTime - now;
+
+//     if (timeLeft <= 0) {
+//         return "Ended";
+//     }
+
+//     const days = Math.floor(timeLeft / (3600 * 24));
+//     const hours = Math.floor((timeLeft % (3600 * 24)) / 3600);
+//     const minutes = Math.floor((timeLeft % 3600) / 60);
+
+//     if (days > 0) {
+//         return `${days}d ${hours}h left`;
+//     }
+//     if (hours > 0) {
+//         return `${hours}h ${minutes}m left`;
+//     }
+//     return `${minutes}m left`;
+// };
+
+// // Ticket Count Selection Popup Component
+// const TicketCountPopup: React.FC<{
+//     isOpen: boolean;
+//     onClose: () => void;
+//     ticketQuantity: number;
+//     setTicketQuantity: (quantity: number) => void;
+//     ticketPrice: string;
+//     onConfirm: () => void;
+//     isProcessing: boolean;
+//     raffleName: string;
+// }> = ({ isOpen, onClose, ticketQuantity, setTicketQuantity, ticketPrice, onConfirm, isProcessing, raffleName }) => {
+    
+//     const quickSelectButtons = [1, 5, 10, 25, 50, 100];
+    
+//     const handleQuickSelect = (quantity: number) => {
+//         setTicketQuantity(quantity);
+//     };
+
+//     const handleIncrement = () => {
+//         if (ticketQuantity < 1000) {
+//             setTicketQuantity(ticketQuantity + 1);
+//         }
+//     };
+
+//     const handleDecrement = () => {
+//         if (ticketQuantity > 1) {
+//             setTicketQuantity(ticketQuantity - 1);
+//         }
+//     };
+
+//     if (!isOpen) return null;
+
+//     return (
+//         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+//             <div className="bg-[#1a1b23] border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+//                 <div className="flex items-center justify-between p-6 border-b border-gray-700">
+//                     <h3 className="text-xl font-bold text-white">Select Tickets</h3>
+//                     <button
+//                         onClick={onClose}
+//                         className="text-gray-400 hover:text-white transition-colors"
+//                     >
+//                         <X size={24} />
+//                     </button>
+//                 </div>
+                
+//                 <div className="p-6 space-y-6">
+//                     <div className="text-center">
+//                         <p className="text-gray-400 text-sm mb-1">Entering raffle for</p>
+//                         <p className="text-[#E27625] font-semibold text-3xl">{raffleName}</p>
+//                     </div>
+
+//                     {/* Quick Select Buttons
+//                     <div>
+//                         <p className="text-gray-300 text-sm mb-3">Quick Select:</p>
+//                         <div className="grid grid-cols-3 gap-2">
+//                             {quickSelectButtons.map((quantity) => (
+//                                 <button
+//                                     key={quantity}
+//                                     onClick={() => handleQuickSelect(quantity)}
+//                                     className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+//                                         ticketQuantity === quantity
+//                                             ? 'bg-[#E27625] text-white'
+//                                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+//                                     }`}
+//                                 >
+//                                     {quantity}
+//                                 </button>
+//                             ))}
+//                         </div>
+//                     </div> */}
+
+//                     {/* Manual Input */}
+//                     <div>
+//                         <p className="text-gray-300 text-sm mb-3">Ticket Amount:</p>
+//                         <div className="flex items-center gap-3">
+//                             <button
+//                                 onClick={handleDecrement}
+//                                 disabled={ticketQuantity <= 1}
+//                                 className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white"
+//                             >
+//                                 <Minus size={16} />
+//                             </button>
+                            
+//                             <div className="flex-1">
+//                                 <Input
+//                                     type="number"
+//                                     value={ticketQuantity}
+//                                     onChange={(e) => {
+//                                         const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1));
+//                                         setTicketQuantity(value);
+//                                     }}
+//                                     className="bg-gray-800 border-gray-600 text-white text-center text-lg font-semibold"
+//                                     min="1"
+//                                     max="1000"
+//                                 />
+//                             </div>
+                            
+//                             <button
+//                                 onClick={handleIncrement}
+//                                 disabled={ticketQuantity >= 1000}
+//                                 className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white"
+//                             >
+//                                 <Plus size={16} />
+//                             </button>
+//                         </div>
+//                         <p className="text-xs text-gray-500 mt-1 text-center">Maximum 1000 tickets per transaction</p>
+//                     </div>
+
+//                     {/* Total Cost */}
+//                     <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-4">
+//                         <div className="text-center">
+//                             <p className="text-gray-400 text-sm mb-1">Total Cost</p>
+//                             <p className="text-2xl font-bold text-green-400">
+//                                 {(Number(ticketPrice) * ticketQuantity).toFixed(4)} ETH
+//                             </p>
+//                             <p className="text-xs text-gray-500 mt-1">
+//                                 {ticketQuantity} {ticketQuantity === 1 ? 'ticket' : 'tickets'} × {ticketPrice} ETH
+//                             </p>
+//                         </div>
+//                     </div>
+//                 </div>
+
+//                 {/* Action Buttons */}
+//                 <div className="p-6 border-t border-gray-700">
+//                     <div className="flex gap-3">
+//                         <Button
+//                             variant="outline"
+//                             onClick={onClose}
+//                             className="flex-1 border-gray-600 hover:bg-gray-700 text-gray-300"
+//                             disabled={isProcessing}
+//                         >
+//                             Cancel
+//                         </Button>
+//                         <Button
+//                             onClick={onConfirm}
+//                             disabled={isProcessing}
+//                             className="flex-1 bg-gradient-to-r from-[#E27625] to-orange-600 hover:from-orange-600 hover:to-[#E27625] text-white font-semibold"
+//                         >
+//                             {isProcessing ? (
+//                                 <>
+//                                     <Loader2 className="animate-spin h-4 w-4 mr-2" />
+//                                     Processing...
+//                                 </>
+//                             ) : (
+//                                 'Confirm Purchase'
+//                             )}
+//                         </Button>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// const RaffleCard: React.FC<{ raffle: Raffle, onBuyTickets: (raffle: Raffle) => void }> = ({ raffle, onBuyTickets }) => {
+//     const timeLeft = Number(raffle.endTime) * 1000 - Date.now();
+//     const isRaffleActive = timeLeft > 0 && Date.now() > Number(raffle.startTime) * 1000;
+
+//     return (
+//         <div className="bg-gradient-to-br from-[#1a1b23] to-[#252538] rounded-2xl overflow-hidden border border-gray-700/50 hover:border-[#E27625]/50 transition-all duration-300 group shadow-xl hover:shadow-2xl hover:shadow-[#E27625]/10">
+//             <div className="relative h-56 overflow-hidden">
+//                 <img 
+//                     src={raffle.imageURL} 
+//                     alt={raffle.name} 
+//                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+//                 />
+//                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                
+//                 {/* Status Badge */}
+//                 <div className="absolute top-4 left-4">
+//                     <div className="bg-gradient-to-r from-[#E27625] to-orange-600 text-white px-3 py-1.5 rounded-full text-xs font-bold tracking-wider">
+//                         🔥 HOT RAFFLE
+//                     </div>
+//                 </div>
+
+//                 {/* Time Left Badge */}
+//                 <div className="absolute top-4 right-4">
+//                     <div className="bg-black/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1">
+//                         <Clock size={12} />
+//                         {formatTimeLeft(Number(raffle.endTime))}
+//                     </div>
+//                 </div>
+
+//                 {/* Prize Amount Overlay */}
+//                 <div className="absolute bottom-4 left-4 right-4">
+//                     <div className="bg-black/60 backdrop-blur-md rounded-xl p-3 border border-white/10">
+//                         <p className="text-gray-300 text-xs uppercase tracking-wide">Prize Pool</p>
+//                         <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
+//                             {raffle.prizeAmount} ETH
+//                         </p>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             <div className="p-6 space-y-4">
+//                 <div>
+//                     <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-[#E27625] transition-colors">
+//                         {raffle.name}
+//                     </h3>
+//                 </div>
+
+//                 {/* Stats Grid */}
+//                 <div className="grid grid-cols-2 gap-4">
+//                     <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+//                         <div className="flex items-center justify-center gap-1.5 text-gray-400 mb-1">
+//                             <Users size={14} />
+//                             <span className="text-xs">Entries</span>
+//                         </div>
+//                         <p className="font-bold text-white">{raffle.totalTicketsSold}</p>
+//                     </div>
+                    
+//                     <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+//                         <div className="flex items-center justify-center gap-1.5 text-gray-400 mb-1">
+//                             <Ticket size={14} />
+//                             <span className="text-xs">Price</span>
+//                         </div>
+//                         <p className="font-bold text-white">{raffle.ticketPrice} ETH</p>
+//                     </div>
+//                 </div>
+
+//                 {/* Action Button */}
+//                 <Button 
+//                     className="w-full bg-gradient-to-r from-[#E27625] to-orange-600 hover:from-orange-600 hover:to-[#E27625] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+//                     disabled={!isRaffleActive} 
+//                     onClick={() => onBuyTickets(raffle)}
+//                 >
+//                     <div className="flex items-center justify-center gap-2">
+//                         <Coins size={18} />
+//                         {isRaffleActive ? 'Enter Raffle' : 'Raffle Ended'}
+//                     </div>
+//                 </Button>
+//             </div>
+//         </div>
+//     );
+// };
+
+// const RaffleSection = () => {
+//     const [raffles, setRaffles] = useState<Raffle[]>([]);
+//     const [loading, setLoading] = useState(true);
+//     const [selectedRaffle, setSelectedRaffle] = useState<Raffle | null>(null);
+//     const [isModalOpen, setIsModalOpen] = useState(false);
+//     const [ticketQuantity, setTicketQuantity] = useState(1);
+//     const [isProcessing, setIsProcessing] = useState(false);
+//     const [showConfirmation, setShowConfirmation] = useState(false);
+//     const [purchasedTickets, setPurchasedTickets] = useState(0);
+//     const [showAllRaffles, setShowAllRaffles] = useState(false);
+
+//     const loadRaffles = useCallback(async () => {
+//         setLoading(true);
+//         try {
+//             const allRaffles = await raffleService.getAllRaffles();
+//             const activeRaffles = allRaffles.filter(r => !r.isCompleted);
+//             // Sort by end time, closest to ending first
+//             activeRaffles.sort((a, b) => Number(a.endTime) - Number(b.endTime));
+//             setRaffles(activeRaffles);
+//         } catch (error: any) {
+//             toast.error(error.message || "Failed to load raffles.");
+//         } finally {
+//             setLoading(false);
+//         }
+//     }, []);
+
+//     useEffect(() => {
+//         loadRaffles();
+//     }, [loadRaffles]);
+    
+//     const handleBuyClick = (raffle: Raffle) => {
+//         setSelectedRaffle(raffle);
+//         setTicketQuantity(1);
+//         setIsModalOpen(true);
+//     };
+
+//     const handleConfirmPurchase = async () => {
+//         if (!selectedRaffle) return;
+//         setIsProcessing(true);
+//         try {
+//             toast.info(`Purchasing ${ticketQuantity} ticket(s)... Please confirm in your wallet.`);
+//             await raffleService.buyTickets(selectedRaffle.raffleId, ticketQuantity);
+//             toast.success("Tickets purchased successfully!");
+            
+//             // Store purchase info for confirmation modal
+//             setPurchasedTickets(ticketQuantity);
+            
+//             // Close ticket selection modal and show confirmation
+//             setIsModalOpen(false);
+//             setShowConfirmation(true);
+            
+//             loadRaffles(); // Refresh data
+//         } catch (error: any) {
+//             toast.error(error.message || "Ticket purchase failed.");
+//         } finally {
+//             setIsProcessing(false);
+//         }
+//     };
+
+//     // Toggle view all raffles
+//     const handleToggleViewAll = () => {
+//         setShowAllRaffles(!showAllRaffles);
+//     };
+
+//     // Get displayed raffles based on current view mode
+//     const displayedRaffles = showAllRaffles ? raffles : raffles.slice(0, 8);
+    
+//     if (loading) {
+//         return (
+//             <div className="flex flex-col justify-center items-center py-20">
+//                 <Loader2 className="h-12 w-12 text-[#E27625] animate-spin mb-4" />
+//                 <p className="text-gray-400">Loading awesome raffles...</p>
+//             </div>
+//         );
+//     }
+
+//     return (
+        
+//         <section className="py-12">
+//             {/* Header Section */}
+//             <div className="flex justify-between items-center mb-10">
+//                 <div >
+//                     <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-2">
+//                         Active Raffles
+//                     </h2>
+//                     <p className="text-gray-400">Join exciting raffles and win amazing prizes!</p>
+//                 </div>
+//                 {/* <button className="px-6 py-3 text-sm bg-transparent border-2 border-[#E27625] text-[#E27625] hover:bg-[#E27625] hover:text-white rounded-xl transition-all duration-300 font-semibold">
+//                     View All Raffles
+//                 </button> */}
+//             </div>
+            
+//             {raffles.length === 0 ? (
+//                 <div className="text-center py-16 bg-gradient-to-br from-[#1a1b23] to-[#2a2b35] rounded-2xl border border-gray-700/50">
+//                     <div className="mb-6">
+//                         <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+//                             <Ticket className="w-8 h-8 text-gray-400" />
+//                         </div>
+//                         <h3 className="text-2xl mb-3 font-bold text-white">No Active Raffles</h3>
+//                         <p className="text-gray-400 max-w-md mx-auto">
+//                             There are no active raffles at the moment. Check back soon for new opportunities to win amazing prizes!
+//                         </p>
+//                     </div>
+//                 </div>
+//             ) : (
+//                 <>
+//                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+//                         {displayedRaffles.map(raffle => (
+//                             <RaffleCard key={raffle.raffleId} raffle={raffle} onBuyTickets={handleBuyClick} />
+//                         ))}
+//                     </div>
+                    
+//                     {/* Show more indicator when not showing all */}
+//                     {!showAllRaffles && raffles.length > 8 && (
+//                         <div className="text-center mt-8">
+                           
+                                
+//                                 <button 
+//                                     onClick={handleToggleViewAll}
+//                                     className="px-6 py-3 text-sm bg-transparent border-2 border-[#E27625] text-[#E27625] hover:bg-[#E27625] hover:text-white rounded-xl transition-all duration-300 font-semibold"
+//                                 >
+//                                     View All Raffles
+//                                 </button>
+                            
+//                         </div>
+//                     )}
+//                 </>
+//             )}
+
+//             {/* Ticket Count Selection Popup */}
+//             <TicketCountPopup
+//                 isOpen={isModalOpen}
+//                 onClose={() => setIsModalOpen(false)}
+//                 ticketQuantity={ticketQuantity}
+//                 setTicketQuantity={setTicketQuantity}
+//                 ticketPrice={selectedRaffle?.ticketPrice || "0"}
+//                 onConfirm={handleConfirmPurchase}
+//                 isProcessing={isProcessing}
+//                 raffleName={selectedRaffle?.name || ""}
+//             />
+
+//             {/* Confirmation Modal */}
+//             <ConfirmationModal
+//                 open={showConfirmation}
+//                 onOpenChange={setShowConfirmation}
+//                 raffle={selectedRaffle}
+//                 ticketQuantity={purchasedTickets}
+//             />
+//         </section>
+//     );
+// };
+
+// export default RaffleSection;
+
+
+
 //components/RewardCom/RaffleSection.tsx
-import { useState, useEffect, useContext } from "react";
-import {
-  TicketIcon,
-  ClockIcon,
-  UsersIcon,
-  CoinsIcon,
-  CheckCircleIcon,
-  Loader2Icon,
-  WalletIcon,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ConfirmationModal } from "@/components/RewardCom/Confirmation-model";
-import { AppContext } from "@/context/AppContext";
-import { useWallet } from "@/context/WalletContext"; // Import the wallet context
-import raffleBlockchainService, {
-  RaffleData,
-} from "@/services/raffleBlockchainService";
+import React, { useState, useEffect, useCallback } from "react";
+import { raffleService, Raffle } from "@/services/raffleBlockchainService";
 import { toast } from "react-toastify";
+import { Loader2, Ticket, Clock, Coins, Plus, Minus, X , DollarSign} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+//import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { ConfirmationModal } from "./Confirmation-model";
 
-const RaffleSection = () => {
-  const { isLoggedin } = useContext(AppContext) || {};
-  const { isConnected, walletAddress, connectWallet, isConnecting } =
-    useWallet(); // Use the wallet context
+// Helper function to format time left
+const formatTimeLeft = (endTime: number) => {
+    const now = Math.floor(Date.now() / 1000);
+    const timeLeft = endTime - now;
 
-  const [selectedRaffle, setSelectedRaffle] = useState<RaffleData | null>(null);
-  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [ticketQuantity, setTicketQuantity] = useState(1);
-  const [enrolledRaffles, setEnrolledRaffles] = useState<number[]>([]);
-  const [raffles, setRaffles] = useState<RaffleData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false);
+    if (timeLeft <= 0) {
+        return "Ended";
+    }
 
-  // Fetch active raffles and user's enrolled raffles
-  useEffect(() => {
-    const fetchRaffles = async () => {
-      setLoading(true);
-      try {
-        // Initialize blockchain service
-        await raffleBlockchainService.init();
+    const days = Math.floor(timeLeft / (3600 * 24));
+    const hours = Math.floor((timeLeft % (3600 * 24)) / 3600);
+    const minutes = Math.floor((timeLeft % 3600) / 60);
 
-        // Fetch active raffles from blockchain
-        const activeRaffles = await raffleBlockchainService.getActiveRaffles();
+    if (days > 0) {
+        return `${days}d ${hours}h left`;
+    }
+    if (hours > 0) {
+        return `${hours}h ${minutes}m left`;
+    }
+    return `${minutes}m left`;
+};
 
-        // Sort raffles by end time (closest to ending first)
-        activeRaffles.sort((a, b) => a.endTime - b.endTime);
-
-        setRaffles(activeRaffles);
-
-        // If user is logged in and wallet is connected, check which raffles they've entered
-        if (isLoggedin && isConnected && walletAddress) {
-          const userEnrolledRaffles: number[] = [];
-
-          for (const raffle of activeRaffles) {
-            const userTickets = await raffleBlockchainService.getUserTickets(
-              raffle.raffleId
-            );
-            if (userTickets.length > 0) {
-              userEnrolledRaffles.push(raffle.raffleId);
-            }
-          }
-
-          setEnrolledRaffles(userEnrolledRaffles);
-        }
-      } catch (error) {
-        console.error("Error fetching raffles:", error);
-        toast.error("Failed to load raffles. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
+// Ticket Count Selection Popup Component
+const TicketCountPopup: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    ticketQuantity: number;
+    setTicketQuantity: (quantity: number) => void;
+    ticketPrice: string;
+    onConfirm: () => void;
+    isProcessing: boolean;
+    raffleName: string;
+}> = ({ isOpen, onClose, ticketQuantity, setTicketQuantity, ticketPrice, onConfirm, isProcessing, raffleName }) => {
+    
+    const quickSelectButtons = [1, 5, 10, 25, 50, 100];
+    
+    const handleQuickSelect = (quantity: number) => {
+        setTicketQuantity(quantity);
     };
 
-    fetchRaffles();
-  }, [isLoggedin, isConnected, walletAddress]); // Added wallet connection states to dependencies
+    const handleIncrement = () => {
+        if (ticketQuantity < 1000) {
+            setTicketQuantity(ticketQuantity + 1);
+        }
+    };
 
-  const handleBuyTicket = async (raffle: RaffleData) => {
-    if (!isLoggedin) {
-      toast.error("Please log in to purchase tickets");
-      return;
-    }
+    const handleDecrement = () => {
+        if (ticketQuantity > 1) {
+            setTicketQuantity(ticketQuantity - 1);
+        }
+    };
 
-    if (!isConnected || !walletAddress) {
-      try {
-        // Try to connect the wallet first
-        toast.info("Please connect your wallet to continue");
-        await connectWallet();
-        // If we reach here, the wallet is connected
-      } catch (error) {
-        console.error("Failed to connect wallet:", error);
-        toast.error("Failed to connect wallet. Please try again.");
-        return;
-      }
-    }
+    if (!isOpen) return null;
 
-    // Once we're sure the wallet is connected, proceed with buying the ticket
-    if (isConnected && walletAddress) {
-      setSelectedRaffle(raffle);
-      setIsPurchaseModalOpen(true);
-    } else {
-      toast.error("Please connect your wallet to purchase tickets");
-    }
-  };
-
-  const handleConfirmPurchase = async () => {
-    if (!selectedRaffle) return;
-
-    try {
-      setIsProcessing(true);
-
-      // Buy tickets from blockchain
-      const success = await raffleBlockchainService.buyTickets(
-        selectedRaffle.raffleId,
-        ticketQuantity,
-        selectedRaffle.ticketPrice
-      );
-
-      if (success) {
-        setIsPurchaseModalOpen(false);
-        setIsConfirmationModalOpen(true);
-        setEnrolledRaffles([...enrolledRaffles, selectedRaffle.raffleId]);
-
-        // Update raffle data to reflect new ticket purchase
-        const updatedRaffles = raffles.map((raffle) => {
-          if (raffle.raffleId === selectedRaffle.raffleId) {
-            return {
-              ...raffle,
-              totalTicketsSold: raffle.totalTicketsSold + ticketQuantity,
-              participants: (raffle.participants || 0) + 1,
-            };
-          }
-          return raffle;
-        });
-
-        setRaffles(updatedRaffles);
-      }
-    } catch (error) {
-      console.error("Error purchasing tickets:", error);
-      toast.error("Failed to purchase tickets. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleCloseConfirmation = (open: boolean) => {
-    setIsConfirmationModalOpen(open);
-    setSelectedRaffle(null);
-    setTicketQuantity(1);
-  };
-
-  const isEnrolled = (raffleId: number) => enrolledRaffles.includes(raffleId);
-
-  // Format time left for display
-  const formatTimeLeft = (endTime: number) => {
-    return raffleBlockchainService.formatTimeLeft(endTime);
-  };
-
-  // Format currency
-  const formatCurrency = (value: string, currency: string = "ETH") => {
-    return `${value} ${currency}`;
-  };
-
-  return (
-    <section className="py-10">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-2xl font-bold">Active Raffles</h2>
-
-        {/* Add wallet connect button */}
-        {isLoggedin && !isConnected && (
-          <Button
-            onClick={connectWallet}
-            disabled={isConnecting}
-            className="mr-4 bg-[#E27625] hover:bg-[#d46222]"
-          >
-            {isConnecting ? (
-              <>
-                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                Connecting...
-              </>
-            ) : (
-              <>
-                <WalletIcon className="mr-2 h-4 w-4" />
-                Connect Wallet
-              </>
-            )}
-          </Button>
-        )}
-
-        <button className="px-4 py-2 text-sm bg-transparent border border-[#E27625] text-[#ffffff] hover:bg-[#E27625] rounded-lg transition">
-          View All
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2Icon className="h-12 w-12 text-[#E27625] animate-spin" />
-        </div>
-      ) : raffles.length === 0 ? (
-        <div className="text-center py-12 bg-[#333447] rounded-xl">
-          <h3 className="text-xl mb-2">No Active Raffles</h3>
-          <p className="text-gray-400">
-            Check back soon for new opportunities!
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {raffles.map((raffle) => (
-            <div
-              key={raffle.raffleId}
-              className={`bg-[#333447] rounded-xl overflow-hidden border ${
-                isEnrolled(raffle.raffleId)
-                  ? "border-green-500 shadow-lg shadow-green-500/20"
-                  : "border-gray-700 hover:border-blue-500"
-              } transition group`}
-            >
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={raffle.imageURL || "/placeholder.svg"}
-                  alt={raffle.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                />
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-gray-900 to-transparent opacity-70"></div>
-                {isEnrolled(raffle.raffleId) ? (
-                  <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                    <CheckCircleIcon size={16} className="mr-1" />
-                    Enrolled
-                  </div>
-                ) : (
-                  <div className="absolute bottom-4 left-4 bg-[#E27625] text-white px-3 py-1 rounded-full text-sm font-medium">
-                    Hot Deal
-                  </div>
-                )}
-              </div>
-              <div className="p-5">
-                <h3 className="text-xl font-bold mb-2">{raffle.name}</h3>
-                <div className="bg-[#505279] rounded-lg p-3 mb-4">
-                  <div className="text-center">
-                    <p className="text-sm text-gray-400">Prize Pool</p>
-                    <p className="text-xl font-bold text-[#00BD58]">
-                      {formatCurrency(raffle.prizeAmount, "ETH")}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex justify-between mb-4">
-                  <div className="flex items-center">
-                    <ClockIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">
-                      Ends in {formatTimeLeft(raffle.endTime)}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <UsersIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">
-                      {raffle.totalTicketsSold} tickets
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <TicketIcon size={16} className="text-gray-400 mr-1" />
-                    <span className="text-sm">
-                      {formatCurrency(raffle.ticketPrice, "ETH")}
-                    </span>
-                  </div>
-                  {isEnrolled(raffle.raffleId) ? (
-                    <div className="flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg text-white">
-                      <TicketIcon size={16} className="mr-1" />
-                      <span>Ticket Purchased</span>
-                    </div>
-                  ) : (
+    return (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#1a1b23] border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                    <h3 className="text-xl font-bold text-white">Select Tickets</h3>
                     <button
-                      className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:opacity-90 transition"
-                      onClick={() => handleBuyTicket(raffle)}
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-white transition-colors"
                     >
-                      <CoinsIcon size={16} className="mr-1" />
-                      <span>Buy Ticket</span>
+                        <X size={24} />
                     </button>
-                  )}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Ticket Purchase Modal */}
-      <Dialog open={isPurchaseModalOpen} onOpenChange={setIsPurchaseModalOpen}>
-        <DialogContent className="bg-[#252638] border border-gray-700 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Buy Raffle Tickets
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Purchase tickets for {selectedRaffle?.name}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedRaffle && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="h-16 w-16 rounded-lg overflow-hidden">
-                  <img
-                    src={selectedRaffle.imageURL || "/placeholder.svg"}
-                    alt={selectedRaffle.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-medium">{selectedRaffle.name}</h4>
-                  <p className="text-sm text-gray-400">
-                    Prize: {formatCurrency(selectedRaffle.prizeAmount, "ETH")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-[#333447] p-4 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-400">Ticket Price:</span>
-                  <span className="font-medium">
-                    {formatCurrency(selectedRaffle.ticketPrice, "ETH")}
-                  </span>
-                </div>
-                <div className="flex justify-between mb-4">
-                  <span className="text-gray-400">Ends in:</span>
-                  <span className="font-medium">
-                    {formatTimeLeft(selectedRaffle.endTime)}
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-400">
-                      Number of Tickets
-                    </label>
-                    <div className="flex items-center">
-                      <button
-                        className="h-8 w-8 flex items-center justify-center bg-[#505279] rounded-l-lg"
-                        onClick={() =>
-                          setTicketQuantity(Math.max(1, ticketQuantity - 1))
-                        }
-                      >
-                        -
-                      </button>
-                      <div className="h-8 w-12 flex items-center justify-center bg-[#505279] text-white font-medium">
-                        {ticketQuantity}
-                      </div>
-                      <button
-                        className="h-8 w-8 flex items-center justify-center bg-[#505279] rounded-r-lg"
-                        onClick={() => setTicketQuantity(ticketQuantity + 1)}
-                      >
-                        +
-                      </button>
+                
+                <div className="p-6 space-y-6">
+                    <div className="text-center">
+                        <p className="text-gray-400 text-sm mb-1">Entering raffle for</p>
+                        <p className="text-[#E27625] font-semibold text-3xl">{raffleName}</p>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-[#333447] p-4 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-400">Subtotal:</span>
-                  <span className="font-medium">
-                    {ticketQuantity} ×{" "}
-                    {formatCurrency(selectedRaffle.ticketPrice, "ETH")}
-                  </span>
-                </div>
-                <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
-                  <span>Total:</span>
-                  <span className="text-[#00BD58]">
-                    {formatCurrency(
-                      (
-                        parseFloat(selectedRaffle.ticketPrice) * ticketQuantity
-                      ).toString(),
-                      "ETH"
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsPurchaseModalOpen(false)}
-              className="border-gray-700 text-white hover:bg-[#333447] hover:text-white"
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmPurchase}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Confirm Purchase"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        open={isConfirmationModalOpen}
-        onOpenChange={handleCloseConfirmation}
-        raffle={selectedRaffle as any}
-        ticketQuantity={ticketQuantity}
-      />
-    </section>
-  );
+                    {/* Quick Select Buttons
+                    <div>
+                        <p className="text-gray-300 text-sm mb-3">Quick Select:</p>
+                        <div className="grid grid-cols-3 gap-2">
+                            {quickSelectButtons.map((quantity) => (
+                                <button
+                                    key={quantity}
+                                    onClick={() => handleQuickSelect(quantity)}
+                                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                                        ticketQuantity === quantity
+                                            ? 'bg-[#E27625] text-white'
+                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    {quantity}
+                                </button>
+                            ))}
+                        </div>
+                    </div> */}
+
+                    {/* Manual Input */}
+                    <div>
+                        <p className="text-gray-300 text-sm mb-3">Ticket Amount:</p>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handleDecrement}
+                                disabled={ticketQuantity <= 1}
+                                className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white"
+                            >
+                                <Minus size={16} />
+                            </button>
+                            
+                            <div className="flex-1">
+                                <Input
+                                    type="number"
+                                    value={ticketQuantity}
+                                    onChange={(e) => {
+                                        const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1));
+                                        setTicketQuantity(value);
+                                    }}
+                                    className="bg-gray-800 border-gray-600 text-white text-center text-lg font-semibold"
+                                    min="1"
+                                    max="1000"
+                                />
+                            </div>
+                            
+                            <button
+                                onClick={handleIncrement}
+                                disabled={ticketQuantity >= 1000}
+                                className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white"
+                            >
+                                <Plus size={16} />
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 text-center">Maximum 1000 tickets per transaction</p>
+                    </div>
+
+                    {/* Total Cost */}
+                    <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-xl p-4">
+                        <div className="text-center">
+                            <p className="text-gray-400 text-sm mb-1">Total Cost</p>
+                            <p className="text-2xl font-bold text-green-400">
+                                {(Number(ticketPrice) * ticketQuantity).toFixed(4)} ETH
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {ticketQuantity} {ticketQuantity === 1 ? 'ticket' : 'tickets'} × {ticketPrice} ETH
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="p-6 border-t border-gray-700">
+                    <div className="flex gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={onClose}
+                            className="flex-1 border-gray-600 hover:bg-gray-700 text-gray-300"
+                            disabled={isProcessing}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={onConfirm}
+                            disabled={isProcessing}
+                            className="flex-1 bg-gradient-to-r from-[#E27625] to-orange-600 hover:from-orange-600 hover:to-[#E27625] text-white font-semibold"
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                                    Processing...
+                                </>
+                            ) : (
+                                'Confirm Purchase'
+                            )}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const RaffleCard: React.FC<{ raffle: Raffle, onBuyTickets: (raffle: Raffle) => void }> = ({ raffle, onBuyTickets }) => {
+    const timeLeft = Number(raffle.endTime) * 1000 - Date.now();
+    const isRaffleActive = timeLeft > 0 && Date.now() > Number(raffle.startTime) * 1000;
+
+    return (
+        <div className="bg-gradient-to-br from-[#1a1b23] to-[#252538] rounded-2xl overflow-hidden border border-gray-700/50 hover:border-[#E27625]/50 transition-all duration-300 group shadow-xl hover:shadow-2xl hover:shadow-[#E27625]/10">
+            <div className="relative h-56 overflow-hidden">
+                <img 
+                    src={raffle.imageURL} 
+                    alt={raffle.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                
+                {/* Status Badge */}
+                <div className="absolute top-4 left-4">
+                    <div className="bg-gradient-to-r from-[#E27625] to-orange-600 text-white px-3 py-1.5 rounded-full text-xs font-bold tracking-wider">
+                        🔥 HOT RAFFLE
+                    </div>
+                </div>
+
+                {/* Time Left Badge */}
+                <div className="absolute top-4 right-4">
+                    <div className="bg-black/80 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1">
+                        <Clock size={12} />
+                        {formatTimeLeft(Number(raffle.endTime))}
+                    </div>
+                </div>
+
+                {/* Prize Amount Overlay */}
+                <div className="absolute bottom-4 left-4 right-4">
+                    <div className="bg-black/60 backdrop-blur-md rounded-xl p-3 border border-white/10">
+                        <p className="text-gray-300 text-xs uppercase tracking-wide">Prize Pool</p>
+                        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
+                            {raffle.prizeAmount} ETH
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+                <div>
+                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-[#E27625] transition-colors">
+                        {raffle.name}
+                    </h3>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5 text-gray-400 mb-1">
+                            <Ticket size={14} />
+                            <span className="text-xs">Tickets</span>
+                        </div>
+                        <p className="font-bold text-white">{raffle.totalTicketsSold}</p>
+                    </div>
+                    
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5 text-gray-400 mb-1">
+                            <DollarSign size={14} />
+                            <span className="text-xs">Price</span>
+                        </div>
+                        <p className="font-bold text-white">{raffle.ticketPrice} ETH</p>
+                    </div>
+                </div>
+
+                {/* Action Button */}
+                <Button 
+                    className="w-full bg-gradient-to-r from-[#E27625] to-orange-600 hover:from-orange-600 hover:to-[#E27625] text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+                    disabled={!isRaffleActive} 
+                    onClick={() => onBuyTickets(raffle)}
+                >
+                    <div className="flex items-center justify-center gap-2">
+                        <Coins size={18} />
+                        {isRaffleActive ? 'Enter Raffle' : 'Raffle Ended'}
+                    </div>
+                </Button>
+            </div>
+        </div>
+    );
+};
+
+const RaffleSection = () => {
+    const [raffles, setRaffles] = useState<Raffle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedRaffle, setSelectedRaffle] = useState<Raffle | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [ticketQuantity, setTicketQuantity] = useState(1);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [purchasedTickets, setPurchasedTickets] = useState(0);
+    const [showAllRaffles, setShowAllRaffles] = useState(false);
+
+    const loadRaffles = useCallback(async () => {
+        setLoading(true);
+        try {
+            const allRaffles = await raffleService.getAllRaffles();
+            const activeRaffles = allRaffles.filter(r => !r.isCompleted);
+            // Sort by end time, closest to ending first
+            activeRaffles.sort((a, b) => Number(a.endTime) - Number(b.endTime));
+            setRaffles(activeRaffles);
+        } catch (error: any) {
+            toast.error(error.message || "Failed to load raffles.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        loadRaffles();
+    }, [loadRaffles]);
+    
+    const handleBuyClick = (raffle: Raffle) => {
+        setSelectedRaffle(raffle);
+        setTicketQuantity(1);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmPurchase = async () => {
+        if (!selectedRaffle) return;
+        setIsProcessing(true);
+        try {
+            toast.info(`Purchasing ${ticketQuantity} ticket(s)... Please confirm in your wallet.`);
+            await raffleService.buyTickets(selectedRaffle.raffleId, ticketQuantity);
+            toast.success("Tickets purchased successfully!");
+            
+            // Store purchase info for confirmation modal
+            setPurchasedTickets(ticketQuantity);
+            
+            // Close ticket selection modal and show confirmation
+            setIsModalOpen(false);
+            setShowConfirmation(true);
+            
+            loadRaffles(); // Refresh data
+        } catch (error: any) {
+            toast.error(error.message || "Ticket purchase failed.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    // Toggle view all raffles
+    const handleToggleViewAll = () => {
+        setShowAllRaffles(!showAllRaffles);
+    };
+
+    // Get displayed raffles based on current view mode
+    const displayedRaffles = showAllRaffles ? raffles : raffles.slice(0, 8);
+    
+    if (loading) {
+        return (
+            <div className="flex flex-col justify-center items-center py-20">
+                <Loader2 className="h-12 w-12 text-[#E27625] animate-spin mb-4" />
+                <p className="text-gray-400">Loading awesome raffles...</p>
+            </div>
+        );
+    }
+
+    return (
+        <section className="py-12">
+            {/* Header Section - Using the same style as Upcoming.tsx */}
+            <div className="mb-6 sm:mb-8">
+                <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+                    <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent mb-2 text-center sm:text-left">
+                        Active Raffles
+                    </h1>
+                    <p className="text-[#A1A1AA] text-sm sm:text-base lg:text-lg text-center sm:text-left leading-relaxed">
+                        Join exciting raffles and win amazing prizes! 🪄🎲💫
+                    </p>
+                </div>
+            </div>
+            
+            {raffles.length === 0 ? (
+                <div className="text-center py-16 bg-gradient-to-br from-[#1a1b23] to-[#2a2b35] rounded-2xl border border-gray-700/50">
+                    <div className="mb-6">
+                        <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Ticket className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-2xl mb-3 font-bold text-white">No Active Raffles</h3>
+                        <p className="text-gray-400 max-w-md mx-auto">
+                            There are no active raffles at the moment. Check back soon for new opportunities to win amazing prizes!
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {displayedRaffles.map(raffle => (
+                            <RaffleCard key={raffle.raffleId} raffle={raffle} onBuyTickets={handleBuyClick} />
+                        ))}
+                    </div>
+                    
+                    {/* Show more indicator when not showing all */}
+                    {!showAllRaffles && raffles.length > 8 && (
+                        <div className="text-center mt-8">
+                            <button 
+                                onClick={handleToggleViewAll}
+                                className="px-6 py-3 text-sm bg-transparent border-2 border-[#E27625] text-[#E27625] hover:bg-[#E27625] hover:text-white rounded-xl transition-all duration-300 font-semibold"
+                            >
+                                View All Raffles
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Ticket Count Selection Popup */}
+            <TicketCountPopup
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                ticketQuantity={ticketQuantity}
+                setTicketQuantity={setTicketQuantity}
+                ticketPrice={selectedRaffle?.ticketPrice || "0"}
+                onConfirm={handleConfirmPurchase}
+                isProcessing={isProcessing}
+                raffleName={selectedRaffle?.name || ""}
+            />
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                open={showConfirmation}
+                onOpenChange={setShowConfirmation}
+                raffle={selectedRaffle}
+                ticketQuantity={purchasedTickets}
+            />
+        </section>
+    );
 };
 
 export default RaffleSection;

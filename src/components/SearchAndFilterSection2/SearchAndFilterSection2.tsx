@@ -3,21 +3,18 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Define filter type - removed 'new' as requested
-type FilterType = 'all' | 'trending';
-
 interface SearchAndFilterSectionProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  activeFilter: FilterType;
-  onTrendingClick: () => void;
+  // You can add more props here if the "New" or "Trending" buttons
+  // need to trigger actions in the parent component, e.g.:
+  // onNewClick?: () => void;
+  // onTrendingClick?: () => void;
 }
 
 export default function SearchAndFilterSection({
   searchQuery,
   onSearchChange,
-  activeFilter,
-  onTrendingClick,
 }: SearchAndFilterSectionProps) {
   return (
     <div className="flex gap-4">
@@ -34,17 +31,18 @@ export default function SearchAndFilterSection({
           </div>
         </div>
       </div>
+      {/* <Button
+        variant="secondary"
+        className="bg-gradient-to-r from-[#10B981] to-[#059669] hover:from-[#059669] hover:to-[#047857] text-white font-semibold px-6 py-3 shadow-lg shadow-[#10B981]/20 transition-all duration-300 hover:scale-105"
+      >
+        New
+      </Button>
       <Button
         variant="secondary"
-        onClick={onTrendingClick}
-        className={`font-semibold px-6 py-3 shadow-lg transition-all duration-300 hover:scale-105 border-2 ${
-          activeFilter === 'trending'
-            ? 'bg-gradient-to-r from-[#F59E0B] to-[#E27625] text-white shadow-[#F59E0B]/40 scale-105 border-[#F59E0B] shadow-2xl transform rotate-1'
-            : 'bg-gradient-to-r from-[#333447] to-[#404153] hover:from-[#F59E0B] hover:to-[#E27625] text-[#A1A1AA] hover:text-white shadow-[#333447]/20 border-[#525266] hover:border-[#F59E0B]'
-        }`}
+        className="bg-gradient-to-r from-[#F59E0B] to-[#E27625] hover:from-[#E27625] hover:to-[#D97919] text-white font-semibold px-6 py-3 shadow-lg shadow-[#F59E0B]/20 transition-all duration-300 hover:scale-105"
       >
-        🔥 Trending
-      </Button>
+        Trending
+      </Button> */}
     </div>
   );
 }

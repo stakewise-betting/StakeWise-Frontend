@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/pages/HomePage/home.tsx
 import { useEffect, useState, useCallback } from "react";
 import Web3 from "web3";
 import axios from "axios";
@@ -534,7 +535,7 @@ const Home = () => {
         )}
       </section>
       <FilterBar onFilterChange={handleFilterChange} />
-      <div className="flex flex-col w-full items-center mt-8">
+      <div className="flex flex-col w-full items-center mt-2">
         {isLoadingUI ? (
           <div className="flex justify-center py-8">
             <p className="text-center text-gray-400">

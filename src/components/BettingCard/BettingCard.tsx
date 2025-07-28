@@ -188,7 +188,7 @@ const BettingCard: FC<BettingCardProps> = ({ event, web3 }) => {
                 alt={event.name}
                 className="w-16 h-16 rounded-xl object-cover border-2 border-gray-700/60 group-hover:border-secondary/30 transition-colors duration-300"
               />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-secondary/20 rounded-full border border-secondary/40 group-hover:animate-pulse"></div>
+              {/* <div className="absolute -top-1 -right-1 w-4 h-4 bg-secondary/20 rounded-full border border-secondary/40 group-hover:animate-pulse"></div> */}
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-sm leading-tight text-white mb-1 line-clamp-2 group-hover:text-secondary transition-colors duration-300">
@@ -229,7 +229,7 @@ const BettingCard: FC<BettingCardProps> = ({ event, web3 }) => {
       <CardContent className="p-4 pt-2 space-y-4">
         {/* Options List */}
         <div className="bg-black/20 rounded-xl p-3 border border-gray-700/40">
-          <div className="space-y-2 max-h-[120px] overflow-y-auto">
+          <div className="space-y-2 max-h-[120px] overflow-y-auto ">
             {event.options.map((option, index) => (
               <div
                 key={index}

@@ -16,7 +16,7 @@ export const FooterHeader: React.FC = () => {
               alt="StakeWise Logo"
               className="logo-icon w-10 h-8 sm:w-12 sm:h-10 drop-shadow-lg"
             />
-            <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-secondary rounded-full animate-pulse"></div>
+            {/* <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-secondary rounded-full animate-pulse"></div> */}
           </div>
           <h1 className="font-saira-stencil text-2xl sm:text-3xl font-bold text-white bg-gradient-to-r from-white via-secondary to-white bg-clip-text text-transparent">
             STAKEWISE

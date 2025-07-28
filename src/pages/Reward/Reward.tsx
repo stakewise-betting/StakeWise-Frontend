@@ -1,7 +1,7 @@
 //StakeWise-Frontend/src/pages/Reward/Reward.tsx
 import RaffleSection from '@/components/RewardCom/RaffleSection'
-import TokenClaimSection from '@/components/RewardCom/TokenClaimsSection'
-import RedeemSection from '@/components/RewardCom/RedeemSection'
+// import TokenClaimSection from '@/components/RewardCom/TokenClaimsSection'
+// import RedeemSection from '@/components/RewardCom/RedeemSection'
 
 
 const RewardPage = () => {
@@ -9,13 +9,9 @@ const RewardPage = () => {
     <div className="min-h-screen bg-[#1C1C27] text-white">
       
       <main className="container mx-auto px-[50px] py-0">
-        <RaffleSection />
-        <TokenClaimSection />
-        <RedeemSection />
-      </main>
-      
+        <RaffleSection />     
+      </main>  
     </div>
   )
 }
-
 export default RewardPage

@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useContext } from "react";
 import Web3 from "web3";
-import FilterSidebar from "@/components/dropdownMenu/DropdownMenu";
+import FilterSidebar from "@/components/FilterSidebarDropDown/FilterSidebarDropDown";
 import BettingCard from "@/components/BettingCard/BettingCard";
 import { contractABI, contractAddress } from "@/config/contractConfig";
 import { AppContext } from "@/context/AppContext";
 import { useWatchlist } from "@/context/WatchlistContext";
-import SearchAndFilterSection from "@/components/SearchAndFilterSection/SearchAndFilterSection";
+import SearchAndFilterSection2 from "@/components/SearchAndFilterSection2/SearchAndFilterSection2";
 
 // Interfaces
 interface OptionOdds {
@@ -78,27 +78,28 @@ export default function WatchListPage() {
     {
       title: "Categories",
       items: [
-        { name: "Politics", count: 21 },
-        { name: "Sports", count: 32 },
-        { name: "Games", count: 12 },
+        { name: "Politics", count: 1 },
+        { name: "Sports", count: 2 },
+        { name: "Games", count: 0 },
+        { name: "Entertainment", count: 0 },
       ],
     },
-    {
-      title: "Locations",
-      items: [
-        { name: "USA", count: 12 },
-        { name: "Sri Lanka", count: 34 },
-        { name: "India", count: 8 },
-        { name: "Australia", count: 15 },
-      ],
-    },
+    // {
+    //   title: "Locations",
+    //   items: [
+    //     { name: "USA", count: 12 },
+    //     { name: "Sri Lanka", count: 34 },
+    //     { name: "India", count: 8 },
+    //     { name: "Australia", count: 15 },
+    //   ],
+    // },
     {
       title: "Date Range",
       items: [
-        { name: "Today", count: 9 },
-        { name: "This Weekend", count: 14 },
-        { name: "Next Week", count: 8 },
-        { name: "Next 3 Months", count: 45 },
+        { name: "Today", count: 0 },
+        { name: "This Weekend", count: 3 },
+        { name: "Next Week", count: 0 },
+        { name: "Next 3 Months", count: 0 },
       ],
     },
   ];
@@ -290,36 +291,49 @@ export default function WatchListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1C1C27] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[100px] py-6 sm:py-8">
-      {/* Header Section - Mobile Responsive */}
+    <div className="min-h-screen bg-gradient-to-br from-[#1C1C27] via-[#1E1E2E] to-[#1C1C27] px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[100px] py-6 sm:py-8">
+      {/* Header Section - Using the same style as Upcoming.tsx and RaffleSection.tsx */}
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center sm:text-left">
-          Watch List
-        </h1>
+        <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+          <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent mb-2 text-center sm:text-left">
+            My Watchlist
+          </h1>
+          <p className="text-[#A1A1AA] text-sm sm:text-base lg:text-lg text-center sm:text-left leading-relaxed">
+            Track and manage your favorite events and preferred betting opportunities
+          </p>
+        </div>
       </div>
 
       {/* Main Content Grid - Mobile Responsive */}
-      <div className="grid gap-4 sm:gap-6 md:grid-cols-[240px,1fr]">
-        {/* Sidebar - Hidden on mobile, visible on desktop */}
-        <div className="hidden md:block space-y-6 text-[#ffffff]">
-          {filterItems.map((filter, index) => (
-            <FilterSidebar
-              key={index}
-              title={filter.title}
-              items={filter.items}
-            />
-          ))}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[280px,1fr]">
+        {/* Sidebar - Hidden on mobile, collapsible on tablet */}
+        <div className="hidden lg:block space-y-6">
+          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-xl p-6 shadow-xl border border-[#333447]">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
+              Filters
+            </h3>
+            <div className="space-y-4">
+              {filterItems.map((filter, index) => (
+                <FilterSidebar
+                  key={index}
+                  title={filter.title}
+                  items={filter.items}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
         <div className="space-y-4 sm:space-y-6">
           {/* Mobile Filters Section */}
-          <div className="md:hidden bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg p-4 shadow-xl border border-[#333447]">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+          <div className="lg:hidden bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 bg-[#E27625] rounded-full"></div>
               Filters
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {filterItems.map((filter, index) => (
                 <FilterSidebar
                   key={index}
@@ -331,20 +345,20 @@ export default function WatchListPage() {
           </div>
 
           {/* Search and Filter Section */}
-          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg p-4 sm:p-6 shadow-xl border border-[#333447]">
-            <SearchAndFilterSection
+          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
+            <SearchAndFilterSection2
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
           </div>
 
           {/* Content Section */}
-          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-lg shadow-xl border border-[#333447] overflow-hidden">
+          <div className="bg-gradient-to-br from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl shadow-xl border border-[#333447] overflow-hidden">
             {/* Loading indicator for odds */}
             {isOddsLoading && (
               <div className="text-center py-4 border-b border-[#333447]">
                 <div className="inline-flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#E27625] border-t-transparent"></div>
                   <p className="text-gray-400 text-sm">Loading odds...</p>
                 </div>
               </div>

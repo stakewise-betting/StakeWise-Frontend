@@ -1,275 +1,123 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import axios from "axios";
-import Web3 from "web3";
-import AddRaffleModal from "@/Admin/raffles/AddRaffleModal";
+import { raffleService, Raffle } from "@/services/raffleBlockchainService";
+import AddRaffleModal from "./AddRaffleModal";
 import RaffleListTable from "./RaffleListTable";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, RefreshCw } from "lucide-react";
+import { PlusCircle, RefreshCw, Trophy } from "lucide-react";
 
-interface RaffleData {
-  raffleId: number;
-  name: string;
-  description: string;
-  imageURL: string;
-  startTime: number;
-  endTime: number;
-  ticketPrice: number;
-  prizeAmount: number;
-  isCompleted: boolean;
-  winner: string;
-  totalTicketsSold: number;
-  notificationImageURL: string;
-  notificationMessage: string;
-  category?: string;
-}
+// Consistent loading indicator, themed for the raffles page
+const LoadingIndicator: React.FC<{ message?: string }> = ({
+  message = "Loading Raffles...",
+}) => (
+  <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
+    <div className="relative">
+      <div className="w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin"></div>
+    </div>
+    <div className="space-y-2">
+      <h3 className="text-xl font-semibold text-white">{message}</h3>
+      <p className="text-slate-400">
+        Please wait while we fetch the latest data...
+      </p>
+    </div>
+  </div>
+);
 
-interface RafflesPageProps {
-  contract: any;
-  web3: Web3;
-  onRaffleCreated?: () => void;
-  onWinnerSelected?: () => void;
-  isLoading?: boolean;
-}
 
-export const RafflesPage: React.FC<RafflesPageProps> = ({
-  contract,
-  web3,
-  onRaffleCreated,
-  onWinnerSelected,
-}) => {
-  const [raffles, setRaffles] = useState<RaffleData[]>([]);
+export const RafflesPage: React.FC = () => {
+  const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
-  // Load raffles from backend and blockchain
-  const loadRaffles = async () => {
+  const loadRaffles = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      // Fetch raffles from backend
-      const response = await axios.get(`${backendBaseUrl}/api/raffles`);
-
-      if (response.data.success) {
-        const backendRaffles = response.data.data;
-
-        // Enhance with blockchain data when possible
-        if (contract) {
-          const rafflePromises = backendRaffles.map(
-            async (raffle: RaffleData) => {
-              try {
-                // Try to get additional blockchain data
-                const blockchainRaffle = await contract.methods
-                  .getRaffle(raffle.raffleId)
-                  .call();
-
-                // Convert Wei values to ETH
-                const ticketPrice = web3.utils.fromWei(
-                  blockchainRaffle.ticketPrice.toString(),
-                  "ether"
-                );
-                const prizeAmount = web3.utils.fromWei(
-                  blockchainRaffle.prizeAmount.toString(),
-                  "ether"
-                );
-
-                // Merge data, prioritizing blockchain for accurate state
-                return {
-                  ...raffle,
-                  isCompleted: blockchainRaffle.isCompleted,
-                  winner: blockchainRaffle.winner,
-                  totalTicketsSold: Number(blockchainRaffle.totalTicketsSold),
-                  ticketPrice: parseFloat(ticketPrice),
-                  prizeAmount: parseFloat(prizeAmount),
-                };
-              } catch (err) {
-                console.warn(
-                  `Failed to fetch blockchain data for raffle ${raffle.raffleId}:`,
-                  err
-                );
-                // Return backend data if blockchain fetch fails
-                return raffle;
-              }
-            }
-          );
-
-          const enhancedRaffles = await Promise.all(rafflePromises);
-          setRaffles(enhancedRaffles);
-        } else {
-          // If contract is not available, use backend data only
-          setRaffles(backendRaffles);
-        }
-      } else {
-        throw new Error(response.data.message || "Failed to fetch raffles");
-      }
-    } catch (err: any) {
-      console.error("Error loading raffles:", err);
-      setError(`Failed to load raffles: ${err.message}`);
-      toast.error("Failed to load raffles. Please try again.");
-      setRaffles([]);
+      const allRaffles = await raffleService.getAllRaffles();
+      // Sort raffles: active first, then completed
+      allRaffles.sort((a, b) => (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1);
+      setRaffles(allRaffles);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load raffles.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Initial load
   useEffect(() => {
     loadRaffles();
-  }, [contract, web3]);
+  }, [loadRaffles]);
 
-  // Handle refresh
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadRaffles();
-    setRefreshing(false);
-  };
-
-  // Handle raffle created
-  const handleRaffleCreated = async () => {
-    await loadRaffles();
-    if (onRaffleCreated) onRaffleCreated();
-  };
-
-  // Delete raffle
-  const handleDeleteRaffle = async (raffleId: number) => {
+  const handleDrawWinner = async (raffleId: string) => {
     try {
-      const response = await axios.delete(
-        `${backendBaseUrl}/api/raffles/${raffleId}`
-      );
-
-      if (response.data.success) {
-        toast.success("Raffle deleted successfully");
-        await loadRaffles();
-      } else {
-        throw new Error(response.data.message || "Failed to delete raffle");
-      }
-    } catch (err: any) {
-      console.error("Error deleting raffle:", err);
-      toast.error(`Failed to delete raffle: ${err.message}`);
-    }
-  };
-
-  // Select winner
-  const handleSelectWinner = async (raffleId: number) => {
-    try {
-      const response = await axios.post(
-        `${backendBaseUrl}/api/raffles/${raffleId}/select-winner`
-      );
-
-      if (response.data.success) {
-        toast.success(`Winner selected: ${response.data.data.winner}`);
-        await loadRaffles();
-        if (onWinnerSelected) onWinnerSelected();
-      } else {
-        throw new Error(response.data.message || "Failed to select winner");
-      }
-    } catch (err: any) {
-      console.error("Error selecting winner:", err);
-      toast.error(`Failed to select winner: ${err.message}`);
+      toast.info("Sending transaction to draw winner...");
+      await raffleService.drawWinner(raffleId);
+      toast.success("Winner has been drawn successfully!");
+      loadRaffles(); // Refresh the list
+    } catch (error: any) {
+      toast.error(error.message || "Failed to draw winner.");
     }
   };
 
   return (
-    <div className="animate-admin-fade-in space-y-8 bg-gradient-to-br from-[#1C1C27] via-[#252538] to-[#2A2A3E] min-h-screen p-6 -m-6">
-      {/* Page Header */}
-      <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-2xl p-8 shadow-2xl shadow-black/20 border border-gray-700/50">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#E27625] to-[#F59E0B] flex items-center justify-center shadow-lg shadow-[#E27625]/30">
-                <span className="text-2xl">🎟️</span>
-              </div>
-              Raffle Draws Management
-            </h1>
-            <p className="text-gray-400 mt-2 text-lg">
-              Create, manage, and monitor raffle draws for your platform
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#1C1C27] text-white animate-admin-fade-in">
+        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                <div className="space-y-2">
+                    <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                        <div className="p-2 rounded-full flex items-center justify-center bg-orange-600/20">
+                            <Trophy className="w-6 h-6 text-orange-500" />
+                        </div>
+                        Raffle Management
+                    </h2>
+                    <p className="text-slate-400 text-lg">
+                        Create, manage, and monitor prize raffles
+                    </p>
+                </div>
 
-          <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing || loading}
-              className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] hover:from-[#2A2A3E] hover:to-[#252538] border-gray-600/50 text-white hover:text-white transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
-              />
-              🔄 Refresh
-            </Button>
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="bg-gradient-to-r from-[#E27625] to-[#F59E0B] hover:from-[#F59E0B] hover:to-[#E27625] text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg shadow-[#E27625]/30"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />➕ Create Raffle
-            </Button>
-          </div>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={loadRaffles}
+                        disabled={loading}
+                        className="h-12 bg-transparent border-orange-500/40 text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 transition-colors duration-300"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                    </Button>
+                    <Button
+                        onClick={() => setShowAddModal(true)}
+                        disabled={loading}
+                        className="group flex-grow sm:flex-grow-0 flex items-center justify-center px-4 py-3 h-12 rounded-xl font-medium transition-all duration-300 focus:outline-none relative overflow-hidden bg-orange-600/20 text-white border border-orange-600/50 shadow-lg hover:bg-orange-600/30 hover:shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                        <div className="flex items-center justify-center mr-3 rounded-lg transition-all duration-300 h-8 w-8 bg-orange-600/20 text-orange-400 shadow-lg">
+                            <PlusCircle
+                                className="h-4 w-4 group-hover:rotate-90 transition-transform duration-300"
+                                aria-hidden="true"
+                            />
+                        </div>
+                        <span className="text-sm font-semibold">
+                            Create Raffle
+                        </span>
+                    </Button>
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="bg-gradient-to-br from-[#1C1C27] to-[#22222d] border border-gray-700/50 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
+                {loading ? (
+                    <LoadingIndicator />
+                ) : (
+                    <RaffleListTable raffles={raffles} onDrawWinner={handleDrawWinner} />
+                )}
+            </div>
+
+            <AddRaffleModal
+                open={showAddModal}
+                onOpenChange={setShowAddModal}
+                onRaffleCreated={loadRaffles}
+            />
         </div>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-gradient-to-r from-[#EF4444]/10 to-[#DC2626]/10 border-2 border-[#EF4444]/50 rounded-xl p-6 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#EF4444] to-[#DC2626] flex items-center justify-center">
-              <span className="text-white text-xl">⚠️</span>
-            </div>
-            <div>
-              <h3 className="text-[#EF4444] font-semibold text-lg">
-                Error Loading Raffles
-              </h3>
-              <p className="text-gray-300 mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && !raffles.length ? (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-6 border border-gray-600/50 shadow-lg">
-            <div className="animate-pulse space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="h-6 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg w-1/4"></div>
-                <div className="h-8 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg w-32"></div>
-              </div>
-              <div className="space-y-3">
-                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-full"></div>
-                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-3/4"></div>
-                <div className="h-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded w-1/2"></div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-xl p-8 border border-gray-600/50 shadow-lg">
-            <div className="animate-pulse">
-              <div className="h-64 bg-gradient-to-r from-gray-700 to-gray-600 rounded-xl"></div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <RaffleListTable
-          raffles={raffles}
-          onDeleteRaffle={handleDeleteRaffle}
-          onSelectWinner={handleSelectWinner}
-          web3={web3}
-        />
-      )}
-
-      {/* Add Raffle Modal */}
-      <AddRaffleModal
-        open={showAddModal}
-        onOpenChange={setShowAddModal}
-        onRaffleCreated={handleRaffleCreated}
-        contract={contract}
-        web3={web3}
-      />
     </div>
   );
 };

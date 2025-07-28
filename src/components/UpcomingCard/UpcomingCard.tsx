@@ -1,5 +1,7 @@
-import { FC } from "react";
-import { Star, Share2, Calendar, Clock, MapPin } from "lucide-react";
+//StakeWise-Frontend/src/components/UpcomingCard/UpcomingCard.tsx
+import { FC, useState, useEffect } from "react";
+import axios from "axios";
+import { Heart, Share2, Calendar, Clock, Tags, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 
@@ -15,15 +17,16 @@ interface BlockchainEvent {
   isUserInterested: boolean;
   tags: string[];
   category: string;
-  onInterestedClick?: () => void;
+  onInterestedClick: (eventId: string) => void;
   // Other potential blockchain properties
 }
 
 interface EventCardProps {
   event: BlockchainEvent;
+  currentUserId?: string; // Optional: The ID of the currently logged-in user
 }
 
-export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
+export const UpcomingCard: FC<EventCardProps> = ({ event , currentUserId}) => {
   // ... (keep all the existing code for data extraction, formatting, handlers etc.)
   const title = event.name;
   const image = event.imageURL || "/placeholder.svg";
@@ -63,17 +66,28 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
       return "Starting soon";
     }
   };
-  const venue = "Venue not specified"; // Replace with event.venue when available
+  //const venue = "Venue not specified"; // Replace with event.venue when available
   const description = event.description;
-  const category = event.category || "Event";
+  const [category, setCategory] = useState("Event");
   const interested = event.interestedCount || 0;
   const isInterested = event.isUserInterested || false;
 
-  const handleInterestedClick = () => {
-    if (event.onInterestedClick) {
-      event.onInterestedClick();
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const response = await axios.get(`/api/events/${event.eventId}`);
+        if (response.data && response.data.category) {
+          setCategory(response.data.category);
+        }
+      } catch (error) {
+        console.error("Error fetching event category:", error);
+      }
+    };
+
+    if (event.eventId) {
+      fetchCategory();
     }
-  };
+  }, [event.eventId]);
 
   const handleShare = () => {
     // ... (share handler code remains the same)
@@ -129,43 +143,43 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
               </div>
 
               {/* Event Details Grid */}
-              <div className="bg-gradient-to-br from-[#333447] to-[#2A2A3E] rounded-xl p-4 space-y-3 border border-[#404153]">
-                <div className="grid grid-cols-[120px,1fr] text-sm items-center">
+              <div className="bg-gradient-to-br from-[#333447] to-[#2A2A3E] rounded-xl px-4 pt-4 pb-0 space-y-3 border border-[#404153]">
+                <div className="grid grid-cols-[120px,1fr] text-sm items-center gap-3">
                   <div className="text-[#A1A1AA] flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-[#E27625]" />
                     <span>Event Date</span>
                   </div>
                   <div className="text-white font-medium">{eventDate}</div>
                 </div>
-                <div className="grid grid-cols-[120px,1fr] text-sm items-center">
+                <div className="grid grid-cols-[120px,1fr] text-sm items-center gap-3">
                   <div className="text-[#A1A1AA] flex items-center gap-2">
                     <Clock className="h-4 w-4 text-[#3B82F6]" />
                     <span>Event Time</span>
                   </div>
                   <div className="text-white font-medium">{eventStartTime}</div>
                 </div>
-                <div className="grid grid-cols-[120px,1fr] text-sm items-center">
+                <div className="grid grid-cols-[120px,1fr] text-sm items-center gap-3">
                   <div className="text-[#A1A1AA] flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#F59E0B]" />
-                    <span>Venue</span>
+                    <Tags className="h-4 w-4 text-[#F59E0B]" />
+                    <span>Category</span>
                   </div>
-                  <div className="text-white font-medium">{venue}</div>
+                  <div className="text-white font-medium">{category}</div>
                 </div>
-              </div>
-
-              {/* Description Section */}
-              <div className="bg-gradient-to-br from-[#2A2A3E] to-[#333447] rounded-xl p-4 border border-[#404153]">
-                <div className="text-[#A1A1AA] text-sm mb-2 font-medium">
-                  Description
-                </div>
-                <div className="text-white text-sm leading-relaxed h-20 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#404153] hover:scrollbar-thumb-[#525266]">
-                  {description}
+                {/* Description Section - Kept and Improved */}
+                <div className="grid grid-cols-[120px,1fr] text-sm items-start gap-3 pb-3">
+                  <div className="text-[#A1A1AA] flex items-center gap-2 pt-1">
+                    <FileText className="h-4 w-4 text-[#10B981]" />
+                    <span>Description</span>
+                  </div>
+                  <div className="text-white text-sm leading-relaxed max-h-16 overflow-y-auto pr-2  scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[#404153] hover:scrollbar-thumb-[#525266] break-words">
+                    {description}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Bottom Section: Category and Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#404153]">
+            <div className="flex items-center justify-between pt-0 flex-wrap gap-4">
               <div className="flex flex-wrap gap-2">
                 <div className="bg-gradient-to-r from-[#E27625] to-[#F59E0B] text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-lg">
                   {category}
@@ -174,21 +188,18 @@ export const UpcomingCard: FC<EventCardProps> = ({ event }) => {
               <div className="flex items-center gap-3">
                 <Button
                   variant="secondary"
-                  className={`gap-2 font-medium transition-all duration-300 ${
-                    isInterested
-                      ? "bg-gradient-to-r from-[#F59E0B] to-[#E27625] text-white hover:from-[#E27625] hover:to-[#D97919] shadow-lg shadow-[#F59E0B]/20"
-                      : "bg-gradient-to-r from-[#333447] to-[#404153] text-white hover:from-[#404153] hover:to-[#525266] border border-[#525266]"
-                  }`}
-                  onClick={handleInterestedClick}
+                  className="text-white gap-2 bg-[#333447] hover:bg-[#4A4E68]"
+                  onClick={() => event.onInterestedClick(event.eventId)}
+                  disabled={!currentUserId} // Button is disabled if no user is logged in
+                  title={!currentUserId ? "Login to show interest" : "Interested"}
                 >
-                  <Star
-                    className={`h-4 w-4 transition-all duration-300 ${
-                      isInterested
-                        ? "fill-white text-white"
-                        : "fill-transparent text-[#F59E0B]"
+                  <Heart
+                    className={`h-4 w-4 transition-colors duration-300 ${
+                      isInterested ? "fill-red-500 text-red-500" : "fill-transparent text-red-500"
                     }`}
                   />
-                  Interested {interested}
+                  {/* Interested */}
+                  Interests {interested}
                 </Button>
                 <Button
                   variant="ghost"
