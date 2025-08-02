@@ -229,7 +229,8 @@ const BettingCard: FC<BettingCardProps> = ({ event, web3 }) => {
       <CardContent className="p-4 pt-2 space-y-4">
         {/* Options List */}
         <div className="bg-black/20 rounded-xl p-3 border border-gray-700/40">
-          <div className="space-y-2 max-h-[120px] overflow-y-auto ">
+        {/* Can Style custom-scrollbar from index.css file*/}
+          <div className="space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar ">
             {event.options.map((option, index) => (
               <div
                 key={index}
