@@ -1601,17 +1601,48 @@ const RaffleSection = () => {
         setLoading(true);
         try {
             const allRaffles = await raffleService.getAllRaffles();
-            
-            const twelveHoursAgo = (Math.floor(Date.now() / 1000)) - (12 * 3600);
+            const now = Date.now();
+            const twoHoursInMillis = 2 * 60 * 60 * 1000;
 
+            // 1. Filter out raffles that ended more than 2 hours ago
             const visibleRaffles = allRaffles.filter(raffle => {
-                const endTime = Number(raffle.endTime);
-                // Keep the raffle if it's not ended, OR if it ended within the last 12 hours.
-                return endTime > twelveHoursAgo;
+                const endTime = Number(raffle.endTime) * 1000;
+                // Keep the raffle if its end time + 2 hours is in the future
+                return (endTime + twoHoursInMillis) > now;
             });
 
-            // Sort by end time, closest to ending first
-            visibleRaffles.sort((a, b) => Number(a.endTime) - Number(b.endTime));
+            // 2. Sort the filtered raffles based on their status
+            visibleRaffles.sort((a, b) => {
+                const getStatus = (raffle: Raffle) => {
+                    const startTime = Number(raffle.startTime) * 1000;
+                    const endTime = Number(raffle.endTime) * 1000;
+                    if (now < startTime) return 'Upcoming';
+                    if (now > endTime) return 'Ended';
+                    return 'Active';
+                };
+
+                const statusA = getStatus(a);
+                const statusB = getStatus(b);
+
+                const statusOrder = { 'Active': 1, 'Upcoming': 2, 'Ended': 3 };
+
+                if (statusA !== statusB) {
+                    return statusOrder[statusA] - statusOrder[statusB];
+                }
+
+                // Secondary sorting for raffles with the same status
+                switch (statusA) {
+                    case 'Active':
+                        return Number(a.endTime) - Number(b.endTime); // Soonest to end first
+                    case 'Upcoming':
+                        return Number(a.startTime) - Number(b.startTime); // Soonest to start first
+                    case 'Ended':
+                        return Number(b.endTime) - Number(a.endTime); // Most recently ended first
+                    default:
+                        return 0;
+                }
+            });
+
             setRaffles(visibleRaffles);
 
         } catch (error: any) {
@@ -1623,8 +1654,8 @@ const RaffleSection = () => {
 
     useEffect(() => {
         loadRaffles();
-        // Set up an interval to refresh the list periodically to remove old raffles
-        const interval = setInterval(loadRaffles, 60 * 60 * 1000); // Refresh every hour
+        // Set up an interval to refresh the list periodically
+        const interval = setInterval(loadRaffles, 60 * 1000); // Refresh every minute
         return () => clearInterval(interval);
     }, [loadRaffles]);
     
@@ -1642,10 +1673,7 @@ const RaffleSection = () => {
             await raffleService.buyTickets(selectedRaffle.raffleId, ticketQuantity);
             toast.success("Tickets purchased successfully!");
             
-            // Store purchase info for confirmation modal
             setPurchasedTickets(ticketQuantity);
-            
-            // Close ticket selection modal and show confirmation
             setIsModalOpen(false);
             setShowConfirmation(true);
             
@@ -1676,18 +1704,6 @@ const RaffleSection = () => {
 
     return (
         <section className="py-5">
-            {/* Header Section */}
-            {/* <div className="mb-6 sm:mb-8">
-                <div className="bg-gradient-to-r from-[#252538] to-[#2A2A3E] rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-xl border border-[#333447]">
-                    <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-gradient-to-r from-[#E27625] to-[#F59E0B] bg-clip-text text-transparent mb-2 text-center sm:text-left">
-                        Active Raffles
-                    </h1>
-                    <p className="text-[#A1A1AA] text-sm sm:text-base lg:text-lg text-center sm:text-left leading-relaxed">
-                        Join exciting raffles and win amazing prizes! 🪄🎲💫
-                    </p>
-                </div>
-            </div> */}
-            
             {raffles.length === 0 ? (
                 <div className="text-center py-16 bg-gradient-to-br from-[#1a1b23] to-[#2a2b35] rounded-2xl border border-gray-700/50">
                     <div className="mb-6">
@@ -1708,7 +1724,6 @@ const RaffleSection = () => {
                         ))}
                     </div>
                     
-                    {/* Show more indicator when not showing all */}
                     {!showAllRaffles && raffles.length > 8 && (
                         <div className="text-center mt-8">
                             <button 
@@ -1722,7 +1737,6 @@ const RaffleSection = () => {
                 </>
             )}
 
-            {/* Ticket Count Selection Popup */}
             <TicketCountPopup
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -1734,7 +1748,6 @@ const RaffleSection = () => {
                 raffleName={selectedRaffle?.name || ""}
             />
 
-            {/* Confirmation Modal */}
             <ConfirmationModal
                 open={showConfirmation}
                 onOpenChange={setShowConfirmation}
