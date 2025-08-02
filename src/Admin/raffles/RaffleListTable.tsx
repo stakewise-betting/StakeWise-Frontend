@@ -21,7 +21,7 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
             return <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30">Completed</Badge>;
         }
         if (now > Number(raffle.endTime)) {
-            return <Badge className="bg-orange-600/20 text-orange-400 border border-orange-600/30 hover:bg-orange-600/30">Ended (Draw Ready)</Badge>;
+            return <Badge className="bg-orange-600/20 text-orange-400 border border-orange-600/30 hover:bg-orange-600/30">Ended</Badge>;
         }
         if (now < Number(raffle.startTime)) {
             return <Badge variant="outline" className="border-gray-500 text-gray-300">Upcoming</Badge>;

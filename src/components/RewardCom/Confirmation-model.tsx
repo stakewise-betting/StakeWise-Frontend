@@ -56,7 +56,7 @@ export function ConfirmationModal({ open, onOpenChange, raffle, ticketQuantity =
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-[#1C1C27] to-[#252538] border border-gray-700 text-white overflow-hidden">
         {/* Success Animation Background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1C1C27] to-[#252538]"></div>
         
         <DialogHeader className="relative z-10">
           <DialogTitle className="text-center space-y-3">
@@ -79,7 +79,7 @@ export function ConfirmationModal({ open, onOpenChange, raffle, ticketQuantity =
 
         <div className="space-y-4 relative z-10">
           {/* Compact Stats Grid */}
-          <div className="bg-gray-800/60 backdrop-blur-sm rounded-lg p-4 border border-gray-600/50">
+          <div className="bg-[#1C1C27] backdrop-blur-sm rounded-lg p-4 border border-gray-600/50">
             <div className="grid grid-cols-2 gap-3 text-center">
               <div>
                 <p className="text-gray-400 text-xs mb-1">Your Tickets</p>
@@ -101,7 +101,7 @@ export function ConfirmationModal({ open, onOpenChange, raffle, ticketQuantity =
           </div>
 
           {/* Simple Message */}
-          <div className="text-center p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+          <div className="text-center p-3 bg-yellow-900/10 border border-yellow-500/30 rounded-lg">
             <p className="text-yellow-400 text-sm font-medium">🍀 Good luck! Winners announced when draw ends.</p>
           </div>
 
