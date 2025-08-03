@@ -1,3 +1,4 @@
+// //StakeWise-Frontend/src/Admin/raffles/RaffleListTable.tsx
 // import React, { useState } from "react";
 // import { format } from "date-fns";
 // import { Trophy, Search, AlertCircle } from "lucide-react";
@@ -14,6 +15,8 @@
 
 // const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner }) => {
 //     const [searchTerm, setSearchTerm] = useState("");
+//     const [currentPage, setCurrentPage] = useState(1);
+//     const rowsPerPage = 10;
 
 //     const getStatus = (raffle: Raffle) => {
 //         const now = Math.floor(Date.now() / 1000);
@@ -42,6 +45,22 @@
 //         return nameMatch || idMatch;
 //     });
 
+//     // Pagination logic
+//     const totalPages = Math.ceil(filteredRaffles.length / rowsPerPage);
+//     const paginatedRaffles = filteredRaffles.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+//     const nextPage = () => {
+//         if (currentPage < totalPages) {
+//             setCurrentPage(currentPage + 1);
+//         }
+//     };
+
+//     const prevPage = () => {
+//         if (currentPage > 1) {
+//             setCurrentPage(currentPage - 1);
+//         }
+//     };
+
 //     return (
 //         <div className="w-full bg-[#16161F] rounded-xl border border-gray-700/60 shadow-lg">
 //             {/* --- Search and Filter Controls --- */}
@@ -59,20 +78,13 @@
 //                             type="search"
 //                             placeholder="Search raffles by name, ID..."
 //                             value={searchTerm}
-//                             onChange={(e) => setSearchTerm(e.target.value)}
+//                             onChange={(e) => {
+//                                 setSearchTerm(e.target.value);
+//                                 setCurrentPage(1); // Reset to first page on search
+//                             }}
 //                             className="pl-12 h-12 w-full bg-gray-800/40 border-gray-600/50 text-white placeholder:text-gray-400 focus:border-orange-500/50 focus:ring-orange-500/30 focus:bg-gray-800/50 rounded-xl font-medium shadow-lg hover:border-gray-500/70 hover:bg-gray-800/60 transition-all duration-300"
 //                         />
 //                     </div>
-
-//                     {/* Filter Button */}
-//                     {/* <Button
-//                         variant="outline"
-//                         size="sm"
-//                         className="h-12 bg-gradient-to-r from-orange-600/20 to-orange-600/10 border-orange-600/40 text-orange-400 hover:from-orange-600/30 hover:to-orange-600/20 hover:border-orange-600/60 transition-all duration-300 rounded-xl px-6 font-medium shadow-lg backdrop-blur-sm"
-//                     >
-//                         <Filter className="h-5 w-5 mr-2" />
-//                         Filters
-//                     </Button> */}
 //                 </div>
 //             </div>
 
@@ -91,8 +103,8 @@
 //                         </TableRow>
 //                     </TableHeader>
 //                     <TableBody className="[&_tr:last-child]:border-0">
-//                         {filteredRaffles.length > 0 ? (
-//                             filteredRaffles.map((raffle) => (
+//                         {paginatedRaffles.length > 0 ? (
+//                             paginatedRaffles.map((raffle) => (
 //                                 <TableRow key={raffle.raffleId} className="border-b border-gray-800/90 hover:bg-gray-800/50 transition-colors">
 //                                     <TableCell className="px-4 py-4 font-medium text-white">{raffle.name}</TableCell>
 //                                     <TableCell className="px-4 py-4 font-semibold text-emerald-400">{raffle.prizeAmount}</TableCell>
@@ -152,15 +164,15 @@
 //                 </Table>
 //             </div>
 
-//             {/* --- Pagination Controls (Placeholder) --- */}
-//             {filteredRaffles.length > 10 && (
+//             {/* --- Pagination Controls --- */}
+//             {filteredRaffles.length > rowsPerPage && (
 //                 <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-700/60 bg-[#1C1C27]/80 backdrop-blur-sm text-sm gap-4">
 //                     <div className="text-gray-300">
-//                         Showing <span className="font-semibold text-white bg-gray-700/50 px-2 py-1 rounded-md">1</span> - <span className="font-semibold text-white bg-gray-700/50 px-2 py-1 rounded-md">{Math.min(filteredRaffles.length, 10)}</span> of <span className="font-semibold text-orange-300">{filteredRaffles.length}</span> raffles
+//                         Showing <span className="font-semibold text-white bg-gray-700/50 px-2 py-1 rounded-md">{(currentPage - 1) * rowsPerPage + 1}</span> - <span className="font-semibold text-white bg-gray-700/50 px-2 py-1 rounded-md">{Math.min(currentPage * rowsPerPage, filteredRaffles.length)}</span> of <span className="font-semibold text-orange-300">{filteredRaffles.length}</span> raffles
 //                     </div>
 //                     <div className="flex items-center gap-3">
-//                         <Button variant="outline" size="sm" disabled className="h-9 bg-gray-700/40 border-gray-600/50 text-gray-500 cursor-not-allowed rounded-md px-4">Previous</Button>
-//                         <Button variant="outline" size="sm" disabled className="h-9 bg-gray-700/40 border-gray-600/50 text-gray-500 cursor-not-allowed rounded-md px-4">Next</Button>
+//                         <Button variant="outline" size="sm" onClick={prevPage} disabled={currentPage === 1} className="h-9 bg-gray-700/40 border-gray-600/50 text-gray-300 rounded-md px-4 disabled:opacity-50 disabled:cursor-not-allowed">Previous</Button>
+//                         <Button variant="outline" size="sm" onClick={nextPage} disabled={currentPage === totalPages} className="h-9 bg-gray-700/40 border-gray-600/50 text-gray-300 rounded-md px-4 disabled:opacity-50 disabled:cursor-not-allowed">Next</Button>
 //                     </div>
 //                 </div>
 //             )}
@@ -171,9 +183,10 @@
 // export default RaffleListTable;
 
 
+
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { Trophy, Search, AlertCircle } from "lucide-react";
+import { Trophy, Search, AlertCircle, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -183,9 +196,14 @@ import { Raffle } from "@/services/raffleBlockchainService";
 interface RaffleListTableProps {
   raffles: Raffle[];
   onDrawWinner: (raffleId: string) => void;
+  onEndRaffle: (raffleId: string) => void; // NEW PROP
 }
 
-const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner }) => {
+const RaffleListTable: React.FC<RaffleListTableProps> = ({ 
+  raffles, 
+  onDrawWinner, 
+  onEndRaffle // NEW PROP
+}) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -204,9 +222,16 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
         return <Badge className="bg-purple-600/20 text-purple-400 border border-purple-600/30 hover:bg-purple-600/30">Active</Badge>;
     };
 
+    // Check if raffle can draw winner (has tickets sold)
     const canDrawWinner = (raffle: Raffle) => {
         const now = Math.floor(Date.now() / 1000);
         return !raffle.isCompleted && now > Number(raffle.endTime) && Number(raffle.totalTicketsSold) > 0;
+    };
+
+    // NEW FUNCTION: Check if raffle can be ended (no tickets sold)
+    const canEndRaffle = (raffle: Raffle) => {
+        const now = Math.floor(Date.now() / 1000);
+        return !raffle.isCompleted && now > Number(raffle.endTime) && Number(raffle.totalTicketsSold) === 0;
     };
 
     const filteredRaffles = raffles.filter(raffle => {
@@ -235,7 +260,7 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
 
     return (
         <div className="w-full bg-[#16161F] rounded-xl border border-gray-700/60 shadow-lg">
-            {/* --- Search and Filter Controls --- */}
+            {/* Search and Filter Controls */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center px-6 py-5 border-b border-gray-700/60 bg-[#1C1C27]/80 backdrop-blur-sm">
                 <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 rounded-full bg-orange-500 animate-pulse"></div>
@@ -243,7 +268,6 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    {/* Search Input */}
                     <div className="relative flex-1 md:w-80">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                         <Input
@@ -252,7 +276,7 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
-                                setCurrentPage(1); // Reset to first page on search
+                                setCurrentPage(1);
                             }}
                             className="pl-12 h-12 w-full bg-gray-800/40 border-gray-600/50 text-white placeholder:text-gray-400 focus:border-orange-500/50 focus:ring-orange-500/30 focus:bg-gray-800/50 rounded-xl font-medium shadow-lg hover:border-gray-500/70 hover:bg-gray-800/60 transition-all duration-300"
                         />
@@ -260,7 +284,7 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
                 </div>
             </div>
 
-            {/* --- Table Container --- */}
+            {/* Table Container */}
             <div className="overflow-x-auto">
                 <Table className="w-full border-collapse text-sm text-gray-300">
                     <TableHeader className="[&_tr]:border-b [&_tr]:border-gray-700/60 bg-[#1C1C27]/50 backdrop-blur-sm">
@@ -287,16 +311,42 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
                                     <TableCell className="px-4 py-4">{getStatus(raffle)}</TableCell>
                                     <TableCell className="px-4 py-4 font-mono text-gray-500">
                                         {raffle.isCompleted ? (
-                                            <span title={raffle.winner}>{raffle.winner.substring(0, 6)}...{raffle.winner.substring(raffle.winner.length - 4)}</span>
+                                            raffle.winner === "0x0000000000000000000000000000000000000000" ? (
+                                                <span className="text-gray-400">No Winner</span>
+                                            ) : (
+                                                <span title={raffle.winner}>
+                                                    {raffle.winner.substring(0, 6)}...{raffle.winner.substring(raffle.winner.length - 4)}
+                                                </span>
+                                            )
                                         ) : 'N/A'}
                                     </TableCell>
                                     <TableCell className="px-4 py-4 text-center">
-                                        {canDrawWinner(raffle) && (
-                                            <Button onClick={() => onDrawWinner(raffle.raffleId)} size="sm" className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all">
-                                                <Trophy className="h-4 w-4 mr-2" />
-                                                Draw Winner
-                                            </Button>
-                                        )}
+                                        <div className="flex gap-2 justify-center">
+                                            {/* Draw Winner Button - when tickets are sold */}
+                                            {canDrawWinner(raffle) && (
+                                                <Button 
+                                                    onClick={() => onDrawWinner(raffle.raffleId)} 
+                                                    size="sm" 
+                                                    className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                                                >
+                                                    <Trophy className="h-4 w-4 mr-2" />
+                                                    Draw Winner
+                                                </Button>
+                                            )}
+
+                                            {/* NEW: End Event Button - when no tickets are sold */}
+                                            {canEndRaffle(raffle) && (
+                                                <Button 
+                                                    onClick={() => onEndRaffle(raffle.raffleId)} 
+                                                    size="sm" 
+                                                    variant="destructive"
+                                                    className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                                                >
+                                                    <X className="h-4 w-4 mr-2" />
+                                                    End Event
+                                                </Button>
+                                            )}
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -336,7 +386,7 @@ const RaffleListTable: React.FC<RaffleListTableProps> = ({ raffles, onDrawWinner
                 </Table>
             </div>
 
-            {/* --- Pagination Controls --- */}
+            {/* Pagination Controls */}
             {filteredRaffles.length > rowsPerPage && (
                 <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-700/60 bg-[#1C1C27]/80 backdrop-blur-sm text-sm gap-4">
                     <div className="text-gray-300">

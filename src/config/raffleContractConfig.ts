@@ -1,5 +1,5 @@
 // StakeWise-Frontend/src/config/raffleContractConfig.ts
-export const raffleContractAddress = "0x2bd352e9ceA69E78fF2fd56F60627a266A6Def8b"; // Use your actual address
+export const raffleContractAddress = "0xBcA032764E097b2f38E63B089C317795f33F61b8"; // Use your actual address
 export const raffleContractABI =   [
     {
       "inputs": [],
@@ -402,5 +402,18 @@ export const raffleContractABI =   [
       "stateMutability": "view",
       "type": "function",
       "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_raffleId",
+          "type": "uint256"
+        }
+      ],
+      "name": "endRaffle",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ];
