@@ -1,3 +1,4 @@
+//StakeWise-Frontend/src/services/raffleBlockchainService.ts
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
 import { raffleContractABI, raffleContractAddress } from "@/config/raffleContractConfig";
