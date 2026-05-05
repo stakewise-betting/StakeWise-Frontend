@@ -1,642 +1,613 @@
-"use client";
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Edit, Trash2, X, Plus, Calendar, FileImage, AlertCircle, CheckCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-import type React from "react";
-
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
-import { Activity, AlertCircle, Pencil, Trash2, Upload } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-
-// Define the Slider type
-interface Slider {
-  id: string;
+interface SliderType {
+  _id: string;
   heading: string;
   description: string;
-  buttonName: string;
-  buttonPath: string;
-  image: string;
   addedDate: string;
+  image: {
+    filename: string;
+    contentType: string;
+  };
+  status: string;
+  order?: number;
 }
 
-// Define form errors type
-interface FormErrors {
-  heading?: string;
-  description?: string;
-  buttonName?: string;
-  buttonPath?: string;
-  image?: string;
+interface FormDataType {
+  heading: string;
+  description: string;
+  status: 'active' | 'inactive';
 }
 
-export default function SliderPage() {
-  // State for sliders data
-  const [sliders, setSliders] = useState<Slider[]>([
-    {
-      id: "1",
-      heading: "LAS VEGAS",
-      description:
-        "Get up to speed with everything you need to know about the F1 Las Vegas Grand Prix. Don't miss a single race, place over 50 laps of the 6.2-kilometre Las Vegas Strip Circuit in Nevada, USA, on Saturday.",
-      buttonName: "Buy Now",
-      buttonPath: "home/category/f1/lasvegas",
-      image: "f1Car.png",
-      addedDate: "24 Apr",
-    },
-    {
-      id: "2",
-      heading: "New Event added",
-      description: "Check out our latest event details",
-      buttonName: "Learn More",
-      buttonPath: "home/events/new",
-      image: "evms.png",
-      addedDate: "16 Feb",
-    },
-    {
-      id: "3",
-      heading: "LAS VEGAS",
-      description:
-        "Get up to speed with everything you need to know about the F1 Las Vegas Grand Prix.",
-      buttonName: "Buy Now",
-      buttonPath: "home/category/f1/lasvegas",
-      image: "f1Car.png",
-      addedDate: "24 Apr",
-    },
-    {
-      id: "4",
-      heading: "New Event added",
-      description: "Check out our latest event details",
-      buttonName: "Learn More",
-      buttonPath: "home/events/new",
-      image: "evms.png",
-      addedDate: "16 Feb",
-    },
-  ]);
+const API_BASE_URL = 'http://localhost:5000/api';
 
-  // State for form management
-  const [editingSlider, setEditingSlider] = useState<Slider | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formData, setFormData] = useState<Omit<Slider, "id" | "addedDate">>({
-    heading: "",
-    description: "",
-    buttonName: "",
-    buttonPath: "",
-    image: "",
+const SliderManagement = () => {
+  const [currentView, setCurrentView] = useState<'list' | 'form'>('list');
+  const [editingSlider, setEditingSlider] = useState<SliderType | null>(null);
+  const [sliders, setSliders] = useState<SliderType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<FormDataType>({
+    heading: '',
+    description: '',
+    status: 'active'
   });
-  const [file, setFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form handlers
-  const handleAddNew = () => {
+  useEffect(() => {
+    fetchSliders();
+  }, []);
+
+  useEffect(() => {
+    if (editingSlider) {
+      setFormData({
+        heading: editingSlider.heading || '',
+        description: editingSlider.description || '',
+        status: editingSlider.status as 'active' | 'inactive'
+      });
+      setPreviewUrl(`${API_BASE_URL}/sliders/image/${editingSlider._id}`);
+    } else {
+      resetForm();
+    }
+  }, [editingSlider]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  const resetForm = () => {
     setFormData({
-      heading: "",
-      description: "",
-      buttonName: "",
-      buttonPath: "",
-      image: "",
+      heading: '',
+      description: '',
+      status: 'active'
     });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    setEditingSlider(null);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (slider: Slider) => {
-    setFormData({
-      heading: slider.heading,
-      description: slider.description,
-      buttonName: slider.buttonName,
-      buttonPath: slider.buttonPath,
-      image: slider.image,
-    });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    setEditingSlider(slider);
-    setIsFormOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    setSliders(sliders.filter((slider) => slider.id !== id));
-  };
-
-  const handleCancel = () => {
-    setIsFormOpen(false);
-    setEditingSlider(null);
-  };
-
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setTouched((prev) => ({ ...prev, [name]: true }));
-  };
-
-  const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
-    validate();
-  };
-
-  // Form validation
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.heading.trim()) {
-      newErrors.heading = "Heading is required";
+    setImageFile(null);
+    setPreviewUrl(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    } else if (formData.description.length > 500) {
-      newErrors.description = "Description must be less than 500 characters";
-    }
-
-    if (!formData.buttonName.trim()) {
-      newErrors.buttonName = "Button name is required";
-    }
-
-    if (!formData.buttonPath.trim()) {
-      newErrors.buttonPath = "Button path is required";
-    }
-
-    if (!editingSlider?.image && !file && !formData.image) {
-      newErrors.image = "Image is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  // File handling
-  const validateFile = (file: File): boolean => {
-    // Check file type
-    const validTypes = ["image/jpeg", "image/png"];
-    if (!validTypes.includes(file.type)) {
-      setFileError("Only JPEG and PNG files are allowed");
-      return false;
-    }
-
-    // Check file size (25MB = 25 * 1024 * 1024 bytes)
-    const maxSize = 25 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setFileError("File size must be less than 25MB");
-      return false;
-    }
-
-    setFileError(null);
-    return true;
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      if (validateFile(selectedFile)) {
-        setFile(selectedFile);
-        setFormData((prev) => ({ ...prev, image: selectedFile.name }));
-        setTouched((prev) => ({ ...prev, image: true }));
-        setErrors((prev) => ({ ...prev, image: undefined }));
-      } else {
-        e.target.value = "";
+  const fetchSliders = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/sliders/all-sliders`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      setSliders(data);
+    } catch (error) {
+      console.error('Error fetching sliders:', error);
+      setError('Failed to fetch sliders. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 25 * 1024 * 1024) {
+      setError("Image is too large (max 25MB)");
+      return;
+    }
+
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      setError("Please select only JPG or PNG images");
+      return;
+    }
+
+    setError(null);
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    if (!editingSlider) {
+      setPreviewUrl(null);
+    } else {
+      setPreviewUrl(`${API_BASE_URL}/sliders/image/${editingSlider._id}`);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    
+    if (!formData.heading || !formData.description) {
+      setError("Please fill in all required fields");
+      return;
+    }
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-      if (validateFile(droppedFile)) {
-        setFile(droppedFile);
-        setFormData((prev) => ({ ...prev, image: droppedFile.name }));
-        setTouched((prev) => ({ ...prev, image: true }));
-        setErrors((prev) => ({ ...prev, image: undefined }));
+    if (!editingSlider && !imageFile) {
+      setError("Image is required for new slider");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const submitData = new FormData();
+      submitData.append("heading", formData.heading);
+      submitData.append("description", formData.description);
+      submitData.append("status", formData.status);
+      
+      if (imageFile) {
+        submitData.append("image", imageFile);
       }
-    }
-  };
 
-  const handleBrowseClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleCancelUpload = () => {
-    setFile(null);
-    setFormData((prev) => ({ ...prev, image: editingSlider?.image || "" }));
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    if (!editingSlider?.image) {
-      setErrors((prev) => ({ ...prev, image: "Image is required" }));
-    }
-  };
-
-  const handleDoneUpload = () => {
-    // In a real app, you would upload the file to a server here
-    console.log("File ready for upload:", file);
-  };
-
-  const handleClearForm = () => {
-    setFormData({
-      heading: "",
-      description: "",
-      buttonName: "",
-      buttonPath: "",
-      image: "",
-    });
-    setFile(null);
-    setErrors({});
-    setTouched({});
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleSave = () => {
-    const isValid = validate();
-
-    if (isValid) {
+      let response;
       if (editingSlider) {
         // Update existing slider
-        setSliders(
-          sliders.map((s) =>
-            s.id === editingSlider.id
-              ? {
-                  ...editingSlider,
-                  ...formData,
-                }
-              : s
-          )
-        );
+        response = await fetch(`${API_BASE_URL}/sliders/update-slider/${editingSlider._id}`, {
+          method: 'PUT',
+          body: submitData
+        });
       } else {
-        // Add new slider
-        const newSlider = {
-          ...formData,
-          id: Date.now().toString(),
-          addedDate: new Date().toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "short",
-          }),
-        };
-        setSliders([...sliders, newSlider]);
+        // Create new slider
+        response = await fetch(`${API_BASE_URL}/sliders/save-slider`, {
+          method: 'POST',
+          body: submitData
+        });
       }
-      setIsFormOpen(false);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+  
+      
+      setSuccess(editingSlider ? 'Slider updated successfully!' : 'Slider created successfully!');
+      
+      // Reset form and switch to list view
+      resetForm();
       setEditingSlider(null);
-    } else {
-      // Mark all fields as touched to show errors
-      const allTouched: Record<string, boolean> = {};
-      Object.keys(formData).forEach((key) => {
-        allTouched[key] = true;
-      });
-      setTouched(allTouched);
+      setCurrentView('list');
+      
+      // Refresh sliders list
+      await fetchSliders();
+      
+    } catch (error: any) {
+      console.error('Error saving slider:', error);
+      setError(error.message || "Error saving slider. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Icon wrapper component
-  const IconWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="p-2 rounded-full flex items-center justify-center bg-secondary/20">
-      {children}
-    </div>
-  );
+  const handleEdit = (slider: SliderType) => {
+    setEditingSlider(slider);
+    setCurrentView('form');
+  };
 
-  // Render the slider form
-  const renderSliderForm = () => {
+  const handleDelete = async (sliderId: string) => {
+    if (!confirm("Are you sure you want to delete this slider?")) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/sliders/delete-slider/${sliderId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      setSuccess('Slider deleted successfully!');
+      await fetchSliders();
+    } catch (error: any) {
+      console.error('Error deleting slider:', error);
+      setError(error.message || "Error deleting slider. Please try again.");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+  };
+
+  const getStatusBadge = (status: string) => {
+    return status === 'active' ? (
+      <Badge className="bg-green-500 text-white shadow-lg">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        Active
+      </Badge>
+    ) : (
+      <Badge className="bg-red-500 text-white shadow-lg">
+        <AlertCircle className="w-3 h-3 mr-1" />
+        Inactive
+      </Badge>
+    );
+  };
+
+  if (loading) {
     return (
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Heading
-              </Label>
-              <Input
-                type="text"
-                name="heading"
-                value={formData.heading}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.heading && errors.heading
-                    ? "border-red-500"
-                    : "border-gray-700/60"
-                }`}
-                placeholder="Enter heading"
-              />
-              {touched.heading && errors.heading && (
-                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.heading}
-                </div>
-              )}
-            </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent"></div>
+          <span className="text-lg text-gray-600">Loading sliders...</span>
+        </div>
+      </div>
+    );
+  }
 
-            <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Description
-              </Label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                rows={5}
-                className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.description && errors.description
-                    ? "border-red-500"
-                    : "border-gray-700/60"
-                }`}
-                placeholder="Enter description"
-              />
-              {touched.description && errors.description && (
-                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.description}
-                </div>
-              )}
-              <div className="text-xs text-dark-secondary mt-1">
-                {formData.description.length}/500 characters
-              </div>
-            </div>
+  if (currentView === 'form') {
+    return (
+      <div className="space-y-6">
+        {success && (
+          <Alert className="dark border-green-500/50 bg-green-900/20 text-green-300">
+            <CheckCircle className="h-5 w-5 !text-green-400" />
+            <AlertTitle className="font-semibold text-green-300">Success</AlertTitle>
+            <AlertDescription className="mt-2 text-green-400">{success}</AlertDescription>
+          </Alert>
+        )}
 
-            <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Button Name
-              </Label>
-              <Input
-                type="text"
-                name="buttonName"
-                value={formData.buttonName}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.buttonName && errors.buttonName
-                    ? "border-red-500"
-                    : "border-gray-700/60"
-                }`}
-                placeholder="Enter button name"
-              />
-              {touched.buttonName && errors.buttonName && (
-                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.buttonName}
-                </div>
-              )}
-            </div>
+        <Card className="bg-card border border-gray-700/60 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-dark-primary">
+              {editingSlider ? 'Edit Slider' : 'Add New Slider'}
+            </CardTitle>
+            <CardDescription className="text-dark-secondary text-base">
+              {editingSlider ? 'Update slider details below' : 'Create a new slider for your homepage'}
+            </CardDescription>
+          </CardHeader>
 
-            <div>
-              <Label className="block text-sm font-medium mb-1 text-dark-primary">
-                Button Path
-              </Label>
-              <Input
-                type="text"
-                name="buttonPath"
-                value={formData.buttonPath}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`w-full p-2 bg-gray-800/50 border rounded-md text-dark-primary ${
-                  touched.buttonPath && errors.buttonPath
-                    ? "border-red-500"
-                    : "border-gray-700/60"
-                }`}
-                placeholder="Enter button path"
-              />
-              {touched.buttonPath && errors.buttonPath && (
-                <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.buttonPath}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <div className="bg-gray-800/30 p-6 rounded-lg border border-gray-700/60">
-              <h3 className="font-medium mb-2 text-dark-primary">
-                Upload Image
-              </h3>
-              <p className="text-sm text-dark-secondary mb-4">
-                Please upload file in jpeg or png format and make sure the file
-                size is under 25 MB.
-              </p>
-
-              <div
-                className={`border-2 border-dashed rounded-lg p-8 text-center ${
-                  isDragging
-                    ? "border-secondary bg-secondary/10"
-                    : touched.image && errors.image
-                    ? "border-red-500"
-                    : "border-gray-700/60"
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className="flex flex-col items-center">
-                  <Upload className="w-10 h-10 text-secondary mb-2" />
-                  <p className="mb-2 text-dark-primary">Drop file or browse</p>
-                  <p className="text-sm text-dark-secondary mb-4">
-                    Format: jpeg, png & Max file size: 25 MB
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleBrowseClick}
-                    className="px-4 py-1.5 bg-gray-800 text-dark-primary text-sm rounded-md hover:bg-gray-700 transition-colors"
-                  >
-                    Browse Files
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".jpeg,.jpg,.png"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-
-              {fileError && (
-                <div className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {fileError}
-                </div>
+          <CardContent className="p-8">
+            <div className="space-y-8 animate-fade-in">
+              {error && (
+                <Alert className="dark border-red-500/50 bg-red-900/20 text-red-300">
+                  <AlertCircle className="h-5 w-5 !text-red-400" />
+                  <AlertTitle className="font-semibold text-red-300">Error</AlertTitle>
+                  <AlertDescription className="mt-2 text-red-400">{error}</AlertDescription>
+                </Alert>
               )}
 
-              {touched.image && errors.image && !fileError && (
-                <div className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.image}
-                </div>
-              )}
-
-              {(file || formData.image) && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-dark-primary">
-                    Selected file: {file ? file.name : formData.image}
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      type="button"
-                      onClick={handleCancelUpload}
-                      className="flex-1 py-2 border border-gray-700/60 rounded-md text-center text-dark-primary hover:bg-gray-800/50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDoneUpload}
-                      className="flex-1 py-2 bg-secondary text-dark-primary rounded-md text-center hover:bg-secondary/80 transition-colors"
-                    >
-                      Done
-                    </button>
+              {/* <div className="bg-gradient-to-br from-secondary/5 to-orange-500/5 rounded-2xl p-8 border border-secondary/10">
+                <div className="flex items-center space-x-6">
+                  <div className="p-4 bg-secondary/20 rounded-2xl">
+                    <FileImage className="w-12 h-12 text-secondary" />
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-bold text-dark-primary">
+                      {editingSlider ? 'Editing Slider' : 'Creating New Slider'}
+                    </h3>
+                    <div className="flex items-center space-x-2 text-orange-400">
+                      <Sparkles className="w-4 h-4" />
+                      <span className="text-sm">Fill in the details to create an engaging slider</span>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+              </div> */}
 
-        <div className="flex justify-end gap-3 mt-6">
-          <Button
-            type="button"
-            onClick={handleClearForm}
-            className="px-6 py-2 border border-gray-700/60 rounded-md text-dark-primary hover:bg-gray-800/50 transition-colors"
-            variant="outline"
-          >
-            Clear
-          </Button>
-          <Button
-            type="button"
-            onClick={handleCancel}
-            className="px-6 py-2 border border-gray-700/60 rounded-md text-dark-primary hover:bg-gray-800/50 transition-colors"
-            variant="outline"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSave}
-            className="px-6 py-2 bg-secondary text-dark-primary rounded-md hover:bg-secondary/80 transition-colors"
-          >
-            Save
-          </Button>
-        </div>
-      </div>
-    );
-  };
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="heading" className="text-dark-secondary font-medium mb-2 block">
+                      Heading <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      id="heading"
+                      type="text"
+                      value={formData.heading}
+                      onChange={(e) => setFormData(prev => ({ ...prev, heading: e.target.value }))}
+                      placeholder="Enter heading"
+                      maxLength={100}
+                      className="bg-gray-800/40 border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors text-white font-medium placeholder:text-gray-400"
+                    />
+                    <p className="text-xs text-dark-secondary/70 mt-1">Maximum 100 characters</p>
+                  </div>
 
-  // Render the slider table
-  const renderSliderTable = () => {
-    return (
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4 text-dark-primary">
-          On Going Banners:
-        </h2>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-800/40 border-b border-gray-700/60">
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Added Date
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Heading
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Image
-                </th>
-                <th className="text-left p-3 text-sm font-medium text-dark-secondary">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sliders.map((slider) => (
-                <tr
-                  key={slider.id}
-                  className="border-b border-gray-700/40 hover:bg-gray-800/20"
-                >
-                  <td className="p-3 text-sm text-dark-primary">
-                    {slider.addedDate}
-                  </td>
-                  <td className="p-3 text-sm text-dark-primary">
-                    {slider.heading}
-                  </td>
-                  <td className="p-3 text-sm text-dark-secondary">
-                    {slider.image}
-                  </td>
-                  <td className="p-3 text-sm">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(slider)}
-                        className="p-1 text-admin-info hover:text-admin-info/80 transition-colors"
-                        aria-label="Edit"
+                  <div>
+                    <Label htmlFor="description" className="text-dark-secondary font-medium mb-2 block">
+                      Description <span className="text-red-400">*</span>
+                    </Label>
+                    <textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Enter description"
+                      maxLength={500}
+                      rows={4}
+                      className="w-full px-3 py-2 bg-gray-800/40 border-2 border-gray-600 focus:border-secondary dark:focus:border-secondary rounded-lg shadow-sm transition-colors text-white font-medium resize-none placeholder:text-gray-400"
+                    />
+                    <p className="text-xs text-dark-secondary/70 mt-1">
+                      {formData.description.length}/500 characters
+                    </p>
+                  </div>
+                  
+                  {/* Status Toggle */}
+                  <div>
+                    <Label className="text-dark-secondary font-medium mb-2 block">
+                      Status
+                    </Label>
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className={`relative inline-flex h-6 w-12 items-center rounded-full cursor-pointer transition-colors ${
+                          formData.status === 'active' 
+                            ? 'bg-green-900/40' 
+                            : 'bg-red-900/40'
+                        }`}
+                        onClick={() => setFormData(prev => ({ ...prev, status: formData.status === 'active' ? 'inactive' : 'active' }))}
                       >
-                        <Pencil className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(slider.id)}
-                        className="p-1 text-red-500 hover:text-red-500/80 transition-colors"
-                        aria-label="Delete"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                        <span 
+                          className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                            formData.status === 'active' 
+                              ? 'bg-green-600 translate-x-7' 
+                              : 'bg-red-600 translate-x-1'
+                          }`}
+                        />
+                      </div>
+                      <span className={`text-sm font-medium px-2 py-1 rounded-md ${
+                        formData.status === 'active' 
+                          ? 'text-green-400 bg-green-900/30' 
+                          : 'text-red-400 bg-red-900/30'
+                      }`}>
+                        {formData.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-dark-secondary font-medium mb-2 block">
+                      Upload Image {!editingSlider && <span className="text-red-400">*</span>}
+                    </Label>
+
+                    {previewUrl ? (
+                      <div className="relative">
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-full h-48 object-cover border-2 border-gray-600 rounded-lg shadow-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=';
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          variant="outline"
+                          size="sm"
+                          className="absolute top-2 right-2 bg-black/60 border-white/20 hover:bg-black/80 text-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-secondary transition-colors bg-gradient-to-br from-secondary/5 to-orange-500/5">
+                        <Upload className="w-12 h-12 text-secondary mx-auto mb-4" />
+                        <p className="text-dark-primary mb-2 font-medium">Click to upload image</p>
+                        <p className="text-sm text-dark-secondary/70 mb-4">JPG or PNG (Max 25MB)</p>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          variant="outline"
+                          className="border-2 border-secondary text-secondary hover:bg-secondary hover:text-white transition-all duration-300"
+                        >
+                          Choose File
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-700/60">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    resetForm();
+                    setCurrentView('list');
+                    setEditingSlider(null);
+                  }}
+                  disabled={isSubmitting}
+                  className="border-2 border-gray-600 hover:bg-gray-700 transition-colors"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="bg-secondary hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      {editingSlider ? 'Update Slider' : 'Create Slider'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
-  };
+  }
 
-  // Main render
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
-        <IconWrapper>
-          <Activity className="w-6 h-6 text-secondary" />
-        </IconWrapper>
-        Slider Management
-      </h2>
+      {success && (
+        <Alert className="dark border-green-500/50 bg-green-900/20 text-green-300">
+          <CheckCircle className="h-5 w-5 !text-green-400" />
+          <AlertTitle className="font-semibold text-green-300">Success</AlertTitle>
+          <AlertDescription className="mt-2 text-green-400">{success}</AlertDescription>
+        </Alert>
+      )}
 
-      <Card className="bg-card rounded-xl shadow-lg border border-gray-700/60 transition-all duration-300 ease-in-out overflow-hidden relative bg-noise">
-        <CardHeader className="p-6 border-b border-gray-700/60">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-dark-primary">
-              {isFormOpen ? "Edit Slider" : "Manage Sliders"}
-            </h1>
-            {!isFormOpen && (
-              <Button
-                onClick={handleAddNew}
-                className="px-4 py-2 bg-secondary text-dark-primary rounded-md hover:bg-secondary/80 transition-colors"
-              >
-                Add New Slider
-              </Button>
-            )}
-          </div>
+      {error && (
+        <Alert className="dark border-red-500/50 bg-red-900/20 text-red-300">
+          <AlertCircle className="h-5 w-5 !text-red-400" />
+          <AlertTitle className="font-semibold text-red-300">Error</AlertTitle>
+          <AlertDescription className="mt-2 text-red-400">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-dark-primary flex items-center gap-3">
+            <FileImage className="w-7 h-7 text-secondary" />
+            Slider Management
+          </h2>
+          <p></p>
+        </div>
+        <Button
+          onClick={() => setCurrentView('form')}
+          className="bg-secondary hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add New Slider
+        </Button>
+      </div>
+
+      <Card className="bg-card border border-gray-700/60 shadow-lg hover:shadow-xl transition-shadow">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold text-dark-primary">
+            Active Sliders
+          </CardTitle>
+          <CardDescription className="text-dark-secondary">
+            Manage your homepage banner sliders
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="p-0">
-          {isFormOpen ? renderSliderForm() : renderSliderTable()}
+          {sliders.length === 0 ? (
+            <div className="p-12 text-center">
+              <FileImage className="w-16 h-16 mx-auto mb-4 text-dark-secondary/50" />
+              <h3 className="text-lg font-semibold text-dark-primary mb-2">No sliders found</h3>
+              <p className="text-dark-secondary mb-6">Add your first slider to get started with homepage banners.</p>
+              <Button
+                onClick={() => setCurrentView('form')}
+                className="bg-secondary hover:bg-orange-600 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Slider
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-800/50 border-b border-gray-700/60">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
+                      Added Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
+                      Slider Details
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
+                      Image
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-dark-secondary uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700/60">
+                  {sliders.map((slider) => (
+                    <tr key={slider._id} className="hover:bg-gray-800/30 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-dark-primary">
+                          <Calendar className="w-4 h-4 mr-2 text-secondary" />
+                          {formatDate(slider.addedDate)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          <div className="text-sm font-medium text-dark-primary mb-1">{slider.heading}</div>
+                          <div className="text-sm text-dark-secondary truncate">
+                            {slider.description}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FileImage className="w-4 h-4 mr-2 text-secondary" />
+                          <span className="text-sm text-dark-primary font-medium">{slider.image.filename}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {getStatusBadge(slider.status)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleEdit(slider)}
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-600 hover:bg-gray-700 hover:border-secondary text-secondary transition-all duration-300"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(slider._id)}
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-600 hover:bg-red-900/20 hover:border-red-500 text-red-400 transition-all duration-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default SliderManagement;

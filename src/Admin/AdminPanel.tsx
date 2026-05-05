@@ -296,8 +296,7 @@ const AdminPanel: React.FC = () => {
         validBets.sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
         setRecentBets(validBets.slice(0, limit)); // Limit to 'limit'
         console.log(
-          `Processed and limited to ${
-            validBets.slice(0, limit).length
+          `Processed and limited to ${validBets.slice(0, limit).length
           } recent bets.`
         );
       } catch (err) {
